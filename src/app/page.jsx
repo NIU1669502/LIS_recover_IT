@@ -77,145 +77,175 @@ export default function Page() {
   // El pacient respon un qüestionari de 4-5 preguntes per determinar
   // la lesió i el programa assignat
   // ============================================================
-  const MUSCLES = ['Quadriceps', 'Isquiotibials', 'Bessons']
+  const TEST_STEPS = [
+    {
+      pregunta: 'Quin múscul et fa mal?',
+      opcions: ['Quadriceps', 'Isquiotibials', 'Bessons', 'Triceps', 'Glutis', 'Deltoides', 'Bíceps'],
+    },
+    {
+      pregunta: 'Quan va apareixer el dolor?',
+      opcions: [
+        'De cop, durant esport o esforç',
+        'Gradualment, en dies o setmanes',
+        'Em vaig despertar amb dolor',
+      ],
+    },
+    {
+      pregunta: 'Com descriuries el dolor?',
+      opcions: [
+        'Dolor agut, com una ganivetada',
+        'Rigidesa i tensió general al múscul',
+        'Tibantor, com si el múscul estigués estret',
+      ],
+    },
+    {
+      pregunta: 'Pots moure el múscul amb normalitat?',
+      opcions: [
+        'Difícilment, em provoca molt de dolor',
+        'Puc moure\'l però amb molèstia',
+        'Sí, però noto tensió i limitació',
+      ],
+    },
+  ]
 
-const TEST_STEPS = [
-  {
-    pregunta: 'Quin múscul et fa mal?',
-    opcions: ['Quadriceps', 'Isquiotibials', 'Bessons'],
-  },
-  {
-    pregunta: 'Quan va apareixer el dolor?',
-    opcions: [
-      'De cop, durant esport o esforç',
-      'Gradualment, en dies o setmanes',
-      'Em vaig despertar amb dolor',
-    ],
-  },
-  {
-    pregunta: 'Com descriuries el dolor?',
-    opcions: [
-      'Dolor agut, com una ganivetada',
-      'Rigidesa i tensió general al múscul',
-      'Tibantor, com si el múscul estigués estret',
-    ],
-  },
-  {
-    pregunta: 'Pots moure el múscul amb normalitat?',
-    opcions: [
-      'Difícilment, em provoca molt de dolor',
-      'Puc moure\'l però amb molèstia',
-      'Sí, però noto tensió i limitació',
-    ],
-  },
-]
+  function determinarLesio(respostes) {
+    const onset = respostes[1] // 0=cop, 1=gradual, 2=dormint
+    const dolor = respostes[2] // 0=agut, 1=rigidesa, 2=tibantor
+    const mobilitat = respostes[3] // 0=poc, 1=molèstia, 2=sí
 
-function determinarLesio(respostes) {
-  const onset    = respostes[1] // 0=cop, 1=gradual, 2=dormint
-  const dolor    = respostes[2] // 0=agut, 1=rigidesa, 2=tibantor
-  const mobilitat = respostes[3] // 0=poc, 1=molèstia, 2=sí
+    if (onset === 0 && mobilitat === 0) return { tipus: 'Esquinç muscular', emoji: '🤕', temps: '3-6 setmanes', sessions: '12-15', fase: 'Fase 1 - Inicial' }
+    if (onset === 0 && mobilitat === 1) return { tipus: 'Distensió muscular', emoji: '😖', temps: '2-4 setmanes', sessions: '8-10', fase: 'Fase 1 - Inicial' }
+    if (dolor === 1 || dolor === 2) return { tipus: 'Contractura / Sobrecàrrega', emoji: '😫', temps: '5-10 dies', sessions: '5-7', fase: 'Fase 1 - Inicial' }
 
-  if (onset === 0 && mobilitat === 0) return 'Esquinç muscular'
-  if (onset === 0 && mobilitat === 1) return 'Distensió muscular'
-  if (dolor === 1 || dolor === 2)     return 'Contractura / Sobrecàrrega'
-  return 'Distensió muscular'
-}
+    return { tipus: 'Distensió muscular', emoji: '😖', temps: '2-4 setmanes', sessions: '8-10', fase: 'Fase 1 - Inicial' }
+  }
 
-// ─── Component del test ───────────────────────────────────────────────────────
-function TestDiagnostic({ onGuardar, onCancel }) {
-  const [pas, setPas]           = useState(0)
-  const [respostes, setRespostes] = useState({})
-  const [resultat, setResultat]  = useState(null)
+  // ─── Component del test ───────────────────────────────────────────────────────
+  function TestDiagnostic({ onGuardar, onCancel }) {
+    const [pas, setPas] = useState(0)
+    const [respostes, setRespostes] = useState({})
+    const [resultat, setResultat] = useState(null)
 
-  const seleccionar = (idx) => {
-    const novesRespostes = { ...respostes, [pas]: idx }
-    setRespostes(novesRespostes)
+    const seleccionar = (idx) => {
+      const novesRespostes = { ...respostes, [pas]: idx }
+      setRespostes(novesRespostes)
 
-    if (pas < TEST_STEPS.length - 1) {
-      setPas(pas + 1)
-    } else {
-      // Últim pas: calcular resultat
-      const tipus  = determinarLesio(novesRespostes)
-      const muscle = TEST_STEPS[0].opcions[novesRespostes[0]]
-      setResultat({ muscle, tipus })
+      if (pas < TEST_STEPS.length - 1) {
+        setPas(pas + 1)
+      } else {
+        // Últim pas: calcular resultat
+        const detall = determinarLesio(novesRespostes)
+        const muscle = TEST_STEPS[0].opcions[novesRespostes[0]]
+        setResultat({ muscle, ...detall })
+      }
     }
-  }
 
-  const reiniciar = () => {
-    setPas(0)
-    setRespostes({})
-    setResultat(null)
-  }
+    const reiniciar = () => {
+      setPas(0)
+      setRespostes({})
+      setResultat(null)
+    }
 
-  // Resultat final
-  if (resultat) {
-    return (
-      <div style={{ marginTop: '1rem' }}>
-        <h3>Resultat del diagnosi:</h3>
-        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '1rem', borderRadius: '8px', marginTop: '0.5rem', color: '#166534' }}>
-          <p><strong>Múscul afectat:</strong> {resultat.muscle}</p>
-          <p><strong>Tipus de lesió:</strong> {resultat.tipus}</p>
-        </div>
-        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+    // Resultat final
+    if (resultat) {
+      return (
+        <div style={{ marginTop: '1.5rem', background: '#ffffff', padding: '3rem 2rem', borderRadius: '16px', color: '#111827', textAlign: 'center', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)', fontFamily: 'system-ui, sans-serif', position: 'relative' }}>
+          <button onClick={onCancel} style={{ position: 'absolute', top: '1.25rem', right: '1.5rem', background: 'none', border: 'none', fontSize: '1.5rem', color: '#9ca3af', cursor: 'pointer', lineHeight: 1 }} onMouseOver={e => e.target.style.color = '#ef4444'} onMouseOut={e => e.target.style.color = '#9ca3af'} title="Tancar resultats">
+            &times;
+          </button>
+
+          <div style={{ fontSize: '4.5rem', marginBottom: '1rem', lineHeight: 1 }}>{resultat.emoji}</div>
+
+          <h2 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1rem', lineHeight: 1.1, letterSpacing: '-0.02em', textWrap: 'balance' }}>
+            {resultat.tipus}
+          </h2>
+
+          <p style={{ color: '#4b5563', fontSize: '1.1rem', marginBottom: '2.5rem', maxWidth: '500px', margin: '0 auto 2.5rem auto', lineHeight: 1.6 }}>
+            Hem detectat una <strong style={{ color: '#111827' }}>{resultat.tipus}</strong> als <strong style={{ color: '#111827' }}>{resultat.muscle}</strong>. Et preparem un programa de rehabilitació aproximat.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', textAlign: 'left', marginBottom: '2.5rem' }}>
+            <div style={{ background: '#f3f4f6', padding: '1.25rem', borderRadius: '12px' }}>
+              <p style={{ color: '#6b7280', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Múscul afectat</p>
+              <p style={{ fontSize: '1.25rem', fontWeight: 700 }}>{resultat.muscle}</p>
+            </div>
+            <div style={{ background: '#f3f4f6', padding: '1.25rem', borderRadius: '12px' }}>
+              <p style={{ color: '#6b7280', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Temps de recuperació</p>
+              <p style={{ fontSize: '1.25rem', fontWeight: 700 }}>{resultat.temps}</p>
+            </div>
+            <div style={{ background: '#f3f4f6', padding: '1.25rem', borderRadius: '12px' }}>
+              <p style={{ color: '#6b7280', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Sessions necessàries</p>
+              <p style={{ fontSize: '1.25rem', fontWeight: 700 }}>{resultat.sessions}</p>
+            </div>
+            <div style={{ background: '#f3f4f6', padding: '1.25rem', borderRadius: '12px' }}>
+              <p style={{ color: '#6b7280', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Fase inicial</p>
+              <p style={{ fontSize: '1.25rem', fontWeight: 700 }}>{resultat.fase}</p>
+            </div>
+          </div>
+
           <button
             onClick={() => onGuardar(resultat)}
-            style={{ padding: '0.6rem 1.2rem', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, transition: 'background 0.2s' }}
-            onMouseOver={e=>e.target.style.background='#2563eb'}
-            onMouseOut={e=>e.target.style.background='#3b82f6'}
+            style={{ width: '100%', padding: '1rem', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 700, fontSize: '1.1rem', transition: 'background 0.2s', boxShadow: '0 4px 14px 0 rgba(59, 130, 246, 0.39)', marginBottom: '1rem' }}
+            onMouseOver={e => e.target.style.background = '#2563eb'}
+            onMouseOut={e => e.target.style.background = '#3b82f6'}
           >
-            Guardar a Supabase
+            Començar programa &rarr;
           </button>
           <button
             onClick={reiniciar}
-            style={{ padding: '0.6rem 1.2rem', background: '#e5e7eb', color: '#374151', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, transition: 'background 0.2s' }}
-            onMouseOver={e=>e.target.style.background='#d1d5db'}
-            onMouseOut={e=>e.target.style.background='#e5e7eb'}
+            style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', fontSize: '0.9rem', textDecoration: 'underline' }}
+            onMouseOver={e => e.target.style.color = '#111827'}
+            onMouseOut={e => e.target.style.color = '#6b7280'}
           >
-            Repetir test
+            Tornar a fer el test
           </button>
+        </div>
+      )
+    }
+
+    const step = TEST_STEPS[pas]
+
+    return (
+      <div style={{ marginTop: '1.5rem', background: '#ffffff', padding: '2rem', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', position: 'relative' }}>
+        <button onClick={onCancel} style={{ position: 'absolute', top: '1rem', right: '1.25rem', background: 'none', border: 'none', fontSize: '1.75rem', color: '#9ca3af', cursor: 'pointer', lineHeight: 1, padding: 0 }} onMouseOver={e => e.target.style.color = '#ef4444'} onMouseOut={e => e.target.style.color = '#9ca3af'} title="Sortir del test">
+          &times;
+        </button>
+        {/* Barra de progrés */}
+        <p style={{ color: '#6b7280', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Pas {pas + 1} de {TEST_STEPS.length}</p>
+        <div style={{ background: '#e5e7eb', borderRadius: '999px', height: '8px', marginBottom: '2rem', overflow: 'hidden' }}>
+          <div style={{ background: '#3b82f6', width: `${((pas) / TEST_STEPS.length) * 100}%`, height: '100%', borderRadius: '999px', transition: 'width 0.4s ease-in-out' }} />
+        </div>
+
+        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start', fontSize: '0.95rem', lineHeight: 1.4 }}>
+          <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>❗</span>
+          <p style={{ margin: 0 }}><strong>Atenció:</strong> Aquest pla de rehabilitació és una aproximació mèdica, es recomana consultar a un fisioterapeuta per un pla més precís.</p>
+        </div>
+
+        <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#111827', marginBottom: '1.5rem' }}>{step.pregunta}</h3>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {step.opcions.map((opcio, idx) => (
+            <button
+              key={idx}
+              onClick={() => seleccionar(idx)}
+              style={{ padding: '1rem', background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '8px', cursor: 'pointer', textAlign: 'left', fontSize: '1rem', color: '#374151', transition: 'all 0.2s', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
+              onMouseOver={e => { e.target.style.borderColor = '#3b82f6'; e.target.style.boxShadow = '0 4px 6px -1px rgba(59, 130, 246, 0.1)'; }}
+              onMouseOut={e => { e.target.style.borderColor = '#e5e7eb'; e.target.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)'; }}
+            >
+              {opcio}
+            </button>
+          ))}
         </div>
       </div>
     )
   }
-
-  const step = TEST_STEPS[pas]
-
-  return (
-    <div style={{ marginTop: '1.5rem', background: '#ffffff', padding: '2rem', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', position: 'relative' }}>
-      <button onClick={onCancel} style={{ position: 'absolute', top: '1rem', right: '1.25rem', background: 'none', border: 'none', fontSize: '1.75rem', color: '#9ca3af', cursor: 'pointer', lineHeight: 1, padding: 0 }} onMouseOver={e=>e.target.style.color='#ef4444'} onMouseOut={e=>e.target.style.color='#9ca3af'} title="Sortir del test">
-        &times;
-      </button>
-      {/* Barra de progrés */}
-      <p style={{ color: '#6b7280', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Pas {pas + 1} de {TEST_STEPS.length}</p>
-      <div style={{ background: '#e5e7eb', borderRadius: '999px', height: '8px', marginBottom: '2rem', overflow: 'hidden' }}>
-        <div style={{ background: '#3b82f6', width: `${((pas) / TEST_STEPS.length) * 100}%`, height: '100%', borderRadius: '999px', transition: 'width 0.4s ease-in-out' }} />
-      </div>
-
-      <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#111827', marginBottom: '1.5rem' }}>{step.pregunta}</h3>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        {step.opcions.map((opcio, idx) => (
-          <button
-            key={idx}
-            onClick={() => seleccionar(idx)}
-            style={{ padding: '1rem', background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '8px', cursor: 'pointer', textAlign: 'left', fontSize: '1rem', color: '#374151', transition: 'all 0.2s', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
-            onMouseOver={e => { e.target.style.borderColor = '#3b82f6'; e.target.style.boxShadow = '0 4px 6px -1px rgba(59, 130, 246, 0.1)'; }}
-            onMouseOut={e => { e.target.style.borderColor = '#e5e7eb'; e.target.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)'; }}
-          >
-            {opcio}
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
-   const processarTestDiagnostic = async (resultat) => {
+  const processarTestDiagnostic = async (resultat) => {
     // resultat conté { muscle, tipus } i és enviat pel component TestDiagnostic
 
     try {
       // 1. Obtenir l'usuari actual de la sessió de Supabase
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
+
       if (sessionError || !session) {
         alert("Has d'iniciar sessió per poder guardar el teu diagnòstic.");
         return;
@@ -232,11 +262,11 @@ function TestDiagnostic({ onGuardar, onCancel }) {
       // 3. Guardar el resultat a Supabase
       // Canvia 'diagnostics_pacients' pel nom real de la teva taula a Supabase
       const { data, error } = await supabase
-        .from('diagnostics_pacients') 
+        .from('diagnostics_pacients')
         .insert([
-          { 
-            user_id: userId, 
-            muscle_afectat: resultat.muscle, 
+          {
+            user_id: userId,
+            muscle_afectat: resultat.muscle,
             tipus_lesio: resultat.tipus,
             programa_assignat: programaAssignat,
             creat_el: new Date()
@@ -252,7 +282,7 @@ function TestDiagnostic({ onGuardar, onCancel }) {
       // 4. Feedback a l'usuari i redirigir
       alert("Diagnòstic completat i guardat amb èxit!");
       // Canviem de vista per començar a fer els exercicis o anar al perfil
-      setVistaActual('exercici'); 
+      setVistaActual('exercici');
 
     } catch (err) {
       console.error("Error inesperat:", err);
@@ -310,7 +340,7 @@ function TestDiagnostic({ onGuardar, onCancel }) {
       {/* ── NAV ──────────────────────────────────────────────── */}
       <nav style={{ padding: '1rem 2rem', borderBottom: '1px solid #e5e7eb', background: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span onClick={() => setVistaActual('inici')} style={{ color: '#111827', fontWeight: 800, fontSize: '1.25rem', cursor: 'pointer' }}>Recover<span style={{ color: '#3b82f6' }}>IT</span></span>
-        <button onClick={tancarSessio} style={{ background: '#ffffff', border: '1px solid #d1d5db', color: '#374151', padding: '0.4rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 500, transition: 'all 0.2s' }} onMouseOver={e=>e.target.style.background='#f3f4f6'} onMouseOut={e=>e.target.style.background='#ffffff'}>
+        <button onClick={tancarSessio} style={{ background: '#ffffff', border: '1px solid #d1d5db', color: '#374151', padding: '0.4rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 500, transition: 'all 0.2s' }} onMouseOver={e => e.target.style.background = '#f3f4f6'} onMouseOut={e => e.target.style.background = '#ffffff'}>
           {/* TODO RF-AUTH-04: només mostrar si hi ha sessió activa */}
           Tancar sessió
         </button>
@@ -348,7 +378,7 @@ function TestDiagnostic({ onGuardar, onCancel }) {
           </section>
         )}
 
-                {/* ── PANTALLA: TEST DIAGNÒSTIC ────────────────────── */}
+        {/* ── PANTALLA: TEST DIAGNÒSTIC ────────────────────── */}
         {vistaActual === 'test' && (
           <section>
             <h2>Test diagnòstic</h2>
@@ -379,13 +409,13 @@ function TestDiagnostic({ onGuardar, onCancel }) {
             <h1 style={{ color: '#111827', fontSize: '3rem', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.025em' }}>Recover<span style={{ color: '#3b82f6' }}>IT</span></h1>
             <p style={{ color: '#4b5563', fontSize: '1.125rem', marginBottom: '3rem' }}>La teva plataforma de recuperació guiada i intel·ligent.</p>
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button onClick={() => setVistaActual('login')} style={{ padding: '0.75rem 1.5rem', background: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.3)', transition: 'all 0.2s' }} onMouseOver={e=>e.target.style.transform='translateY(-2px)'} onMouseOut={e=>e.target.style.transform='translateY(0)'}>
+              <button onClick={() => setVistaActual('login')} style={{ padding: '0.75rem 1.5rem', background: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.3)', transition: 'all 0.2s' }} onMouseOver={e => e.target.style.transform = 'translateY(-2px)'} onMouseOut={e => e.target.style.transform = 'translateY(0)'}>
                 Iniciar sessió
               </button>
-              <button onClick={() => setVistaActual('registre')} style={{ padding: '0.75rem 1.5rem', background: '#ffffff', color: '#3b82f6', border: '1px solid #3b82f6', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }} onMouseOver={e=>e.target.style.transform='translateY(-2px)'} onMouseOut={e=>e.target.style.transform='translateY(0)'}>
+              <button onClick={() => setVistaActual('registre')} style={{ padding: '0.75rem 1.5rem', background: '#ffffff', color: '#3b82f6', border: '1px solid #3b82f6', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }} onMouseOver={e => e.target.style.transform = 'translateY(-2px)'} onMouseOut={e => e.target.style.transform = 'translateY(0)'}>
                 Registrar-me
               </button>
-              <button onClick={() => setVistaActual('test')} style={{ padding: '0.75rem 1.5rem', background: '#111827', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.2)', transition: 'all 0.2s' }} onMouseOver={e=>e.target.style.transform='translateY(-2px)'} onMouseOut={e=>e.target.style.transform='translateY(0)'}>
+              <button onClick={() => setVistaActual('test')} style={{ padding: '0.75rem 1.5rem', background: '#111827', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.2)', transition: 'all 0.2s' }} onMouseOver={e => e.target.style.transform = 'translateY(-2px)'} onMouseOut={e => e.target.style.transform = 'translateY(0)'}>
                 Començar test
               </button>
             </div>
