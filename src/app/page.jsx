@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../utils/supabase'
 
 export default function Page() {
@@ -10,16 +10,74 @@ export default function Page() {
   // ============================================================
 
   const [vistaActual, setVistaActual] = useState('inici')
+  const [usuariSessio, setUsuariSessio] = useState(null)
+  const [perfilUsuari, setPerfilUsuari] = useState(null)
+  const [errorAuth, setErrorAuth] = useState('')
+  const [carregantAuth, setCarregantAuth] = useState(false)
+  const [registreForm, setRegistreForm] = useState({ nom: '', dni: '', email: '', password: '' })
+  const [loginForm, setLoginForm] = useState({ email: '', password: '' })
   // Vistes possibles: 'inici' | 'login' | 'registre' | 'perfil' | 'test' | 'exercici'
+
+  useEffect(() => {
+    comprovarSessio()
+  }, [])
 
   // ============================================================
   // RF-AUTH-01 — Registre d'usuari
   // L'usuari pot crear un compte amb correu i contrasenya
   // ============================================================
   const registrarUsuari = async () => {
-    // TODO RF-AUTH-01: Implementar registre amb supabase.auth.signUp()
-    // Camps necessaris: email, password (i possiblement nom, dni...)
-    // En cas d'èxit → redirigir a login o directament a la pantalla principal
+    const nom = registreForm.nom.trim()
+    const dni = registreForm.dni.trim()
+    const email = registreForm.email.trim()
+    const password = registreForm.password
+
+    if (!nom || !dni || !email || !password) {
+      setErrorAuth('Omple nom, DNI, email i contrasenya per registrar-te.')
+      return
+    }
+
+    setErrorAuth('')
+    setCarregantAuth(true)
+    try {
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { dni, nom, es_fisioterapeuta: false }
+        }
+      })
+
+      if (signUpError) {
+        setErrorAuth(signUpError.message)
+        return
+      }
+
+      const { error: upsertError } = await supabase
+        .from('usuaris')
+        .upsert(
+          { dni, nom, es_fisioterapeuta: false },
+          { onConflict: 'dni' }
+        )
+
+      if (upsertError) {
+        setErrorAuth(`Usuari creat a Auth però no guardat a usuaris: ${upsertError.message}`)
+        return
+      }
+
+      if (signUpData.session?.user) {
+        setUsuariSessio(signUpData.session.user)
+        await obtenirPerfil(signUpData.session.user)
+        setVistaActual('perfil')
+      } else {
+        setVistaActual('login')
+        alert('Compte creat. Revisa el correu si tens confirmació d\'email activada.')
+      }
+    } catch (err) {
+      setErrorAuth(err.message || 'Error inesperat al registrar usuari.')
+    } finally {
+      setCarregantAuth(false)
+    }
   }
 
   // ============================================================
@@ -27,9 +85,31 @@ export default function Page() {
   // L'usuari pot iniciar sessió amb el seu compte
   // ============================================================
   const iniciarSessio = async () => {
-    // TODO RF-AUTH-02: Implementar login amb supabase.auth.signInWithPassword()
-    // En cas d'èxit → guardar sessió i redirigir al dashboard del pacient
-    // En cas d'error → mostrar missatge d'error a l'usuari
+    const email = loginForm.email.trim()
+    const password = loginForm.password
+
+    if (!email || !password) {
+      setErrorAuth('Introdueix email i contrasenya.')
+      return
+    }
+
+    setErrorAuth('')
+    setCarregantAuth(true)
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) {
+        setErrorAuth(error.message)
+        return
+      }
+
+      setUsuariSessio(data.user)
+      await obtenirPerfil(data.user)
+      setVistaActual('perfil')
+    } catch (err) {
+      setErrorAuth(err.message || 'Error inesperat en iniciar sessió.')
+    } finally {
+      setCarregantAuth(false)
+    }
   }
 
   // ============================================================
@@ -37,8 +117,11 @@ export default function Page() {
   // L'usuari pot tancar la sessió manualment
   // ============================================================
   const tancarSessio = async () => {
-    // TODO RF-AUTH-04: Implementar logout amb supabase.auth.signOut()
-    // En cas d'èxit → redirigir a la pantalla d'inici/login
+    await supabase.auth.signOut()
+    setUsuariSessio(null)
+    setPerfilUsuari(null)
+    setErrorAuth('')
+    setVistaActual('inici')
   }
 
   // ============================================================
@@ -46,20 +129,40 @@ export default function Page() {
   // L'app recorda la sessió de l'usuari per no haver de fer login cada cop
   // ============================================================
   const comprovarSessio = async () => {
-    // TODO RF-AUTH-05: Al carregar l'app, comprovar si hi ha sessió activa
-    // Fer servir supabase.auth.getSession() o onAuthStateChange()
-    // Si hi ha sessió → saltar directament al dashboard
-    // Recomanat: posar aquesta lògica dins un useEffect([]) al component
+    const { data, error } = await supabase.auth.getSession()
+    if (error) return
+
+    const user = data.session?.user ?? null
+    setUsuariSessio(user)
+    if (user) {
+      await obtenirPerfil(user)
+    }
   }
 
   // ============================================================
   // RF-AUTH-09 — Veure perfil
   // L'usuari pot consultar les seves dades del compte
   // ============================================================
-  const obtenirPerfil = async () => {
-    // TODO RF-AUTH-09: Llegir les dades del perfil de l'usuari des de Supabase
-    // Probablement de la taula 'usuaris' filtrant per l'id de l'usuari autenticat
-    // Mostrar: nom, dni, i altres camps del perfil
+  const obtenirPerfil = async (userParam) => {
+    const user = userParam || usuariSessio
+    const dni = user?.user_metadata?.dni
+    if (!dni) {
+      setPerfilUsuari(null)
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('usuaris')
+      .select('*')
+      .eq('dni', dni)
+      .maybeSingle()
+
+    if (error) {
+      setErrorAuth(error.message)
+      return
+    }
+
+    setPerfilUsuari(data || null)
   }
 
   // ============================================================
@@ -67,9 +170,23 @@ export default function Page() {
   // L'usuari pot modificar les seves dades personals
   // ============================================================
   const editarPerfil = async () => {
-    // TODO RF-AUTH-10: Actualitzar les dades del perfil a Supabase
-    // Fer servir supabase.from('usuaris').update({...}).eq('id', userId)
-    // Mostrar feedback visual un cop guardat
+    if (!perfilUsuari?.dni) return
+
+    const nomEditat = prompt('Nou nom:', perfilUsuari.nom || '')
+    if (!nomEditat || !nomEditat.trim()) return
+
+    const { error } = await supabase
+      .from('usuaris')
+      .update({ nom: nomEditat.trim() })
+      .eq('dni', perfilUsuari.dni)
+
+    if (error) {
+      alert(`No s'ha pogut actualitzar el perfil: ${error.message}`)
+      return
+    }
+
+    await obtenirPerfil()
+    alert('Perfil actualitzat correctament.')
   }
 
   // ============================================================
@@ -322,9 +439,30 @@ function TestDiagnostic({ onGuardar, onCancel }) {
         {vistaActual === 'login' && (
           <section>
             <h2>Inici de sessió</h2>
-            {/* TODO RF-AUTH-02: Formulari amb email + password → cridar iniciarSessio() */}
-            {/* TODO RF-AUTH-05: Al muntar aquest component, comprovar si ja hi ha sessió activa */}
-            <p style={{ color: '#4b5063' }}>[Formulari de login aquí]</p>
+            <form onSubmit={(e) => { e.preventDefault(); iniciarSessio() }} style={{ display: 'grid', gap: '0.75rem', maxWidth: '420px' }}>
+              <input
+                type="email"
+                placeholder="Email"
+                value={loginForm.email}
+                onChange={(e) => setLoginForm((prev) => ({ ...prev, email: e.target.value }))}
+                style={{ padding: '0.65rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
+              />
+              <input
+                type="password"
+                placeholder="Contrasenya"
+                value={loginForm.password}
+                onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
+                style={{ padding: '0.65rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
+              />
+              {errorAuth && <p style={{ color: '#dc2626', margin: 0 }}>{errorAuth}</p>}
+              <button
+                type="submit"
+                disabled={carregantAuth}
+                style={{ padding: '0.65rem 1rem', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}
+              >
+                {carregantAuth ? 'Iniciant sessió...' : 'Iniciar sessió'}
+              </button>
+            </form>
           </section>
         )}
 
@@ -332,8 +470,44 @@ function TestDiagnostic({ onGuardar, onCancel }) {
         {vistaActual === 'registre' && (
           <section>
             <h2>Registre</h2>
-            {/* TODO RF-AUTH-01: Formulari amb email, password (i dades addicionals) → cridar registrarUsuari() */}
-            <p style={{ color: '#4b5063' }}>[Formulari de registre aquí]</p>
+            <form onSubmit={(e) => { e.preventDefault(); registrarUsuari() }} style={{ display: 'grid', gap: '0.75rem', maxWidth: '420px' }}>
+              <input
+                type="text"
+                placeholder="Nom complet"
+                value={registreForm.nom}
+                onChange={(e) => setRegistreForm((prev) => ({ ...prev, nom: e.target.value }))}
+                style={{ padding: '0.65rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
+              />
+              <input
+                type="text"
+                placeholder="DNI"
+                value={registreForm.dni}
+                onChange={(e) => setRegistreForm((prev) => ({ ...prev, dni: e.target.value }))}
+                style={{ padding: '0.65rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={registreForm.email}
+                onChange={(e) => setRegistreForm((prev) => ({ ...prev, email: e.target.value }))}
+                style={{ padding: '0.65rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
+              />
+              <input
+                type="password"
+                placeholder="Contrasenya"
+                value={registreForm.password}
+                onChange={(e) => setRegistreForm((prev) => ({ ...prev, password: e.target.value }))}
+                style={{ padding: '0.65rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
+              />
+              {errorAuth && <p style={{ color: '#dc2626', margin: 0 }}>{errorAuth}</p>}
+              <button
+                type="submit"
+                disabled={carregantAuth}
+                style={{ padding: '0.65rem 1rem', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}
+              >
+                {carregantAuth ? 'Registrant...' : 'Registrar-me'}
+              </button>
+            </form>
           </section>
         )}
 
@@ -341,10 +515,21 @@ function TestDiagnostic({ onGuardar, onCancel }) {
         {vistaActual === 'perfil' && (
           <section>
             <h2>El meu perfil</h2>
-            {/* TODO RF-AUTH-09: Mostrar dades del perfil → cridar obtenirPerfil() */}
-            {/* TODO RF-AUTH-10: Botó/formulari per editar les dades → cridar editarPerfil() */}
-            <p style={{ color: '#4b5063' }}>[Dades del perfil aquí]</p>
-            <p style={{ color: '#4b5063' }}>[Formulari d'edició aquí]</p>
+            {!perfilUsuari && <p style={{ color: '#4b5063' }}>No s'han trobat dades del perfil.</p>}
+            {perfilUsuari && (
+              <>
+                <p style={{ color: '#111827' }}><strong>Nom:</strong> {perfilUsuari.nom}</p>
+                <p style={{ color: '#111827' }}><strong>DNI:</strong> {perfilUsuari.dni}</p>
+                <p style={{ color: '#111827' }}><strong>Punts:</strong> {perfilUsuari.punts}</p>
+                <p style={{ color: '#111827' }}><strong>Rol:</strong> {perfilUsuari.es_fisioterapeuta ? 'Fisioterapeuta' : 'Pacient'}</p>
+                <button
+                  onClick={editarPerfil}
+                  style={{ padding: '0.55rem 1rem', background: '#ffffff', border: '1px solid #d1d5db', color: '#374151', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}
+                >
+                  Editar nom
+                </button>
+              </>
+            )}
           </section>
         )}
 
