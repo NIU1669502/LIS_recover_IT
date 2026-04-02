@@ -18,9 +18,37 @@ export default function Page() {
   const [loginForm, setLoginForm] = useState({ email: '', password: '' })
   // Vistes possibles: 'inici' | 'login' | 'registre' | 'perfil' | 'test' | 'exercici'
 
+  // === NOU: GESTIÓ D'HISTORIAL PER PODER TORNAR ENRERE ===
   useEffect(() => {
-    comprovarSessio()
-  }, [])
+    const manejarPopState = (event) => {
+      if (event.state && event.state.vista) {
+        setVistaActual(event.state.vista);
+      } else {
+        setVistaActual('inici');
+      }
+    };
+
+    window.addEventListener('popstate', manejarPopState);
+
+    if (!window.history.state) {
+      window.history.replaceState({ vista: 'inici' }, '');
+    }
+
+    comprovarSessio();
+
+    return () => window.removeEventListener('popstate', manejarPopState);
+  }, []);
+
+  // Funció per canviar de vista i guardar en l'historial del navegador
+  const navegarA = (novaVista) => {
+    setErrorAuth('');
+    setVistaActual(novaVista);
+    window.history.pushState({ vista: novaVista }, '', `#${novaVista}`);
+  };
+
+  const tornarEnrere = () => {
+    window.history.back();
+  };
 
   // ============================================================
   // RF-AUTH-01 — Registre d'usuari
@@ -68,9 +96,9 @@ export default function Page() {
       if (signUpData.session?.user) {
         setUsuariSessio(signUpData.session.user)
         await obtenirPerfil(signUpData.session.user)
-        setVistaActual('test')
+        navegarA('test')
       } else {
-        setVistaActual('login')
+        navegarA('login')
         alert('Compte creat correctament! Has de verificar el teu email abans de començar. Revisa el correu (i la carpeta de Spam) i després inicia sessió aquí.')
       }
     } catch (err) {
@@ -96,29 +124,24 @@ export default function Page() {
     setErrorAuth('')
     setCarregantAuth(true)
     try {
+      // ... dins del try d'iniciarSessio
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) {
-        setErrorAuth(error.message)
-        return
-      }
+      if (error) throw error
 
       setUsuariSessio(data.user)
       await obtenirPerfil(data.user)
-      
-      // Comprovar si l'usuari ja té una lesió registrada
-      const userDni = data.user.user_metadata?.dni;
-      const { data: lesionsUser } = await supabase
+
+      // Comprovem si ja té una lesió per saber on enviar-lo
+      const { data: lesio } = await supabase
         .from('lesions')
         .select('id_lesio')
-        .eq('dni_pacient', userDni)
-        .limit(1);
+        .eq('dni_pacient', data.user.user_metadata.dni)
+        .maybeSingle()
 
-      if (lesionsUser && lesionsUser.length > 0) {
-        // Ja ha fet el test prèviament
-        setVistaActual('perfil')
+      if (lesio) {
+        navegarA('perfil') // Si ja està lesionat, al seu perfil
       } else {
-        // Primera vegada: ha de fer el test
-        setVistaActual('test')
+        navegarA('test')   // Si és nou o no té lesió activa, al test
       }
     } catch (err) {
       setErrorAuth(err.message || 'Error inesperat en iniciar sessió.')
@@ -136,7 +159,7 @@ export default function Page() {
     setUsuariSessio(null)
     setPerfilUsuari(null)
     setErrorAuth('')
-    setVistaActual('inici')
+    navegarA('inici')
   }
 
   // ============================================================
@@ -421,7 +444,7 @@ export default function Page() {
       if (lesioAnterior && lesioAnterior.length > 0) {
         // ACTUALITZAR LA LESIÓ EXISTENT (sobreescriure)
         const id_lesio_existent = lesioAnterior[0].id_lesio;
-        
+
         const { error } = await supabase
           .from('lesions')
           .update({
@@ -433,7 +456,7 @@ export default function Page() {
             dia_rehabilitacio: 1
           })
           .eq('id_lesio', id_lesio_existent);
-          
+
         if (error) {
           console.error("Error al actualitzar a Supabase:", error);
           alert(`Hi ha hagut un problema a l'actualitzar el resultat: ${error.message}`);
@@ -447,9 +470,9 @@ export default function Page() {
           .select('id_lesio')
           .order('id_lesio', { ascending: false })
           .limit(1);
-  
+
         const novaIdLesio = ultimaLesio && ultimaLesio.length > 0 ? ultimaLesio[0].id_lesio + 1 : 1;
-  
+
         // Guardar el resultat a la taula lesions de Supabase
         const { error } = await supabase
           .from('lesions')
@@ -465,7 +488,7 @@ export default function Page() {
               dia_rehabilitacio: 1
             }
           ]);
-  
+
         if (error) {
           console.error("Error al guardar a Supabase:", error);
           alert(`Hi ha hagut un problema al guardar el resultat: ${error.message}`);
@@ -474,7 +497,7 @@ export default function Page() {
       }
 
       alert("Diagnòstic completat i guardat amb èxit!");
-      setVistaActual('exercici');
+      navegarA('exercici');
     } catch (err) {
       console.error("Error inesperat:", err);
     }
@@ -483,41 +506,26 @@ export default function Page() {
 
   // ============================================================
   // RF-PAC-02 — Iniciar i completar exercici
-  // El pacient pot iniciar un exercici, seguir el cronòmetre
-  // i marcar-lo com a completat
   // ============================================================
   const iniciarExercici = async (exerciciId) => {
     // TODO RF-PAC-02: Carregar les dades de l'exercici des de Supabase
-    // Mostrar: nom, vídeo, repeticions, cronòmetre
-    // Quan acabi → marcar com a completat i sumar punts
   }
 
   const completarExercici = async (exerciciId) => {
     // TODO RF-PAC-02: Marcar l'exercici com a completat a Supabase
-    // Actualitzar punts del pacient
-    // Desbloquejar el següent exercici si escau (veure RF-PAC-03)
   }
 
   // ============================================================
   // RF-PAC-03 — Bloqueig seqüencial d'exercicis
-  // El pacient no pot fer l'exercici N+1 sense haver completat l'exercici N
   // ============================================================
   const potFerExercici = (exerciciIndex, exercicisCompletats) => {
-    // TODO RF-PAC-03: Retornar true/false segons si l'exercici anterior està completat
-    // Exemple: si exerciciIndex === 0 → sempre disponible
-    //          si exerciciIndex > 0  → comprovar que exercicisCompletats[index-1] === true
     return false // placeholder
   }
 
   // ============================================================
   // RF-PAC-04 — Bloqueig entre fases
-  // El pacient no pot accedir als exercicis de la fase N+1
-  // fins completar les sessions requerides de la fase N
   // ============================================================
   const potAccedirFase = (faseIndex, sessionsCompletadesFaseAnterior) => {
-    // TODO RF-PAC-04: Comprovar si el pacient ha completat les sessions mínimes
-    // de la fase anterior per desbloquejar la fase actual
-    // Llegir de Supabase el progrés del pacient i comparar amb el llindar
     return false // placeholder
   }
 
@@ -528,14 +536,35 @@ export default function Page() {
   return (
     <div style={{ minHeight: '100vh', background: '#f9fafb', color: '#111827', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
 
-      {/* ── NAV ──────────────────────────────────────────────── */}
-      <nav style={{ padding: '0.5rem 2rem', borderBottom: '1px solid #e5e7eb', background: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span onClick={() => setVistaActual('inici')} style={{ color: '#111827', fontWeight: 800, fontSize: '1.25rem', cursor: 'pointer' }}>Recover<span style={{ color: '#3b82f6' }}>IT</span></span>
-        {usuariSessio && (
-          <button onClick={tancarSessio} style={{ background: '#ffffff', border: '1px solid #d1d5db', color: '#374151', padding: '0.4rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 500, transition: 'all 0.2s' }} onMouseOver={e => e.target.style.background = '#f3f4f6'} onMouseOut={e => e.target.style.background = '#ffffff'}>
-            Tancar sessió
-          </button>
-        )}
+      {/* ── NAV ACTUALITZAT ── */}
+      <nav style={{ padding: '0.8rem 2rem', borderBottom: '1px solid #e5e7eb', background: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 10 }}>
+        <span onClick={() => navegarA('inici')} style={{ color: '#111827', fontWeight: 800, fontSize: '1.25rem', cursor: 'pointer' }}>Recover<span style={{ color: '#3b82f6' }}>IT</span></span>
+
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          {/* BOTÓ TORNAR ENRERE: Surt sempre que no siguem a la Home */}
+          {vistaActual !== 'inici' && (
+            <button
+              onClick={tornarEnrere}
+              style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}
+              onMouseOver={e => e.target.style.color = '#3b82f6'}
+              onMouseOut={e => e.target.style.color = '#6b7280'}
+            >
+              <span style={{ fontSize: '1.1rem' }}>←</span> Tornar
+            </button>
+          )}
+
+          {/* BOTÓ TANCAR SESSIÓ: Només si hi ha sessió activa */}
+          {usuariSessio && (
+            <button
+              onClick={tancarSessio}
+              style={{ background: '#ffffff', border: '1px solid #fee2e2', color: '#ef4444', padding: '0.4rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', transition: 'all 0.2s' }}
+              onMouseOver={e => { e.target.style.background = '#fef2f2'; e.target.style.borderColor = '#fecaca'; }}
+              onMouseOut={e => { e.target.style.background = '#ffffff'; e.target.style.borderColor = '#fee2e2'; }}
+            >
+              Tancar sessió
+            </button>
+          )}
+        </div>
       </nav>
 
       <main style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
@@ -649,8 +678,7 @@ export default function Page() {
                 <h2 style={{ margin: 0, fontSize: '2rem', fontWeight: 900, color: '#111827', letterSpacing: '-0.02em', lineHeight: 1.1 }}>Test diagnòstic</h2>
               </div>
             </div>
-            {/* Fem servir el component passant les nostres funcions */}
-            <TestDiagnostic onGuardar={processarTestDiagnostic} onCancel={() => setVistaActual('inici')} />
+            <TestDiagnostic onGuardar={processarTestDiagnostic} onCancel={() => navegarA('inici')} />
           </section>
         )}
 
@@ -659,10 +687,6 @@ export default function Page() {
         {vistaActual === 'exercici' && (
           <section>
             <h2>Exercici</h2>
-            {/* TODO RF-PAC-02: Mostrar info de l'exercici (nom, vídeo, reps, cronòmetre) */}
-            {/* TODO RF-PAC-02: Botó "Marcar com a completat" → cridar completarExercici() */}
-            {/* TODO RF-PAC-03: Comprovar potFerExercici() abans de mostrar el botó d'inici */}
-            {/* TODO RF-PAC-04: Comprovar potAccedirFase() abans de mostrar exercicis d'una fase */}
             <p style={{ color: '#4b5063' }}>[Vídeo demostratiu aquí]</p>
             <p style={{ color: '#4b5063' }}>[Cronòmetre aquí]</p>
             <p style={{ color: '#4b5063' }}>[Repeticions aquí]</p>
@@ -678,19 +702,19 @@ export default function Page() {
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
               {!usuariSessio ? (
                 <>
-                  <button onClick={() => setVistaActual('login')} style={{ padding: '0.75rem 1.5rem', background: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.3)', transition: 'all 0.2s' }} onMouseOver={e => e.target.style.transform = 'translateY(-2px)'} onMouseOut={e => e.target.style.transform = 'translateY(0)'}>
+                  <button onClick={() => navegarA('login')} style={{ padding: '0.75rem 1.5rem', background: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.3)', transition: 'all 0.2s' }} onMouseOver={e => e.target.style.transform = 'translateY(-2px)'} onMouseOut={e => e.target.style.transform = 'translateY(0)'}>
                     Iniciar sessió
                   </button>
-                  <button onClick={() => setVistaActual('registre')} style={{ padding: '0.75rem 1.5rem', background: '#ffffff', color: '#3b82f6', border: '1px solid #3b82f6', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }} onMouseOver={e => e.target.style.transform = 'translateY(-2px)'} onMouseOut={e => e.target.style.transform = 'translateY(0)'}>
+                  <button onClick={() => navegarA('registre')} style={{ padding: '0.75rem 1.5rem', background: '#ffffff', color: '#3b82f6', border: '1px solid #3b82f6', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }} onMouseOver={e => e.target.style.transform = 'translateY(-2px)'} onMouseOut={e => e.target.style.transform = 'translateY(0)'}>
                     Registrar-me
                   </button>
                 </>
               ) : (
                 <>
-                  <button onClick={() => setVistaActual('test')} style={{ padding: '0.75rem 1.5rem', background: '#ffffff', color: '#111827', border: '1px solid #d1d5db', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s' }} onMouseOver={e => e.target.style.background = '#f3f4f6'} onMouseOut={e => e.target.style.background = '#ffffff'}>
+                  <button onClick={() => navegarA('test')} style={{ padding: '0.75rem 1.5rem', background: '#ffffff', color: '#111827', border: '1px solid #d1d5db', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s' }} onMouseOver={e => e.target.style.background = '#f3f4f6'} onMouseOut={e => e.target.style.background = '#ffffff'}>
                     Tornar a fer el test
                   </button>
-                  <button onClick={() => setVistaActual('perfil')} style={{ padding: '0.75rem 1.5rem', background: '#111827', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.2)', transition: 'all 0.2s' }} onMouseOver={e => e.target.style.transform = 'translateY(-2px)'} onMouseOut={e => e.target.style.transform = 'translateY(0)'}>
+                  <button onClick={() => navegarA('perfil')} style={{ padding: '0.75rem 1.5rem', background: '#111827', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.2)', transition: 'all 0.2s' }} onMouseOver={e => e.target.style.transform = 'translateY(-2px)'} onMouseOut={e => e.target.style.transform = 'translateY(0)'}>
                     Anar al meu perfil &rarr;
                   </button>
                 </>
