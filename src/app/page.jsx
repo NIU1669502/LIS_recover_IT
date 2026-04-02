@@ -528,6 +528,67 @@ export default function Page() {
   const potAccedirFase = (faseIndex, sessionsCompletadesFaseAnterior) => {
     return false // placeholder
   }
+  // ============================================================
+  // BIBLIOTECA D'EXERCICIS
+  // ============================================================
+  function BibliotecaExercicis({ onTornar }) {
+    const [exercicis, setExercicis] = useState([])
+    const [filtreActiu, setFiltreActiu] = useState('Tots')
+    const [carregant, setCarregant] = useState(true)
+
+    const filtres = ['Tots', 'Quadríceps', 'Isquiotibials', 'Genoll', 'Turmell', 'Panxell', 'Maluc']
+
+    useEffect(() => {
+      const carregar = async () => {
+        const { data, error } = await supabase.from('exercicis').select('*')
+        if (!error) setExercicis(data)
+        setCarregant(false)
+      }
+      carregar()
+    }, [])
+
+    return (
+      <div>
+        <button
+          onClick={onTornar}
+          style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', fontWeight: 500, fontSize: '1rem', marginBottom: '1.5rem', padding: 0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+        >
+          ← Tornar a l'inici
+        </button>
+
+        <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '1.5rem' }}>Biblioteca d'exercicis</h2>
+
+        <div style={{ marginBottom: '1.5rem' }}>
+          <p style={{ fontWeight: 600, marginBottom: '0.75rem' }}>Filtrar per zona corporal</p>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {filtres.map(f => (
+              <button
+                key={f}
+                onClick={() => setFiltreActiu(f)}
+                style={{ padding: '0.5rem 1rem', borderRadius: '999px', border: '1px solid #d1d5db', background: filtreActiu === f ? '#3b82f6' : '#ffffff', color: filtreActiu === f ? '#ffffff' : '#374151', cursor: 'pointer', fontWeight: 500, transition: 'all 0.2s' }}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {carregant ? (
+          <p style={{ color: '#6b7280' }}>Carregant exercicis...</p>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem' }}>
+            {exercicis.map(ex => (
+              <div key={ex.id_exercici} style={{ background: '#ffffff', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e5e7eb' }}>
+                <h3 style={{ fontWeight: 700, marginBottom: '0.5rem', color: '#111827' }}>{ex.nom}</h3>
+                <p style={{ color: '#6b7280', fontSize: '0.875rem', marginBottom: '0.75rem' }}>{ex.descripcio}</p>
+                <p style={{ color: '#3b82f6', fontSize: '0.875rem', fontWeight: 500 }}>⏱ {ex.duracio_segons}s</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
 
 
   // ============================================================
@@ -693,6 +754,10 @@ export default function Page() {
             <p style={{ color: '#4b5063' }}>[Botó completar aquí]</p>
           </section>
         )}
+        {/* ── PANTALLA: BIBLIOTECA D'EXERCICIS ───────────────── */}
+        {vistaActual === 'biblioteca' && (
+          <BibliotecaExercicis onTornar={() => navegarA('inici')} />
+        )}
 
         {/* ── PANTALLA: INICI (default) ────────────────────── */}
         {vistaActual === 'inici' && (
@@ -708,7 +773,9 @@ export default function Page() {
                   <button onClick={() => navegarA('registre')} style={{ padding: '0.75rem 1.5rem', background: '#ffffff', color: '#3b82f6', border: '1px solid #3b82f6', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }} onMouseOver={e => e.target.style.transform = 'translateY(-2px)'} onMouseOut={e => e.target.style.transform = 'translateY(0)'}>
                     Registrar-me
                   </button>
+
                 </>
+
               ) : (
                 <>
                   <button onClick={() => navegarA('test')} style={{ padding: '0.75rem 1.5rem', background: '#ffffff', color: '#111827', border: '1px solid #d1d5db', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s' }} onMouseOver={e => e.target.style.background = '#f3f4f6'} onMouseOut={e => e.target.style.background = '#ffffff'}>
@@ -719,6 +786,18 @@ export default function Page() {
                   </button>
                 </>
               )}
+            </div>
+            {/* Secció Veure exercicis */}
+            <div style={{ marginTop: '4rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
+              <div style={{ width: '240px', height: '300px', background: '#e5e7eb', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: '0.9rem' }}>
+                [Imatge anatòmica]
+              </div>
+              <button
+                onClick={() => navegarA('biblioteca')}
+                style={{ padding: '0.75rem 2rem', background: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '1rem', boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.3)' }}
+              >
+                Veure exercicis
+              </button>
             </div>
           </section>
         )}
