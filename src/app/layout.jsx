@@ -1,6 +1,5 @@
 export const metadata = {
-  title: "Exemple Supabase",
-  description: "Exemple de lectura i escriptura amb Supabase",
+  title: "RecoverIT",
 };
 
 export default function RootLayout({ children }) {
