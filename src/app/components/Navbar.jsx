@@ -31,7 +31,7 @@ export default function Navbar({ vistaActual, usuariSessio, onTornar, onTancarSe
                         onMouseOver={e => e.target.style.color = '#3b82f6'}
                         onMouseOut={e => e.target.style.color = '#6b7280'}
                     >
-                        <span style={{ fontSize: '1.1rem' }}>←</span> Tornar
+                        <span style={{ fontSize: '1.1rem' }}></span> Tornar
                     </button>
                 )}
 

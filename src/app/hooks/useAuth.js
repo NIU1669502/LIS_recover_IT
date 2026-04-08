@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../utils/supabase'
+import { showToast } from '../utils/toast'
 
 // ============================================================
 // Hook personalitzat que centralitza tota la lògica d'autenticació
@@ -109,7 +110,7 @@ export function useAuth(navegarA) {
                 navegarA('test')
             } else {
                 navegarA('login')
-                alert('Compte creat correctament! Has de verificar el teu email abans de començar. Revisa el correu (i la carpeta de Spam) i després inicia sessió aquí.')
+                showToast('Compte creat! Verifica el teu email abans d\'iniciar sessió. Revisa la carpeta de Spam si cal.', 'success')
             }
         } catch (err) {
             setErrorAuth(err.message || 'Error inesperat al registrar usuari.')
@@ -143,6 +144,7 @@ export function useAuth(navegarA) {
                 .eq('dni_pacient', data.user.user_metadata.dni)
                 .maybeSingle()
 
+            showToast(`Benvingut/da ${data.user.user_metadata?.nom || ''}`, 'success')
             navegarA(lesio ? 'perfil' : 'test')
         } catch (err) {
             setErrorAuth(err.message || 'Error inesperat en iniciar sessió.')
@@ -154,18 +156,17 @@ export function useAuth(navegarA) {
     // ── RF-AUTH-04 — Tancament de sessió ─────────────────────
     const tancarSessio = async () => {
         await supabase.auth.signOut()
+        const nomUsuari = perfilUsuari?.nom || ''
         setUsuariSessio(null)
         setPerfilUsuari(null)
         setErrorAuth('')
+        showToast(`Has tancat la sessió, ${nomUsuari}. Esperem tornar a veure't aviat!`, 'info')
         navegarA('inici')
     }
 
     // ── RF-AUTH-10 — Editar perfil ───────────────────────────
-    const editarPerfil = async () => {
-        if (!perfilUsuari?.dni) return
-
-        const nomEditat = prompt('Nou nom:', perfilUsuari.nom || '')
-        if (!nomEditat || !nomEditat.trim()) return
+    const editarPerfil = async (nomEditat) => {
+        if (!perfilUsuari?.dni || !nomEditat?.trim()) return
 
         const { error } = await supabase
             .from('usuaris')
@@ -173,12 +174,12 @@ export function useAuth(navegarA) {
             .eq('dni', perfilUsuari.dni)
 
         if (error) {
-            alert(`No s'ha pogut actualitzar el perfil: ${error.message}`)
+            showToast(`No s'ha pogut actualitzar el perfil: ${error.message}`, 'error')
             return
         }
 
         await obtenirPerfil()
-        alert('Perfil actualitzat correctament.')
+        showToast('Perfil actualitzat correctament.', 'success')
     }
 
     return {

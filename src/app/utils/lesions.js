@@ -1,5 +1,6 @@
 import { supabase } from '../../utils/supabase'
 import { TEST_STEPS } from '../data/testSteps.js'
+import { showToast } from '../utils/toast'
 
 // ============================================================
 // Determina el tipus de lesió a partir de les respostes del test
@@ -27,7 +28,7 @@ export async function processarTestDiagnostic(resultat, navegarA) {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
         if (sessionError || !session) {
-            alert("Has d'iniciar sessió per poder guardar el teu diagnòstic.")
+            showToast("Has d'iniciar sessió per poder guardar el teu diagnòstic.", 'warning')
             return
         }
 
@@ -62,7 +63,7 @@ export async function processarTestDiagnostic(resultat, navegarA) {
 
             if (error) {
                 console.error('Error al actualitzar a Supabase:', error)
-                alert(`Hi ha hagut un problema a l'actualitzar el resultat: ${error.message}`)
+                showToast(`Hi ha hagut un problema a l'actualitzar el resultat: ${error.message}`, 'error')
                 return
             }
         } else {
@@ -92,12 +93,12 @@ export async function processarTestDiagnostic(resultat, navegarA) {
 
             if (error) {
                 console.error('Error al guardar a Supabase:', error)
-                alert(`Hi ha hagut un problema al guardar el resultat: ${error.message}`)
+                showToast(`Hi ha hagut un problema al guardar el resultat: ${error.message}`, 'error')
                 return
             }
         }
 
-        alert('Diagnòstic completat i guardat amb èxit!')
+        showToast('Diagnòstic completat i guardat amb èxit!', 'success')
         navegarA('exercici')
     } catch (err) {
         console.error('Error inesperat:', err)

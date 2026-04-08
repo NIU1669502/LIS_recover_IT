@@ -81,7 +81,7 @@ export default function TestDiagnostic({ onGuardar, onCancel }) {
                     onMouseOver={e => e.target.style.background = '#2563eb'}
                     onMouseOut={e => e.target.style.background = '#3b82f6'}
                 >
-                    Començar programa &rarr;
+                    Començar programa
                 </button>
                 <button
                     onClick={reiniciar}
@@ -139,7 +139,7 @@ export default function TestDiagnostic({ onGuardar, onCancel }) {
                             disabled={!textInput.trim()}
                             style={{ marginTop: '0.5rem', padding: '0.8rem 1rem', background: textInput.trim() ? '#3b82f6' : '#9ca3af', color: 'white', border: 'none', borderRadius: '8px', cursor: textInput.trim() ? 'pointer' : 'not-allowed', fontWeight: 600, fontSize: '0.95rem' }}
                         >
-                            Següent &rarr;
+                            Següent
                         </button>
                     </>
                 ) : (

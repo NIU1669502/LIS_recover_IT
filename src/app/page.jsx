@@ -43,29 +43,29 @@ export default function Page() {
         onTancarSessio={tancarSessio}
       />
 
+      {/* ── LOGIN — fora del main per evitar el recuadre gris ── */}
+      {vistaActual === 'login' && (
+        <LoginForm
+          loginForm={loginForm}
+          setLoginForm={setLoginForm}
+          onSubmit={iniciarSessio}
+          errorAuth={errorAuth}
+          carregantAuth={carregantAuth}
+        />
+      )}
+
+      {/* ── REGISTRE — fora del main per evitar el recuadre gris ── */}
+      {vistaActual === 'registre' && (
+        <RegistreForm
+          registreForm={registreForm}
+          setRegistreForm={setRegistreForm}
+          onSubmit={registrarUsuari}
+          errorAuth={errorAuth}
+          carregantAuth={carregantAuth}
+        />
+      )}
+
       <main style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
-
-        {/* ── LOGIN ────────────────────────────────────────── */}
-        {vistaActual === 'login' && (
-          <LoginForm
-            loginForm={loginForm}
-            setLoginForm={setLoginForm}
-            onSubmit={iniciarSessio}
-            errorAuth={errorAuth}
-            carregantAuth={carregantAuth}
-          />
-        )}
-
-        {/* ── REGISTRE ─────────────────────────────────────── */}
-        {vistaActual === 'registre' && (
-          <RegistreForm
-            registreForm={registreForm}
-            setRegistreForm={setRegistreForm}
-            onSubmit={registrarUsuari}
-            errorAuth={errorAuth}
-            carregantAuth={carregantAuth}
-          />
-        )}
 
         {/* ── PERFIL ───────────────────────────────────────── */}
         {vistaActual === 'perfil' && (
@@ -133,7 +133,7 @@ export default function Page() {
                     Tornar a fer el test
                   </button>
                   <button onClick={() => navegarA('perfil')} style={{ padding: '0.75rem 1.5rem', background: '#111827', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.2)', transition: 'all 0.2s' }} onMouseOver={e => e.target.style.transform = 'translateY(-2px)'} onMouseOut={e => e.target.style.transform = 'translateY(0)'}>
-                    Anar al meu perfil &rarr;
+                    Anar al meu perfil
                   </button>
                 </>
               )}
