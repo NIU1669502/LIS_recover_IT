@@ -1,0 +1,245 @@
+/* ======================================
+   Contenidor RESULTAT
+   ====================================== */
+.resultContainer {
+    margin-top: 1.5rem;
+    background: #ffffff;
+    padding: 2rem 1.5rem;
+    border-radius: 16px;
+    color: #111827;
+    text-align: center;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    font-family: system-ui, sans-serif;
+    position: relative;
+}
+
+/* Botó tancar */
+.closeButton {
+    position: absolute;
+    top: 1rem;
+    right: 1.25rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #9ca3af;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.closeButton:hover {
+    color: #ef4444;
+}
+
+/* Emoji */
+.emoji {
+    font-size: 3.5rem;
+    margin-bottom: 0.75rem;
+    line-height: 1;
+}
+
+/* Títol resultat */
+.resultTitle {
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 0.75rem;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+/* Descripció */
+.resultText {
+    color: #4b5563;
+    font-size: 1rem;
+    max-width: 500px;
+    margin: 0 auto 1.5rem auto;
+    line-height: 1.5;
+}
+
+.highlight {
+    color: #111827;
+}
+
+/* Grid info */
+.resultGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    text-align: left;
+    margin-bottom: 2rem;
+}
+
+.resultCard {
+    background: #f3f4f6;
+    padding: 1rem;
+    border-radius: 12px;
+}
+
+.resultLabel {
+    color: #6b7280;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+}
+
+.resultValue {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+/* Botons resultat */
+.primaryButton {
+    width: 100%;
+    padding: 0.8rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1rem;
+    box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.39);
+    margin-bottom: 0.75rem;
+}
+
+.primaryButton:hover {
+    background: #2563eb;
+}
+
+.secondaryButton {
+    width: 100%;
+    padding: 0.8rem;
+    background: #f3f4f6;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.secondaryButton:hover {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+/* ======================================
+   Contenidor PREGUNTES
+   ====================================== */
+.questionContainer {
+    margin-top: 1.5rem;
+    background: #ffffff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+/* Progrés */
+.progressText {
+    color: #6b7280;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.progressBar {
+    background: #e5e7eb;
+    border-radius: 999px;
+    height: 6px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.progressFill {
+    background: #3b82f6;
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s ease-in-out;
+}
+
+/* Avis */
+.warningBox {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.warningIcon {
+    font-size: 1.1rem;
+}
+
+/* Pregunta */
+.questionTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1rem;
+}
+
+/* Opcions */
+.optionsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.optionButton {
+    padding: 0.8rem 1rem;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 0.95rem;
+    color: #374151;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.optionButton:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+}
+
+/* Textarea */
+.textarea {
+    padding: 0.8rem 1rem;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #374151;
+    min-height: 100px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.nextButton {
+    margin-top: 0.5rem;
+    padding: 0.8rem 1rem;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.nextButtonEnabled {
+    background: #3b82f6;
+    cursor: pointer;
+}
+
+.nextButtonDisabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}

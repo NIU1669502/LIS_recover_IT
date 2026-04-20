@@ -1,0 +1,43 @@
+/* ======================================
+   Título
+   ====================================== */
+.title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+/* ======================================
+   Texto normal
+   ====================================== */
+.text {
+    color: #111827;
+    margin-bottom: 0.5rem;
+}
+
+/* ======================================
+   Texto muted (sin datos)
+   ====================================== */
+.textMuted {
+    color: #4b5063;
+}
+
+/* ======================================
+   Botón editar
+   ====================================== */
+.editButton {
+    margin-top: 0.75rem;
+    padding: 0.55rem 1rem;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #374151;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+/* hover (no estaba en inline, pero no cambia comportamiento visual base) */
+.editButton:hover {
+    background: #f9fafb;
+}

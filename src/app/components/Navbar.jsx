@@ -1,51 +1,41 @@
 'use client'
 
-// ============================================================
-// Component: Navbar
-// ============================================================
+import styles from './navbar.module.css'
+
 export default function Navbar({ vistaActual, usuariSessio, onTornar, onTancarSessio, onNavegar }) {
     return (
-        <nav style={{
-            padding: '0.8rem 2rem',
-            borderBottom: '1px solid #e5e7eb',
-            background: '#ffffff',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            position: 'sticky',
-            top: 0,
-            zIndex: 10,
-        }}>
+        <nav className={styles.navbar}>
+
             <span
                 onClick={() => onNavegar('inici')}
-                style={{ color: '#111827', fontWeight: 800, fontSize: '1.25rem', cursor: 'pointer' }}
+                className={styles.logo}
             >
-                Recover<span style={{ color: '#3b82f6' }}>IT</span>
+                Recover<span className={styles.logoAccent}>IT</span>
             </span>
 
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div className={styles.rightSection}>
+
                 {vistaActual !== 'inici' && (
                     <button
                         onClick={onTornar}
-                        style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, fontSize: '0.9rem' }}
-                        onMouseOver={e => e.target.style.color = '#3b82f6'}
-                        onMouseOut={e => e.target.style.color = '#6b7280'}
+                        className={styles.backButton}
                     >
-                        <span style={{ fontSize: '1.1rem' }}>←</span> Tornar
+                        <span className={styles.backIcon}>←</span>
+                        Tornar
                     </button>
                 )}
 
                 {usuariSessio && (
                     <button
                         onClick={onTancarSessio}
-                        style={{ background: '#ffffff', border: '1px solid #fee2e2', color: '#ef4444', padding: '0.4rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', transition: 'all 0.2s' }}
-                        onMouseOver={e => { e.target.style.background = '#fef2f2'; e.target.style.borderColor = '#fecaca' }}
-                        onMouseOut={e => { e.target.style.background = '#ffffff'; e.target.style.borderColor = '#fee2e2' }}
+                        className={styles.logoutButton}
                     >
                         Tancar sessió
                     </button>
                 )}
+
             </div>
+
         </nav>
     )
 }

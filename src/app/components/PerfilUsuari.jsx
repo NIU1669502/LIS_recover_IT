@@ -1,22 +1,40 @@
 'use client'
 
-// ============================================================
-// Component: PerfilUsuari — RF-AUTH-09 / RF-AUTH-10
-// ============================================================
+import styles from './perfilUsuari.module.css'
+
 export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
     return (
         <section>
-            <h2>El meu perfil</h2>
-            {!perfilUsuari && <p style={{ color: '#4b5063' }}>No s'han trobat dades del perfil.</p>}
+            <h2 className={styles.title}>El meu perfil</h2>
+
+            {!perfilUsuari && (
+                <p className={styles.textMuted}>
+                    No s'han trobat dades del perfil.
+                </p>
+            )}
+
             {perfilUsuari && (
                 <>
-                    <p style={{ color: '#111827' }}><strong>Nom:</strong> {perfilUsuari.nom}</p>
-                    <p style={{ color: '#111827' }}><strong>DNI:</strong> {perfilUsuari.dni}</p>
-                    <p style={{ color: '#111827' }}><strong>Punts:</strong> {perfilUsuari.punts}</p>
-                    <p style={{ color: '#111827' }}><strong>Rol:</strong> {perfilUsuari.es_fisioterapeuta ? 'Fisioterapeuta' : 'Pacient'}</p>
+                    <p className={styles.text}>
+                        <strong>Nom:</strong> {perfilUsuari.nom}
+                    </p>
+
+                    <p className={styles.text}>
+                        <strong>DNI:</strong> {perfilUsuari.dni}
+                    </p>
+
+                    <p className={styles.text}>
+                        <strong>Punts:</strong> {perfilUsuari.punts}
+                    </p>
+
+                    <p className={styles.text}>
+                        <strong>Rol:</strong>{' '}
+                        {perfilUsuari.es_fisioterapeuta ? 'Fisioterapeuta' : 'Pacient'}
+                    </p>
+
                     <button
                         onClick={onEditarPerfil}
-                        style={{ padding: '0.55rem 1rem', background: '#ffffff', border: '1px solid #d1d5db', color: '#374151', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}
+                        className={styles.editButton}
                     >
                         Editar nom
                     </button>

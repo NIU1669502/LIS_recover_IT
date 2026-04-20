@@ -1,0 +1,54 @@
+/* ======================================
+   Título
+   ====================================== */
+.title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+/* ======================================
+   Formulario
+   ====================================== */
+.form {
+    display: grid;
+    gap: 0.75rem;
+    max-width: 420px;
+}
+
+/* ======================================
+   Inputs
+   ====================================== */
+.input {
+    padding: 0.65rem;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    font-size: 1rem;
+}
+
+/* ======================================
+   Error
+   ====================================== */
+.error {
+    color: #dc2626;
+    margin: 0;
+}
+
+/* ======================================
+   Botón submit
+   ====================================== */
+.submitButton {
+    padding: 0.65rem 1rem;
+    background: #3b82f6;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* estado disabled */
+.submitButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
