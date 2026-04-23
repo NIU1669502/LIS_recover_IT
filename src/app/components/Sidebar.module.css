@@ -1,0 +1,112 @@
+/* ======================================
+   SIDEBAR
+   ====================================== */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 240px;
+    background: #1d4ed8;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 0 1.5rem 0;
+    z-index: 100;
+    box-shadow: 4px 0 16px rgba(29, 78, 216, 0.25);
+    overflow: hidden;
+}
+
+/* Logo */
+.logo {
+    padding: 0 1.5rem 2rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    margin-bottom: 1rem;
+}
+
+.logoText {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+}
+
+.logoAccent {
+    color: #93c5fd;
+}
+
+/* Nav */
+.nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0 0.75rem;
+}
+
+.navItem {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: left;
+    transition: background 0.15s, color 0.15s;
+}
+
+.navItem:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.navItemActive {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.navLabel {
+    flex: 1;
+}
+
+.activeIndicator {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #93c5fd;
+    flex-shrink: 0;
+}
+
+/* Footer (logout) */
+.footer {
+    padding: 1rem 0.75rem 1.5rem 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.logoutButton {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    cursor: pointer;
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: left;
+    transition: background 0.15s;
+}
+
+.logoutButton:hover {
+    background: rgba(255, 255, 255, 0.2);
+}

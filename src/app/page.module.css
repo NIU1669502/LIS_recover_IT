@@ -8,6 +8,11 @@
     font-family: system-ui, -apple-system, sans-serif;
 }
 
+/* Quan hi ha sidebar, el main es desplaça cap a la dreta */
+.withSidebar .main {
+    margin-left: 240px;
+}
+
 .main {
     max-width: 800px;
     margin: 0 auto;

@@ -5,6 +5,7 @@ import { useAuth } from './hooks/useAuth'
 import { processarTestDiagnostic } from './utils/lesions'
 
 import Navbar from './components/Navbar'
+import Sidebar from './components/Sidebar'
 import LoginForm from './components/LoginForm'
 import RegistreForm from './components/RegistreForm'
 import PerfilUsuari from './components/PerfilUsuari'
@@ -31,15 +32,27 @@ export default function Page() {
   } = useAuth(navegarA)
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${usuariSessio ? styles.withSidebar : ''}`}>
 
-      <Navbar
-        vistaActual={vistaActual}
-        usuariSessio={usuariSessio}
-        onNavegar={navegarA}
-        onTornar={() => window.history.back()}
-        onTancarSessio={tancarSessio}
-      />
+      {/* Sidebar: només quan l'usuari ha iniciat sessió */}
+      {usuariSessio && (
+        <Sidebar
+          vistaActual={vistaActual}
+          onNavegar={navegarA}
+          onTancarSessio={tancarSessio}
+        />
+      )}
+
+      {/* Navbar: només quan NO ha iniciat sessió */}
+      {!usuariSessio && (
+        <Navbar
+          vistaActual={vistaActual}
+          usuariSessio={usuariSessio}
+          onNavegar={navegarA}
+          onTornar={() => window.history.back()}
+          onTancarSessio={tancarSessio}
+        />
+      )}
 
       <main className={styles.main}>
 
@@ -98,6 +111,20 @@ export default function Page() {
 
         {vistaActual === 'biblioteca' && (
           <BibliotecaExercicis onTornar={() => navegarA('inici')} />
+        )}
+
+        {vistaActual === 'historial' && (
+          <section>
+            <h2>Historial de lesions</h2>
+            <p className={styles.textMuted}>[Historial aquí]</p>
+          </section>
+        )}
+
+        {vistaActual === 'exercicis-en-curs' && (
+          <section>
+            <h2>Exercicis en curs</h2>
+            <p className={styles.textMuted}>[Exercicis actius aquí]</p>
+          </section>
         )}
 
         {vistaActual === 'inici' && (
