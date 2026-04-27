@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useAuth } from './hooks/useAuth'
 import { processarTestDiagnostic } from './utils/lesions'
+import SessioExercici from './components/SessioExercici'
+
 
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
@@ -11,11 +13,14 @@ import RegistreForm from './components/RegistreForm'
 import PerfilUsuari from './components/PerfilUsuari'
 import TestDiagnostic from './components/TestDiagnostic'
 import BibliotecaExercicis from './components/BibliotecaExercicis'
+import ExercicisEnCurs from './components/ExercicisEnCurs'
 
 import styles from './page.module.css'
 
 export default function Page() {
   const [vistaActual, setVistaActual] = useState('inici')
+  const [exercicisRutina, setExercicisRutina] = useState([])
+  const [indexExercici, setIndexExercici] = useState(0)
 
   const navegarA = (novaVista) => {
     setVistaActual(novaVista)
@@ -100,13 +105,11 @@ export default function Page() {
         )}
 
         {vistaActual === 'exercici' && (
-          <section>
-            <h2>Exercici</h2>
-            <p className={styles.textMuted}>[Vídeo demostratiu aquí]</p>
-            <p className={styles.textMuted}>[Cronòmetre aquí]</p>
-            <p className={styles.textMuted}>[Repeticions aquí]</p>
-            <p className={styles.textMuted}>[Botó completar aquí]</p>
-          </section>
+          <SessioExercici
+            exercicis={exercicisRutina}
+            indexInicial={indexExercici}
+            onCompletarSessio={() => navegarA('exercicis-en-curs')}
+          />
         )}
 
         {vistaActual === 'biblioteca' && (
@@ -121,10 +124,14 @@ export default function Page() {
         )}
 
         {vistaActual === 'exercicis-en-curs' && (
-          <section>
-            <h2>Exercicis en curs</h2>
-            <p className={styles.textMuted}>[Exercicis actius aquí]</p>
-          </section>
+          <ExercicisEnCurs
+            onNavegar={navegarA}
+            onIniciarSessio={(exercicis) => {
+              setExercicisRutina(exercicis)
+              setIndexExercici(0)
+              navegarA('exercici')
+            }}
+          />
         )}
 
         {vistaActual === 'inici' && (

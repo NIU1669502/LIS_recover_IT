@@ -1,5 +1,6 @@
 import { supabase } from '../../utils/supabase'
 import { TEST_STEPS } from '../data/testSteps.js'
+import { assignarRutina } from '../data/mockRutines'
 
 // ============================================================
 // Determina el tipus de lesió a partir de les respostes del test
@@ -23,10 +24,19 @@ export function determinarLesio(respostes) {
 // RF-PAC-01 — Guarda o actualitza la lesió a Supabase
 // ============================================================
 export async function processarTestDiagnostic(resultat, navegarA) {
+
+    // [MOCK] — comentar això i descomentar la versió real quan la BD estigui llesta
+    assignarRutina({ muscle: resultat.muscle, tipus: resultat.tipus })
+    alert('Diagnòstic completat!')
+    navegarA('exercicis-en-curs')
+    return
+
+    /*
     try {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
         if (sessionError || !session) {
+
             alert("Has d'iniciar sessió per poder guardar el teu diagnòstic.")
             return
         }
@@ -96,10 +106,11 @@ export async function processarTestDiagnostic(resultat, navegarA) {
                 return
             }
         }
-
+        assignarRutina({ muscle: resultat.muscle, tipus: resultat.tipus })
         alert('Diagnòstic completat i guardat amb èxit!')
         navegarA('exercici')
     } catch (err) {
         console.error('Error inesperat:', err)
     }
+        */
 }
