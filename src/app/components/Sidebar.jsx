@@ -6,7 +6,7 @@ const seccions = [
     { id: 'inici', label: 'Inici' },
     { id: 'exercicis-en-curs', label: 'Exercicis en curs' },
     { id: 'perfil', label: 'El meu perfil' },
-    { id: 'historial', label: 'Historial de lesions' },
+    { id: 'historial', label: 'Historial de sessions' },
 ]
 
 export default function Sidebar({ vistaActual, onNavegar, onTancarSessio }) {
