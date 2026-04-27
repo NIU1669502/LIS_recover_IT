@@ -1,0 +1,87 @@
+.container {
+    margin-top: 2rem;
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    color: #111827;
+}
+
+.muted {
+    color: #6b7280;
+}
+
+.error {
+    color: #dc2626;
+    font-weight: 500;
+}
+
+/* ── Bloque por día ───────────────────────── */
+
+.dayBlock {
+    margin-bottom: 2rem;
+}
+
+.dayTitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.75rem;
+}
+
+/* ── Tabla ───────────────────────────────── */
+
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.table thead {
+    background: #f3f4f6;
+}
+
+.table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+}
+
+.table td {
+    padding: 0.9rem 1rem;
+    border-top: 1px solid #e5e7eb;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+/* Hover igual que tu estilo original */
+.table tbody tr {
+    transition: background 0.2s;
+}
+
+.table tbody tr:hover {
+    background: #f9fafb;
+}
+
+/* Exercici info */
+.exerciseName {
+    font-weight: 600;
+    color: #111827;
+}
+
+.exerciseDesc {
+    font-size: 0.8rem;
+    color: #6b7280;
+}

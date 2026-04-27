@@ -1,68 +1,134 @@
 'use client'
 
+import { useState } from 'react'
 import styles from './registreForm.module.css'
 
-export default function RegistreForm({ registreForm, setRegistreForm, onSubmit, errorAuth, carregantAuth }) {
+// ============================================================
+// Component: RegistreForm — pantalla pública (sin sidebar)
+// ============================================================
+
+export default function RegistreForm({
+    registreForm,
+    setRegistreForm,
+    onSubmit,
+    errorAuth,
+    carregantAuth
+}) {
+    const [focusedField, setFocusedField] = useState(null)
+
+    const inputClass = (field) =>
+        `${styles.input} ${focusedField === field ? styles.inputFocus : ''}`
+
     return (
-        <section>
-            <h2 className={styles.title}>Registre</h2>
+        <div className={styles.wrapper}>
 
-            <form
-                onSubmit={(e) => { e.preventDefault(); onSubmit() }}
-                className={styles.form}
-            >
-                <input
-                    type="text"
-                    placeholder="Nom complet"
-                    value={registreForm.nom}
-                    onChange={(e) =>
-                        setRegistreForm((prev) => ({ ...prev, nom: e.target.value }))
-                    }
-                    className={styles.input}
-                />
+            {/* ORBS */}
+            <div className={`${styles.orb} ${styles.orb1}`} />
+            <div className={`${styles.orb} ${styles.orb2}`} />
+            <div className={`${styles.orb} ${styles.orb3}`} />
 
-                <input
-                    type="text"
-                    placeholder="DNI"
-                    value={registreForm.dni}
-                    onChange={(e) =>
-                        setRegistreForm((prev) => ({ ...prev, dni: e.target.value }))
-                    }
-                    className={styles.input}
-                />
+            <div className={styles.card}>
 
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={registreForm.email}
-                    onChange={(e) =>
-                        setRegistreForm((prev) => ({ ...prev, email: e.target.value }))
-                    }
-                    className={styles.input}
-                />
+                {/* HEADER */}
+                <div className={`${styles.header} ${styles.anim} ${styles.anim1}`}>
+                    <div className={styles.logo}>
+                        Recover<span>IT</span>
+                    </div>
+                    <p className={styles.tagline}>
+                        La teva plataforma de recuperació guiada
+                    </p>
+                </div>
 
-                <input
-                    type="password"
-                    placeholder="Contrasenya"
-                    value={registreForm.password}
-                    onChange={(e) =>
-                        setRegistreForm((prev) => ({ ...prev, password: e.target.value }))
-                    }
-                    className={styles.input}
-                />
+                <div className={styles.content}>
+                    <h2 className={`${styles.title} ${styles.anim} ${styles.anim2}`}>
+                        Crea el teu compte
+                    </h2>
 
-                {errorAuth && (
-                    <p className={styles.error}>{errorAuth}</p>
-                )}
+                    <p className={`${styles.subtitle} ${styles.anim} ${styles.anim2}`}>
+                        Comença la teva recuperació avui mateix
+                    </p>
 
-                <button
-                    type="submit"
-                    disabled={carregantAuth}
-                    className={styles.submitButton}
-                >
-                    {carregantAuth ? 'Registrant...' : 'Registrar-me'}
-                </button>
-            </form>
-        </section>
+                    <form onSubmit={(e) => { e.preventDefault(); onSubmit() }}>
+
+                        <div className={`${styles.field} ${styles.anim} ${styles.anim3}`}>
+                            <label>Nom complet</label>
+                            <input
+                                type="text"
+                                value={registreForm.nom}
+                                onChange={(e) =>
+                                    setRegistreForm(prev => ({ ...prev, nom: e.target.value }))
+                                }
+                                onFocus={() => setFocusedField('nom')}
+                                onBlur={() => setFocusedField(null)}
+                                className={inputClass('nom')}
+                            />
+                        </div>
+
+                        <div className={`${styles.field} ${styles.anim} ${styles.anim3}`}>
+                            <label>DNI</label>
+                            <input
+                                type="text"
+                                value={registreForm.dni}
+                                onChange={(e) =>
+                                    setRegistreForm(prev => ({ ...prev, dni: e.target.value }))
+                                }
+                                onFocus={() => setFocusedField('dni')}
+                                onBlur={() => setFocusedField(null)}
+                                className={inputClass('dni')}
+                            />
+                        </div>
+
+                        <div className={`${styles.field} ${styles.anim} ${styles.anim4}`}>
+                            <label>Email</label>
+                            <input
+                                type="email"
+                                value={registreForm.email}
+                                onChange={(e) =>
+                                    setRegistreForm(prev => ({ ...prev, email: e.target.value }))
+                                }
+                                onFocus={() => setFocusedField('email')}
+                                onBlur={() => setFocusedField(null)}
+                                className={inputClass('email')}
+                            />
+                        </div>
+
+                        <div className={`${styles.field} ${styles.anim} ${styles.anim5}`}>
+                            <label>Contrasenya</label>
+                            <input
+                                type="password"
+                                value={registreForm.password}
+                                onChange={(e) =>
+                                    setRegistreForm(prev => ({ ...prev, password: e.target.value }))
+                                }
+                                onFocus={() => setFocusedField('password')}
+                                onBlur={() => setFocusedField(null)}
+                                className={inputClass('password')}
+                            />
+                        </div>
+
+                        {errorAuth && (
+                            <div className={styles.error}>
+                                {errorAuth}
+                            </div>
+                        )}
+
+                        <div className={`${styles.anim} ${styles.anim6}`}>
+                            <button
+                                type="submit"
+                                disabled={carregantAuth}
+                                className={styles.button}
+                            >
+                                {carregantAuth ? (
+                                    <span className={styles.loadingDots}>
+                                        <span /><span /><span />
+                                    </span>
+                                ) : 'Registrar-me'}
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
     )
 }
