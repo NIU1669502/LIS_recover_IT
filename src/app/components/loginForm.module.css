@@ -1,54 +1,291 @@
-/* ======================================
-   Título
-   ====================================== */
+/* WRAPPER */
+.wrapper {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 3rem 1rem;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', system-ui;
+}
+
+/* ORBS */
+.orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.5;
+}
+
+.orb1 {
+    width: 420px;
+    height: 420px;
+    background: radial-gradient(circle, #bfdbfe, #818cf8);
+    top: -100px;
+    left: -120px;
+    animation: float1 9s infinite ease-in-out;
+}
+
+.orb2 {
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, #bbf7d0, #6ee7b7);
+    bottom: -80px;
+    right: -100px;
+    animation: float2 11s infinite ease-in-out;
+}
+
+.orb3 {
+    width: 260px;
+    height: 260px;
+    background: radial-gradient(circle, #fde68a, #fca5a5);
+    top: 40%;
+    right: 5%;
+    animation: float3 13s infinite ease-in-out;
+}
+
+@keyframes float1 {
+
+    0%,
+    100% {
+        transform: translate(0, 0)
+    }
+
+    50% {
+        transform: translate(40px, 30px)
+    }
+}
+
+@keyframes float2 {
+
+    0%,
+    100% {
+        transform: translate(0, 0)
+    }
+
+    50% {
+        transform: translate(-40px, -20px)
+    }
+}
+
+@keyframes float3 {
+
+    0%,
+    100% {
+        transform: translate(0, 0)
+    }
+
+    50% {
+        transform: translate(-30px, 40px)
+    }
+}
+
+/* CARD */
+.card {
+    width: 100%;
+    max-width: 420px;
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+    animation: cardIn 0.6s ease;
+}
+
+@keyframes cardIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* HEADER */
+.header {
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    padding: 1.75rem;
+    color: white;
+}
+
+.logo {
+    font-weight: 900;
+    font-size: 1.6rem;
+}
+
+.logo span {
+    opacity: 0.7;
+}
+
+.tagline {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* CONTENT */
+.content {
+    padding: 2rem;
+}
+
 .title {
     font-size: 1.5rem;
-    font-weight: 700;
+    font-weight: 800;
+}
+
+.subtitle {
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+}
+
+/* FIELD */
+.field {
     margin-bottom: 1rem;
 }
 
-/* ======================================
-   Formulario
-   ====================================== */
-.form {
-    display: grid;
-    gap: 0.75rem;
-    max-width: 420px;
-}
-
-/* ======================================
-   Inputs
-   ====================================== */
+/* INPUT */
 .input {
-    padding: 0.65rem;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-    font-size: 1rem;
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: 10px;
+    border: 2px solid #e5e7eb;
+    background: #f9fafb;
+    transition: all 0.25s;
 }
 
-/* ======================================
-   Error
-   ====================================== */
+.inputFocus {
+    border-color: #3b82f6;
+    background: #f0f7ff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+/* ERROR */
 .error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    padding: 0.7rem;
+    border-radius: 8px;
     color: #dc2626;
-    margin: 0;
+    margin-bottom: 1rem;
+    animation: shake 0.3s;
 }
 
-/* ======================================
-   Botón submit
-   ====================================== */
-.submitButton {
-    padding: 0.65rem 1rem;
-    background: #3b82f6;
-    color: #ffffff;
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0)
+    }
+
+    25% {
+        transform: translateX(-5px)
+    }
+
+    75% {
+        transform: translateX(5px)
+    }
+}
+
+/* BUTTON */
+.button {
+    width: 100%;
+    padding: 0.9rem;
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 12px;
     cursor: pointer;
-    font-weight: 600;
+    position: relative;
+    overflow: hidden;
 }
 
-/* estado disabled */
-.submitButton:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
+/* shimmer */
+.button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+}
+
+.button:hover::after {
+    animation: shimmer 0.6s;
+}
+
+@keyframes shimmer {
+    100% {
+        left: 130%
+    }
+}
+
+/* LOADING */
+.loadingDots span {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin: 0 2px;
+    background: white;
+    border-radius: 50%;
+    animation: bounce 1s infinite;
+}
+
+.loadingDots span:nth-child(2) {
+    animation-delay: 0.2s
+}
+
+.loadingDots span:nth-child(3) {
+    animation-delay: 0.4s
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0)
+    }
+
+    50% {
+        transform: translateY(-5px)
+    }
+}
+
+/* ANIM STAGGER */
+.anim {
+    opacity: 0;
+    animation: fadeUp 0.5s forwards;
+}
+
+.anim1 {
+    animation-delay: 0.1s
+}
+
+.anim2 {
+    animation-delay: 0.2s
+}
+
+.anim3 {
+    animation-delay: 0.3s
+}
+
+.anim4 {
+    animation-delay: 0.4s
+}
+
+.anim5 {
+    animation-delay: 0.5s
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

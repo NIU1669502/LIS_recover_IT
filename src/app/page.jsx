@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useAuth } from './hooks/useAuth'
 import { processarTestDiagnostic } from './utils/lesions'
 
+import HistorialSessions from './components/HistorialSessions'
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
 import LoginForm from './components/LoginForm'
@@ -114,10 +115,7 @@ export default function Page() {
         )}
 
         {vistaActual === 'historial' && (
-          <section>
-            <h2>Historial de lesions</h2>
-            <p className={styles.textMuted}>[Historial aquí]</p>
-          </section>
+          <HistorialSessions perfilUsuari={perfilUsuari} />
         )}
 
         {vistaActual === 'exercicis-en-curs' && (

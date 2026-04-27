@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../utils/supabase'
 import styles from './bibliotecaExercicis.module.css'
 
+// ============================================================
+// Component: BibliotecaExercicis
+// ============================================================
+
 const FILTRES = ['Tots', 'Quadríceps', 'Isquiotibials', 'Genoll', 'Turmell', 'Panxell', 'Maluc']
 
 export default function BibliotecaExercicis({ onTornar }) {
