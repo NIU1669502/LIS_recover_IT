@@ -1,0 +1,118 @@
+.container {
+    position: fixed;
+    top: 1.25rem;
+    right: 1.25rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+/* Toast base */
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    border: 1px solid;
+    min-width: 260px;
+    max-width: 360px;
+    font-size: 0.85rem;
+    position: relative;
+    overflow: hidden;
+
+    animation: toastIn 0.3s ease;
+}
+
+.leaving {
+    animation: toastOut 0.25s forwards;
+}
+
+/* Tipos */
+.success {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #166534;
+}
+
+.error {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #991b1b;
+}
+
+.warning {
+    background: #fffbeb;
+    border-color: #fcd34d;
+    color: #92400e;
+}
+
+.info {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #1e40af;
+}
+
+/* Icono */
+.icon {
+    font-weight: bold;
+}
+
+/* Mensaje */
+.message {
+    flex: 1;
+}
+
+/* Botón cerrar */
+.close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0.5;
+}
+
+.close:hover {
+    opacity: 1;
+}
+
+/* Barra progreso */
+.progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    background: currentColor;
+    animation: progress 5s linear forwards;
+}
+
+/* Animaciones */
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateX(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes toastOut {
+    to {
+        opacity: 0;
+        transform: translateX(40px);
+    }
+}
+
+@keyframes progress {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}

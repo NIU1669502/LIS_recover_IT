@@ -1,0 +1,214 @@
+/* ======================================
+   Layout general
+   ====================================== */
+.container {
+    min-height: 100vh;
+    background: #f9fafb;
+    color: #111827;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Quan hi ha sidebar, el main es desplaça cap a la dreta */
+.withSidebar .main {
+    margin-left: 240px;
+}
+
+.main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Modo pantalla completa para login / registre */
+.mainFull {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+/* ======================================
+   TEST
+   ====================================== */
+.testSection {
+    margin-top: 2.5rem;
+}
+
+.testHeader {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.testIconBox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 3.5rem;
+    height: 3.5rem;
+    background: #eff6ff;
+    border-radius: 12px;
+    border: 1px solid #bfdbfe;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+}
+
+.testIcon {
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+.testTitle {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 900;
+    color: #111827;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+}
+
+/* ======================================
+   TEXTOS
+   ====================================== */
+.textMuted {
+    color: #4b5063;
+}
+
+/* ======================================
+   HOME
+   ====================================== */
+.homeSection {
+    text-align: center;
+    padding-top: 4rem;
+}
+
+.title {
+    color: #111827;
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+    letter-spacing: -0.025em;
+}
+
+.titleAccent {
+    color: #3b82f6;
+}
+
+.subtitle {
+    color: #4b5563;
+    font-size: 1.125rem;
+    margin-bottom: 3rem;
+}
+
+.buttonGroup {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ======================================
+   BOTONES (uno por uno, sin abstraer)
+   ====================================== */
+
+/* Login */
+.loginButton {
+    padding: 0.75rem 1.5rem;
+    background: #3b82f6;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+    transition: all 0.2s;
+}
+
+.loginButton:hover {
+    transform: translateY(-2px);
+}
+
+/* Registro */
+.registerButton {
+    padding: 0.75rem 1.5rem;
+    background: #ffffff;
+    color: #3b82f6;
+    border: 1px solid #3b82f6;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.registerButton:hover {
+    transform: translateY(-2px);
+}
+
+/* Test */
+.testButton {
+    padding: 0.75rem 1.5rem;
+    background: #ffffff;
+    color: #111827;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.testButton:hover {
+    background: #f3f4f6;
+}
+
+/* Perfil */
+.profileButton {
+    padding: 0.75rem 1.5rem;
+    background: #111827;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+}
+
+.profileButton:hover {
+    transform: translateY(-2px);
+}
+
+/* Botón grande */
+.bigButton {
+    padding: 0.75rem 2rem;
+    background: #3b82f6;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+/* ======================================
+   IMAGEN
+   ====================================== */
+.imageSection {
+    margin-top: 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.imageBox {
+    width: 240px;
+    height: 300px;
+    background: #e5e7eb;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 0.9rem;
+}

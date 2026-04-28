@@ -1,0 +1,80 @@
+/* ======================================
+   Navbar contenedor
+   ====================================== */
+.navbar {
+    padding: 0.8rem 2rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* ======================================
+   Logo
+   ====================================== */
+.logo {
+    color: #111827;
+    font-weight: 800;
+    font-size: 1.25rem;
+    cursor: pointer;
+}
+
+.logoAccent {
+    color: #3b82f6;
+}
+
+/* ======================================
+   Contenedor botones derecha
+   ====================================== */
+.rightSection {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+/* ======================================
+   Botón volver
+   ====================================== */
+.backButton {
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.backButton:hover {
+    color: #3b82f6;
+}
+
+.backIcon {
+    font-size: 1.1rem;
+}
+
+/* ======================================
+   Botón logout
+   ====================================== */
+.logoutButton {
+    background: #ffffff;
+    border: 1px solid #fee2e2;
+    color: #ef4444;
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.logoutButton:hover {
+    background: #fef2f2;
+    border-color: #fecaca;
+}

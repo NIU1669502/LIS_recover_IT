@@ -3,20 +3,26 @@
 import { useState } from 'react'
 import { useAuth } from './hooks/useAuth'
 import { processarTestDiagnostic } from './utils/lesions'
+import SessioExercici from './components/SessioExercici'
+import ToastContainer from './components/ToastContainer'
 
+import HistorialSessions from './components/HistorialSessions'
 import Navbar from './components/Navbar'
+import Sidebar from './components/Sidebar'
 import LoginForm from './components/LoginForm'
 import RegistreForm from './components/RegistreForm'
 import PerfilUsuari from './components/PerfilUsuari'
 import TestDiagnostic from './components/TestDiagnostic'
 import BibliotecaExercicis from './components/BibliotecaExercicis'
+import ExercicisEnCurs from './components/ExercicisEnCurs'
 
-// ============================================================
-// Pàgina principal — Router de vistes
-// Vistes: 'inici' | 'login' | 'registre' | 'perfil' | 'test' | 'exercici' | 'biblioteca'
-// ============================================================
+import styles from './page.module.css'
+
 export default function Page() {
   const [vistaActual, setVistaActual] = useState('inici')
+  const [exercicisRutina, setExercicisRutina] = useState([])
+  const [indexExercici, setIndexExercici] = useState(0)
+  const [faseActual, setFaseActual] = useState(1)
 
   const navegarA = (novaVista) => {
     setVistaActual(novaVista)
@@ -25,49 +31,58 @@ export default function Page() {
 
   const {
     usuariSessio, perfilUsuari,
-    errorAuth, setErrorAuth,
+    errorAuth,
     carregantAuth,
     registreForm, setRegistreForm,
     loginForm, setLoginForm,
     registrarUsuari, iniciarSessio, tancarSessio, editarPerfil,
   } = useAuth(navegarA)
 
+  const esPantallaAuth = vistaActual === 'login' || vistaActual === 'registre'
+
   return (
-    <div style={{ minHeight: '100vh', background: '#f9fafb', color: '#111827', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+    <div className={`${styles.container} ${usuariSessio ? styles.withSidebar : ''}`}>
 
-      <Navbar
-        vistaActual={vistaActual}
-        usuariSessio={usuariSessio}
-        onNavegar={navegarA}
-        onTornar={() => window.history.back()}
-        onTancarSessio={tancarSessio}
-      />
-
-      {/* ── LOGIN — fora del main per evitar el recuadre gris ── */}
-      {vistaActual === 'login' && (
-        <LoginForm
-          loginForm={loginForm}
-          setLoginForm={setLoginForm}
-          onSubmit={iniciarSessio}
-          errorAuth={errorAuth}
-          carregantAuth={carregantAuth}
+      {usuariSessio && (
+        <Sidebar
+          vistaActual={vistaActual}
+          onNavegar={navegarA}
+          onTancarSessio={tancarSessio}
         />
       )}
 
-      {/* ── REGISTRE — fora del main per evitar el recuadre gris ── */}
-      {vistaActual === 'registre' && (
-        <RegistreForm
-          registreForm={registreForm}
-          setRegistreForm={setRegistreForm}
-          onSubmit={registrarUsuari}
-          errorAuth={errorAuth}
-          carregantAuth={carregantAuth}
+      {!usuariSessio && (
+        <Navbar
+          vistaActual={vistaActual}
+          usuariSessio={usuariSessio}
+          onNavegar={navegarA}
+          onTornar={() => window.history.back()}
+          onTancarSessio={tancarSessio}
         />
       )}
 
-      <main style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
+      <main className={esPantallaAuth ? styles.mainFull : styles.main}>
 
-        {/* ── PERFIL ───────────────────────────────────────── */}
+        {vistaActual === 'login' && (
+          <LoginForm
+            loginForm={loginForm}
+            setLoginForm={setLoginForm}
+            onSubmit={iniciarSessio}
+            errorAuth={errorAuth}
+            carregantAuth={carregantAuth}
+          />
+        )}
+
+        {vistaActual === 'registre' && (
+          <RegistreForm
+            registreForm={registreForm}
+            setRegistreForm={setRegistreForm}
+            onSubmit={registrarUsuari}
+            errorAuth={errorAuth}
+            carregantAuth={carregantAuth}
+          />
+        )}
+
         {vistaActual === 'perfil' && (
           <PerfilUsuari
             perfilUsuari={perfilUsuari}
@@ -75,15 +90,15 @@ export default function Page() {
           />
         )}
 
-        {/* ── TEST DIAGNÒSTIC ──────────────────────────────── */}
         {vistaActual === 'test' && (
-          <section style={{ marginTop: '2.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '3.5rem', height: '3.5rem', background: '#eff6ff', borderRadius: '12px', border: '1px solid #bfdbfe', boxShadow: '0 2px 4px rgba(59,130,246,0.1)' }}>
-                <span style={{ fontSize: '1.75rem', lineHeight: 1 }}>🩺</span>
+          <section className={styles.testSection}>
+            <div className={styles.testHeader}>
+              <div className={styles.testIconBox}>
+                <span className={styles.testIcon}>🩺</span>
               </div>
-              <h2 style={{ margin: 0, fontSize: '2rem', fontWeight: 900, color: '#111827', letterSpacing: '-0.02em', lineHeight: 1.1 }}>Test diagnòstic</h2>
+              <h2 className={styles.testTitle}>Test diagnòstic</h2>
             </div>
+
             <TestDiagnostic
               onGuardar={(resultat) => processarTestDiagnostic(resultat, navegarA)}
               onCancel={() => navegarA('inici')}
@@ -91,65 +106,83 @@ export default function Page() {
           </section>
         )}
 
-        {/* ── EXERCICI ─────────────────────────────────────── */}
         {vistaActual === 'exercici' && (
-          <section>
-            <h2>Exercici</h2>
-            <p style={{ color: '#4b5063' }}>[Vídeo demostratiu aquí]</p>
-            <p style={{ color: '#4b5063' }}>[Cronòmetre aquí]</p>
-            <p style={{ color: '#4b5063' }}>[Repeticions aquí]</p>
-            <p style={{ color: '#4b5063' }}>[Botó completar aquí]</p>
-          </section>
+          <SessioExercici
+            exercicis={exercicisRutina}
+            indexInicial={indexExercici}
+            fase={faseActual}
+            onCompletarSessio={() => navegarA('exercicis-en-curs')}
+          />
         )}
 
-        {/* ── BIBLIOTECA ───────────────────────────────────── */}
         {vistaActual === 'biblioteca' && (
           <BibliotecaExercicis onTornar={() => navegarA('inici')} />
         )}
 
-        {/* ── INICI ────────────────────────────────────────── */}
+        {vistaActual === 'historial' && (
+          <HistorialSessions perfilUsuari={perfilUsuari} />
+        )}
+
+        {vistaActual === 'exercicis-en-curs' && (
+          <ExercicisEnCurs
+            onNavegar={navegarA}
+            onIniciarSessio={(exercicis, fase) => {
+              setExercicisRutina(exercicis)
+              setFaseActual(fase)
+              setIndexExercici(0)
+              navegarA('exercici')
+            }}
+          />
+        )}
+
         {vistaActual === 'inici' && (
-          <section style={{ textAlign: 'center', paddingTop: '4rem' }}>
-            <h1 style={{ color: '#111827', fontSize: '3rem', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.025em' }}>
-              Recover<span style={{ color: '#3b82f6' }}>IT</span>
+          <section className={styles.homeSection}>
+
+            <h1 className={styles.title}>
+              Recover<span className={styles.titleAccent}>IT</span>
             </h1>
-            <p style={{ color: '#4b5563', fontSize: '1.125rem', marginBottom: '3rem' }}>
+
+            <p className={styles.subtitle}>
               La teva plataforma de recuperació guiada i intel·ligent.
             </p>
 
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <div className={styles.buttonGroup}>
               {!usuariSessio ? (
                 <>
-                  <button onClick={() => navegarA('login')} style={{ padding: '0.75rem 1.5rem', background: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 6px -1px rgba(59,130,246,0.3)', transition: 'all 0.2s' }} onMouseOver={e => e.target.style.transform = 'translateY(-2px)'} onMouseOut={e => e.target.style.transform = 'translateY(0)'}>
+                  <button onClick={() => navegarA('login')} className={styles.loginButton}>
                     Iniciar sessió
                   </button>
-                  <button onClick={() => navegarA('registre')} style={{ padding: '0.75rem 1.5rem', background: '#ffffff', color: '#3b82f6', border: '1px solid #3b82f6', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s' }} onMouseOver={e => e.target.style.transform = 'translateY(-2px)'} onMouseOut={e => e.target.style.transform = 'translateY(0)'}>
+
+                  <button onClick={() => navegarA('registre')} className={styles.registerButton}>
                     Registrar-me
                   </button>
                 </>
               ) : (
                 <>
-                  <button onClick={() => navegarA('test')} style={{ padding: '0.75rem 1.5rem', background: '#ffffff', color: '#111827', border: '1px solid #d1d5db', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s' }} onMouseOver={e => e.target.style.background = '#f3f4f6'} onMouseOut={e => e.target.style.background = '#ffffff'}>
+                  <button onClick={() => navegarA('test')} className={styles.testButton}>
                     Tornar a fer el test
                   </button>
-                  <button onClick={() => navegarA('perfil')} style={{ padding: '0.75rem 1.5rem', background: '#111827', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.2)', transition: 'all 0.2s' }} onMouseOver={e => e.target.style.transform = 'translateY(-2px)'} onMouseOut={e => e.target.style.transform = 'translateY(0)'}>
-                    Anar al meu perfil
+
+                  <button onClick={() => navegarA('perfil')} className={styles.profileButton}>
+                    Anar al meu perfil →
                   </button>
                 </>
               )}
             </div>
 
-            <div style={{ marginTop: '4rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
-              <div style={{ width: '240px', height: '300px', background: '#e5e7eb', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: '0.9rem' }}>
+            <div className={styles.imageSection}>
+              <div className={styles.imageBox}>
                 [Imatge anatòmica]
               </div>
+
               <button
                 onClick={() => navegarA('biblioteca')}
-                style={{ padding: '0.75rem 2rem', background: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '1rem', boxShadow: '0 4px 6px -1px rgba(59,130,246,0.3)' }}
+                className={styles.bigButton}
               >
                 Veure exercicis
               </button>
             </div>
+
           </section>
         )}
 

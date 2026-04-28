@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '../../utils/supabase'
+import styles from './bibliotecaExercicis.module.css'
 
 // ============================================================
 // Component: BibliotecaExercicis
 // ============================================================
+
 const FILTRES = ['Tots', 'Quadríceps', 'Isquiotibials', 'Genoll', 'Turmell', 'Panxell', 'Maluc']
 
 export default function BibliotecaExercicis({ onTornar }) {
@@ -28,23 +30,21 @@ export default function BibliotecaExercicis({ onTornar }) {
 
   return (
     <div>
-      <button
-        onClick={onTornar}
-        style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', fontWeight: 500, fontSize: '1rem', marginBottom: '1.5rem', padding: 0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-      >
+      <button className={styles.backButton} onClick={onTornar}>
         ← Tornar a l'inici
       </button>
 
-      <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '1.5rem' }}>Biblioteca d'exercicis</h2>
+      <h2 className={styles.title}>Biblioteca d'exercicis</h2>
 
-      <div style={{ marginBottom: '1.5rem' }}>
-        <p style={{ fontWeight: 600, marginBottom: '0.75rem' }}>Filtrar per zona corporal</p>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+      <div className={styles.filterContainer}>
+        <p className={styles.filterLabel}>Filtrar per zona corporal</p>
+
+        <div className={styles.filterButtons}>
           {FILTRES.map(f => (
             <button
               key={f}
               onClick={() => setFiltreActiu(f)}
-              style={{ padding: '0.5rem 1rem', borderRadius: '999px', border: '1px solid #d1d5db', background: filtreActiu === f ? '#3b82f6' : '#ffffff', color: filtreActiu === f ? '#ffffff' : '#374151', cursor: 'pointer', fontWeight: 500, transition: 'all 0.2s' }}
+              className={`${styles.filterButton} ${filtreActiu === f ? styles.activeFilter : ''}`}
             >
               {f}
             </button>
@@ -53,14 +53,14 @@ export default function BibliotecaExercicis({ onTornar }) {
       </div>
 
       {carregant ? (
-        <p style={{ color: '#6b7280' }}>Carregant exercicis...</p>
+        <p className={styles.loadingText}>Carregant exercicis...</p>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem' }}>
+        <div className={styles.grid}>
           {exercicisFiltrats.map(ex => (
-            <div key={ex.id_exercici} style={{ background: '#ffffff', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e5e7eb' }}>
-              <h3 style={{ fontWeight: 700, marginBottom: '0.5rem', color: '#111827' }}>{ex.nom}</h3>
-              <p style={{ color: '#6b7280', fontSize: '0.875rem', marginBottom: '0.75rem' }}>{ex.descripcio}</p>
-              <p style={{ color: '#3b82f6', fontSize: '0.875rem', fontWeight: 500 }}>⏱ {ex.duracio_segons}s</p>
+            <div key={ex.id_exercici} className={styles.card}>
+              <h3 className={styles.cardTitle}>{ex.nom}</h3>
+              <p className={styles.cardDescription}>{ex.descripcio}</p>
+              <p className={styles.cardDuration}>⏱ {ex.duracio_segons}s</p>
             </div>
           ))}
         </div>
