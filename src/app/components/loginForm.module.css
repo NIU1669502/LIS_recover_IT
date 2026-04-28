@@ -152,6 +152,7 @@
     border: 2px solid #e5e7eb;
     background: #f9fafb;
     transition: all 0.25s;
+    box-sizing: border-box;
 }
 
 .inputFocus {

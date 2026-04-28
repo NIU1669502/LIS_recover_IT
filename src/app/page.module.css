@@ -19,6 +19,14 @@
     padding: 2rem;
 }
 
+/* Modo pantalla completa para login / registre */
+.mainFull {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
 /* ======================================
    TEST
    ====================================== */

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useAuth } from './hooks/useAuth'
 import { processarTestDiagnostic } from './utils/lesions'
 import SessioExercici from './components/SessioExercici'
-
+import ToastContainer from './components/ToastContainer'
 
 import HistorialSessions from './components/HistorialSessions'
 import Navbar from './components/Navbar'
@@ -37,6 +37,8 @@ export default function Page() {
     registrarUsuari, iniciarSessio, tancarSessio, editarPerfil,
   } = useAuth(navegarA)
 
+  const esPantallaAuth = vistaActual === 'login' || vistaActual === 'registre'
+
   return (
     <div className={`${styles.container} ${usuariSessio ? styles.withSidebar : ''}`}>
 
@@ -60,7 +62,7 @@ export default function Page() {
         />
       )}
 
-      <main className={styles.main}>
+      <main className={esPantallaAuth ? styles.mainFull : styles.main}>
 
         {vistaActual === 'login' && (
           <LoginForm
