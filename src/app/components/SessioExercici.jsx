@@ -1,34 +1,37 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { avancarFase, getAssignacio } from '../data/mockRutines'
+import { supabase } from '../../utils/supabase'
+import { completarSessio } from '../utils/lesions'
 import styles from './sessioExercici.module.css'
 
-export default function SessioExercici({ exercicis = [], indexInicial = 0, onCompletarSessio }) {
+export default function SessioExercici({ exercicis = [], indexInicial = 0, fase = 1, onCompletarSessio }) {
     const [index, setIndex] = useState(indexInicial)
+    const [repActual, setRepActual] = useState(1)
     const [tempsRestant, setTempsRestant] = useState(null)
     const [cronometreActiu, setCronometreActiu] = useState(false)
     const [cronometreFinalitzat, setCronometreFinalitzat] = useState(false)
     const [mostrarCompletada, setMostrarCompletada] = useState(false)
-    const assignacio = getAssignacio()
-    const fase = assignacio?.fase_actual ?? 1
+    const [resultCompletada, setResultCompletada] = useState(null)
     const intervalRef = useRef(null)
 
-
     const exercici = exercicis[index]
-    const esUltim = index === exercicis.length - 1
+    const totalReps = exercici?.repeticions || 1
+    const esUltimaRep = repActual >= totalReps
+    const esUltimExercici = index === exercicis.length - 1
 
-    // Reset cronòmetre quan canvia d'exercici
+    // Reset quan canvia d'exercici
     useEffect(() => {
         if (exercici) {
             setTempsRestant(exercici.duracio_segons)
             setCronometreActiu(false)
             setCronometreFinalitzat(false)
+            setRepActual(1)
         }
         return () => clearInterval(intervalRef.current)
-    }, [index, exercici])
+    }, [index])
 
-    // Lògica del cronòmetre
+    // Cronòmetre
     useEffect(() => {
         if (cronometreActiu && tempsRestant > 0) {
             intervalRef.current = setInterval(() => {
@@ -46,13 +49,8 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, onCom
         return () => clearInterval(intervalRef.current)
     }, [cronometreActiu])
 
-    const iniciarCronòmetre = () => {
-        setCronometreActiu(true)
-        setCronometreFinalitzat(false)
-    }
-
+    const iniciarCronòmetre = () => { setCronometreActiu(true); setCronometreFinalitzat(false) }
     const pausarCronòmetre = () => setCronometreActiu(false)
-
     const reiniciarCronòmetre = () => {
         clearInterval(intervalRef.current)
         setCronometreActiu(false)
@@ -60,14 +58,28 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, onCom
         setTempsRestant(exercici.duracio_segons)
     }
 
-    const handleCompletar = () => {
-        if (esUltim) {
-            // Última sessió — avançar fase i mostrar pantalla de completat
-            avancarFase()
-            setMostrarCompletada(true)
-        } else {
-            setIndex(i => i + 1)
+    const handleCompletar = async () => {
+        if (!esUltimaRep) {
+            // Encara queden repeticions — reinicia cronòmetre per la següent
+            setRepActual(r => r + 1)
+            setTempsRestant(exercici.duracio_segons)
+            setCronometreActiu(false)
+            setCronometreFinalitzat(false)
+            return
         }
+
+        if (!esUltimExercici) {
+            setIndex(i => i + 1)
+            return
+        }
+
+        // Últim exercici, última rep — completar sessió a Supabase
+        const puntsGuanyats = exercicis.reduce((acc, ex) => acc + ((ex.punts || 0) * fase), 0)
+        const { data: { session } } = await supabase.auth.getSession()
+        const userDni = session?.user?.user_metadata?.dni
+        const resultat = await completarSessio(userDni, puntsGuanyats)
+        setResultCompletada({ ...resultat, puntsGuanyats })
+        setMostrarCompletada(true)
     }
 
     const formatTemps = (s) => {
@@ -77,28 +89,24 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, onCom
     }
 
     const pct = exercici ? (tempsRestant / exercici.duracio_segons) * 100 : 100
-    const circumferencia = 2 * Math.PI * 54 // radi 54
+    const circumferencia = 2 * Math.PI * 54
     const strokeDashoffset = circumferencia * (1 - pct / 100)
 
     // ── Pantalla completada ─────────────────────────────────
-    if (mostrarCompletada) {
-        const assignacio = getAssignacio()
-        const faseSeguent = assignacio?.fase_actual
-        const completada = assignacio?.completada
-
+    if (mostrarCompletada && resultCompletada) {
         return (
             <div className={styles.completadaContainer}>
-                <div className={styles.completadaIcon}>{completada ? '🏆' : '🎯'}</div>
+
                 <h2 className={styles.completadaTitle}>
-                    {completada ? 'Programa completat!' : 'Sessió completada!'}
+                    {resultCompletada.completada ? 'Programa completat!' : 'Sessió completada!'}
                 </h2>
                 <p className={styles.completadaText}>
-                    {completada
-                        ? 'Has completat totes les fases del programa de recuperació. Enhorabona!'
-                        : `Molt bé! Ara estàs a la Fase ${faseSeguent}.`}
+                    {resultCompletada.completada
+                        ? 'Has completat totes les fases del programa. Enhorabona!'
+                        : `Molt bé! Ara estàs a la Fase ${resultCompletada.novaFase}.`}
                 </p>
                 <div className={styles.puntsBadge}>
-                    +{exercicis.reduce((acc, ex) => acc + (ex.punts * fase || 0), 0)} punts guanyats
+                    +{resultCompletada.puntsGuanyats} punts guanyats
                 </div>
                 <button className={styles.primaryButton} onClick={onCompletarSessio}>
                     Tornar als exercicis →
@@ -109,10 +117,15 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, onCom
 
     if (!exercici) return null
 
+    const textBoto = () => {
+        if (!esUltimaRep) return `Següent repetició → ${repActual + 1}/${totalReps}`
+        if (!esUltimExercici) return `Següent exercici → ${exercicis[index + 1]?.nom}`
+        return 'Completar sessió'
+    }
+
     return (
         <div className={styles.container}>
 
-            {/* Progrés de la sessió */}
             <div className={styles.progressHeader}>
                 <span className={styles.progressText}>
                     Exercici {index + 1} de {exercicis.length}
@@ -120,23 +133,30 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, onCom
                 <div className={styles.progressBar}>
                     <div
                         className={styles.progressFill}
-                        style={{ width: `${((index) / exercicis.length) * 100}%` }}
+                        style={{ width: `${(index / exercicis.length) * 100}%` }}
                     />
                 </div>
             </div>
 
-            {/* Nom i info */}
             <h2 className={styles.exerciciNom}>{exercici.nom}</h2>
-            <p className={styles.exerciciReps}>🔁 {exercici.reps} repeticions</p>
 
-            {/* Video placeholder */}
+            {/* Tracker de repeticions */}
+            <div className={styles.repsTracker}>
+                {Array.from({ length: totalReps }).map((_, i) => (
+                    <div
+                        key={i}
+                        className={`${styles.repDot} ${i < repActual - 1 ? styles.repDotDone : ''} ${i === repActual - 1 ? styles.repDotActive : ''}`}
+                    />
+                ))}
+                <span className={styles.repsLabel}>Rep {repActual}/{totalReps}</span>
+            </div>
+
             <div className={styles.videoPlaceholder}>
                 <div className={styles.videoIcon}>▶</div>
                 <p className={styles.videoText}>Vídeo demostratiu</p>
                 <p className={styles.videoSub}>(disponible aviat)</p>
             </div>
 
-            {/* Cronòmetre circular */}
             <div className={styles.cronometreWrapper}>
                 <svg className={styles.cronometreSvg} viewBox="0 0 120 120">
                     <circle cx="60" cy="60" r="54" className={styles.trackCircle} />
@@ -156,36 +176,33 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, onCom
                 </div>
             </div>
 
-            {/* Controls cronòmetre */}
             <div className={styles.cronometreControls}>
                 {!cronometreActiu && !cronometreFinalitzat && (
                     <button className={styles.playButton} onClick={iniciarCronòmetre}>
-                        ▶ Iniciar cronòmetre
+                        Iniciar cronòmetre
                     </button>
                 )}
                 {cronometreActiu && (
                     <button className={styles.pauseButton} onClick={pausarCronòmetre}>
-                        ⏸ Pausar
+                        Pausar
                     </button>
                 )}
                 {(cronometreActiu || cronometreFinalitzat || tempsRestant < exercici.duracio_segons) && (
                     <button className={styles.resetButton} onClick={reiniciarCronòmetre}>
-                        ↺ Reiniciar
+                        Reiniciar
                     </button>
                 )}
             </div>
 
-            {/* Punts d'aquest exercici */}
             <div className={styles.puntsInfo}>
-                ⭐ {exercici.punts * fase} punts en completar
+                {exercici.punts * fase} punts en completar
             </div>
 
-            {/* Botó completar */}
             <button
                 className={`${styles.completarButton} ${cronometreFinalitzat ? styles.completarButtonReady : ''}`}
                 onClick={handleCompletar}
             >
-                {esUltim ? '🏁 Completar sessió' : `Següent exercici → ${exercicis[index + 1]?.nom}`}
+                {textBoto()}
             </button>
 
         </div>

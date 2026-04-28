@@ -1,20 +1,62 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getAssignacio, getExercicisFaseActual } from '../data/mockRutines'
+import { supabase } from '../../utils/supabase'
+import { getDiagnosticActiu, getExercicisDelaFase } from '../utils/lesions'
 import styles from './exercicisEnCurs.module.css'
 
 export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
-    const [assignacio, setAssignacio] = useState(null)
+    const [diagnostic, setDiagnostic] = useState(null)
     const [exercicis, setExercicis] = useState([])
+    const [nomMuscul, setNomMuscul] = useState('')
+    const [nomLesio, setNomLesio] = useState('')
+    const [carregant, setCarregant] = useState(true)
 
     useEffect(() => {
-        const a = getAssignacio()
-        setAssignacio(a)
-        setExercicis(getExercicisFaseActual())
+        const carregar = async () => {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (!session) { setCarregant(false); return }
+
+            const userDni = session.user.user_metadata?.dni
+            const diag = await getDiagnosticActiu(userDni)
+            if (!diag) { setCarregant(false); return }
+
+            setDiagnostic(diag)
+
+            // Nom del múscul
+            const { data: muscul } = await supabase
+                .from('musculs')
+                .select('nom')
+                .eq('id_cos', diag.part_cos)
+                .single()
+            if (muscul) setNomMuscul(muscul.nom)
+
+            // Nom de la lesió
+            const { data: lesio } = await supabase
+                .from('lesions')
+                .select('nom')
+                .eq('id_lesio', diag.id_lesio)
+                .single()
+            if (lesio) setNomLesio(lesio.nom)
+
+            // Exercicis de la fase actual
+            const exs = await getExercicisDelaFase(diag)
+            setExercicis(exs)
+
+            setCarregant(false)
+        }
+        carregar()
     }, [])
 
-    if (!assignacio) {
+    if (carregant) {
+        return (
+            <div className={styles.emptyContainer}>
+                <p>Carregant...</p>
+            </div>
+        )
+    }
+
+    if (!diagnostic) {
         return (
             <div className={styles.emptyContainer}>
                 <div className={styles.emptyIcon}>🏥</div>
@@ -29,7 +71,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
         )
     }
 
-    if (assignacio.completada) {
+    if (diagnostic.fase_actual > 3) {
         return (
             <div className={styles.emptyContainer}>
                 <div className={styles.emptyIcon}>🎉</div>
@@ -51,15 +93,15 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
             <div className={styles.rutinaInfo}>
                 <div className={styles.rutinaTag}>
                     <span className={styles.tagLabel}>Múscul</span>
-                    <span className={styles.tagValue}>{assignacio.muscle}</span>
+                    <span className={styles.tagValue}>{nomMuscul}</span>
                 </div>
                 <div className={styles.rutinaTag}>
                     <span className={styles.tagLabel}>Lesió</span>
-                    <span className={styles.tagValue}>{assignacio.tipus_lesio}</span>
+                    <span className={styles.tagValue}>{nomLesio}</span>
                 </div>
                 <div className={styles.rutinaTag}>
                     <span className={styles.tagLabel}>Fase</span>
-                    <span className={styles.tagValue}>{assignacio.fase_actual} / 3</span>
+                    <span className={styles.tagValue}>{diagnostic.fase_actual} / 3</span>
                 </div>
             </div>
 
@@ -67,7 +109,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
                 {[1, 2, 3].map(f => (
                     <div
                         key={f}
-                        className={`${styles.faseDot} ${f < assignacio.fase_actual ? styles.faseDotDone : ''} ${f === assignacio.fase_actual ? styles.faseDotActive : ''}`}
+                        className={`${styles.faseDot} ${f < diagnostic.fase_actual ? styles.faseDotDone : ''} ${f === diagnostic.fase_actual ? styles.faseDotActive : ''}`}
                     >
                         <span className={styles.faseNum}>{f}</span>
                         <span className={styles.faseLabel}>
@@ -85,8 +127,8 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
                             <h3 className={styles.exerciciNom}>{ex.nom}</h3>
                             <div className={styles.exerciciMeta}>
                                 <span>⏱ {ex.duracio_segons}s</span>
-                                <span>🔁 {ex.reps} reps</span>
-                                <span>⭐ {ex.punts} pts</span>
+                                <span>🔁 {ex.repeticions} reps</span>
+                                <span>⭐ {ex.punts * diagnostic.fase_actual} pts</span>
                             </div>
                         </div>
                     </div>
@@ -95,7 +137,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
 
             <button
                 className={styles.primaryButton}
-                onClick={() => onIniciarSessio(exercicis)}
+                onClick={() => onIniciarSessio(exercicis, diagnostic.fase_actual)}
             >
                 Iniciar sessió →
             </button>

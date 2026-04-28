@@ -22,6 +22,7 @@ export default function Page() {
   const [vistaActual, setVistaActual] = useState('inici')
   const [exercicisRutina, setExercicisRutina] = useState([])
   const [indexExercici, setIndexExercici] = useState(0)
+  const [faseActual, setFaseActual] = useState(1)
 
   const navegarA = (novaVista) => {
     setVistaActual(novaVista)
@@ -42,7 +43,6 @@ export default function Page() {
   return (
     <div className={`${styles.container} ${usuariSessio ? styles.withSidebar : ''}`}>
 
-      {/* Sidebar: només quan l'usuari ha iniciat sessió */}
       {usuariSessio && (
         <Sidebar
           vistaActual={vistaActual}
@@ -51,7 +51,6 @@ export default function Page() {
         />
       )}
 
-      {/* Navbar: només quan NO ha iniciat sessió */}
       {!usuariSessio && (
         <Navbar
           vistaActual={vistaActual}
@@ -111,6 +110,7 @@ export default function Page() {
           <SessioExercici
             exercicis={exercicisRutina}
             indexInicial={indexExercici}
+            fase={faseActual}
             onCompletarSessio={() => navegarA('exercicis-en-curs')}
           />
         )}
@@ -126,8 +126,9 @@ export default function Page() {
         {vistaActual === 'exercicis-en-curs' && (
           <ExercicisEnCurs
             onNavegar={navegarA}
-            onIniciarSessio={(exercicis) => {
+            onIniciarSessio={(exercicis, fase) => {
               setExercicisRutina(exercicis)
+              setFaseActual(fase)
               setIndexExercici(0)
               navegarA('exercici')
             }}
