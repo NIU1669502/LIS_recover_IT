@@ -85,7 +85,7 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
     const circumferencia = 2 * Math.PI * 54
     const strokeDashoffset = circumferencia * (1 - pct / 100)
 
-    // ── Pantalla completada ─────────────────────────────────
+    // ── Pantalla completada ────────a
     if (mostrarCompletada && resultCompletada) {
         return (
             <div className={styles.completadaContainer}>
