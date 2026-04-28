@@ -45,12 +45,14 @@ export function useAuth(navegarA) {
         setUsuariSessio(user)
         if (user) {
             await obtenirPerfil(user)
-            const { data: lesio } = await supabase
+            // Navegar a 'test' només si no té cap lesió activa (no recuperada)
+            const { data: lesionsActives } = await supabase
                 .from('lesions')
                 .select('id_lesio')
                 .eq('dni_pacient', user.user_metadata?.dni)
-                .maybeSingle()
-            navegarA(lesio ? 'perfil' : 'test')
+                .eq('recuperat', false)
+                .limit(1)
+            navegarA(lesionsActives?.length > 0 ? 'perfil' : 'test')
         }
     }
 
@@ -138,14 +140,16 @@ export function useAuth(navegarA) {
             setUsuariSessio(data.user)
             await obtenirPerfil(data.user)
 
-            const { data: lesio } = await supabase
+            // Navegar a 'test' només si no té cap lesió activa (no recuperada)
+            const { data: lesionsActives } = await supabase
                 .from('lesions')
                 .select('id_lesio')
                 .eq('dni_pacient', data.user.user_metadata.dni)
-                .maybeSingle()
+                .eq('recuperat', false)
+                .limit(1)
 
             showToast(`Benvingut/da ${data.user.user_metadata?.nom || ''}`, 'success')
-            navegarA(lesio ? 'perfil' : 'test')
+            navegarA(lesionsActives?.length > 0 ? 'perfil' : 'test')
         } catch (err) {
             setErrorAuth(err.message || 'Error inesperat en iniciar sessió.')
         } finally {

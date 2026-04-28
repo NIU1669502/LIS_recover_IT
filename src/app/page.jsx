@@ -10,10 +10,11 @@ import RegistreForm from './components/RegistreForm'
 import PerfilUsuari from './components/PerfilUsuari'
 import TestDiagnostic from './components/TestDiagnostic'
 import BibliotecaExercicis from './components/BibliotecaExercicis'
+import ProgresPacient from './components/ProgresPacient'
 
 // ============================================================
 // Pàgina principal — Router de vistes
-// Vistes: 'inici' | 'login' | 'registre' | 'perfil' | 'test' | 'exercici' | 'biblioteca'
+// Vistes: 'inici' | 'login' | 'registre' | 'perfil' | 'test' | 'exercici' | 'biblioteca' | 'progres'
 // ============================================================
 export default function Page() {
   const [vistaActual, setVistaActual] = useState('inici')
@@ -107,6 +108,11 @@ export default function Page() {
           <BibliotecaExercicis onTornar={() => navegarA('inici')} />
         )}
 
+        {/* ── PROGRÉS I HISTORIAL (RF-PAC-05 / RF-PAC-06) ──── */}
+        {vistaActual === 'progres' && (
+          <ProgresPacient perfilUsuari={perfilUsuari} onNavagarTest={() => navegarA('test')} />
+        )}
+
         {/* ── INICI ────────────────────────────────────────── */}
         {vistaActual === 'inici' && (
           <section style={{ textAlign: 'center', paddingTop: '4rem' }}>
@@ -131,6 +137,9 @@ export default function Page() {
                 <>
                   <button onClick={() => navegarA('test')} style={{ padding: '0.75rem 1.5rem', background: '#ffffff', color: '#111827', border: '1px solid #d1d5db', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s' }} onMouseOver={e => e.target.style.background = '#f3f4f6'} onMouseOut={e => e.target.style.background = '#ffffff'}>
                     Tornar a fer el test
+                  </button>
+                  <button onClick={() => navegarA('progres')} style={{ padding: '0.75rem 1.5rem', background: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 6px -1px rgba(59,130,246,0.3)', transition: 'all 0.2s' }} onMouseOver={e => e.target.style.transform = 'translateY(-2px)'} onMouseOut={e => e.target.style.transform = 'translateY(0)'}>
+                    📈 El meu progrés
                   </button>
                   <button onClick={() => navegarA('perfil')} style={{ padding: '0.75rem 1.5rem', background: '#111827', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.2)', transition: 'all 0.2s' }} onMouseOver={e => e.target.style.transform = 'translateY(-2px)'} onMouseOut={e => e.target.style.transform = 'translateY(0)'}>
                     Anar al meu perfil

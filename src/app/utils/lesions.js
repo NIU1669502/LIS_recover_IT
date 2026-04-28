@@ -21,7 +21,9 @@ export function determinarLesio(respostes) {
 }
 
 // ============================================================
-// RF-PAC-01 — Guarda o actualitza la lesió a Supabase
+// RF-PAC-01 — Crea SEMPRE una nova lesió (mai sobreescriu)
+// Cada cop que un pacient fa el test, s'afegeix una nova entrada
+// a l'historial de lesions. Les lesions anteriors es conserven.
 // ============================================================
 export async function processarTestDiagnostic(resultat, navegarA) {
     try {
@@ -38,69 +40,54 @@ export async function processarTestDiagnostic(resultat, navegarA) {
         const idxCos = TEST_STEPS[0].opcions.indexOf(resultat.muscle)
         const idCos = idxCos >= 0 ? idxCos + 1 : 1
 
-        // Comprovar si ja té una lesió guardada
-        const { data: lesioAnterior } = await supabase
+        // Sempre inserim una nova lesió — mai sobreescrivim les anteriors
+        // (la id_lesio la genera automàticament la seqüència de la BD)
+        const { error } = await supabase
             .from('lesions')
-            .select('id_lesio')
-            .eq('dni_pacient', userDni)
-            .limit(1)
+            .insert([{
+                dni_pacient: userDni,
+                id_cos: idCos,
+                nom_lesio: resultat.tipus,
+                descripcio: resultat.descripcio || 'Sense descripció',
+                punts_recuperacio_objectiu: 100,
+                recuperat: false,
+                dia_rehabilitacio: 1,
+                data_inici: new Date().toISOString(),
+                data_fi: null,  // null = lesió activa
+            }])
 
-        if (lesioAnterior && lesioAnterior.length > 0) {
-            // ACTUALITZAR LA LESIÓ EXISTENT
-            const id_lesio_existent = lesioAnterior[0].id_lesio
-
-            const { error } = await supabase
-                .from('lesions')
-                .update({
-                    id_cos: idCos,
-                    nom_lesio: resultat.tipus,
-                    descripcio: resultat.descripcio || 'Sense descripció',
-                    punts_recuperacio_objectiu: 100,
-                    recuperat: false,
-                    dia_rehabilitacio: 1,
-                })
-                .eq('id_lesio', id_lesio_existent)
-
-            if (error) {
-                console.error('Error al actualitzar a Supabase:', error)
-                showToast(`Hi ha hagut un problema a l'actualitzar el resultat: ${error.message}`, 'error')
-                return
-            }
-        } else {
-            // CREAR UNA NOVA LESIÓ
-            const { data: ultimaLesio } = await supabase
-                .from('lesions')
-                .select('id_lesio')
-                .order('id_lesio', { ascending: false })
-                .limit(1)
-
-            const novaIdLesio = ultimaLesio && ultimaLesio.length > 0 ? ultimaLesio[0].id_lesio + 1 : 1
-
-            const { error } = await supabase
-                .from('lesions')
-                .insert([
-                    {
-                        id_lesio: novaIdLesio,
-                        dni_pacient: userDni || '00000000A',
-                        id_cos: idCos,
-                        nom_lesio: resultat.tipus,
-                        descripcio: resultat.descripcio || 'Sense descripció',
-                        punts_recuperacio_objectiu: 100,
-                        recuperat: false,
-                        dia_rehabilitacio: 1,
-                    },
-                ])
-
-            if (error) {
-                console.error('Error al guardar a Supabase:', error)
-                showToast(`Hi ha hagut un problema al guardar el resultat: ${error.message}`, 'error')
-                return
-            }
+        if (error) {
+            console.error('Error al guardar la lesió a Supabase:', error)
+            showToast(`Hi ha hagut un problema al guardar el resultat: ${error.message}`, 'error')
+            return
         }
 
         showToast('Diagnòstic completat i guardat amb èxit!', 'success')
-        navegarA('exercici')
+        navegarA('perfil')
     } catch (err) {
         console.error('Error inesperat:', err)
     }
+}
+
+// ============================================================
+// Marca una lesió com a recuperada i estableix data_fi.
+// Cridat AUTOMÀTICAMENT pel sistema quan punts >= objectiu.
+// El pacient NO pot invocar aquesta acció manualment.
+// ============================================================
+export async function marcarLesioRecuperada(idLesio) {
+    const { error } = await supabase
+        .from('lesions')
+        .update({
+            recuperat: true,
+            data_fi: new Date().toISOString(),
+        })
+        .eq('id_lesio', idLesio)
+
+    if (error) {
+        showToast(`Error en marcar la lesió com a recuperada: ${error.message}`, 'error')
+        return false
+    }
+
+    showToast('Enhorabona! Has completat la teva recuperació. 🎉', 'success')
+    return true
 }

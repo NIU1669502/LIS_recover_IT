@@ -36,14 +36,30 @@ export default function Navbar({ vistaActual, usuariSessio, onTornar, onTancarSe
                 )}
 
                 {usuariSessio && (
-                    <button
-                        onClick={onTancarSessio}
-                        style={{ background: '#ffffff', border: '1px solid #fee2e2', color: '#ef4444', padding: '0.4rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', transition: 'all 0.2s' }}
-                        onMouseOver={e => { e.target.style.background = '#fef2f2'; e.target.style.borderColor = '#fecaca' }}
-                        onMouseOut={e => { e.target.style.background = '#ffffff'; e.target.style.borderColor = '#fee2e2' }}
-                    >
-                        Tancar sessió
-                    </button>
+                    <>
+                        <button
+                            onClick={() => onNavegar('progres')}
+                            style={{
+                                background: vistaActual === 'progres' ? '#eff6ff' : 'none',
+                                border: vistaActual === 'progres' ? '1px solid #bfdbfe' : 'none',
+                                color: vistaActual === 'progres' ? '#3b82f6' : '#6b7280',
+                                padding: '0.4rem 0.9rem', borderRadius: '6px',
+                                cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', transition: 'all 0.2s'
+                            }}
+                            onMouseOver={e => e.currentTarget.style.color = '#3b82f6'}
+                            onMouseOut={e => e.currentTarget.style.color = vistaActual === 'progres' ? '#3b82f6' : '#6b7280'}
+                        >
+                            📈 Progrés
+                        </button>
+                        <button
+                            onClick={onTancarSessio}
+                            style={{ background: '#ffffff', border: '1px solid #fee2e2', color: '#ef4444', padding: '0.4rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', transition: 'all 0.2s' }}
+                            onMouseOver={e => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.borderColor = '#fecaca' }}
+                            onMouseOut={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.borderColor = '#fee2e2' }}
+                        >
+                            Tancar sessió
+                        </button>
+                    </>
                 )}
             </div>
         </nav>
