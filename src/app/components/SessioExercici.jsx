@@ -115,7 +115,17 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
         if (!esUltimExercici) return `Següent exercici → ${exercicis[index + 1]?.nom}`
         return 'Completar sessió'
     }
+    const convertirYoutubeURL = (url) => {
+        if (!url) return ''
+        let videoId = ''
+        const shortMatch = url.match(/youtu\.be\/([^?]+)/)
+        if (shortMatch) videoId = shortMatch[1]
+        const longMatch = url.match(/[?&]v=([^&]+)/)
+        if (longMatch) videoId = longMatch[1]
 
+        if (!videoId) return url
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0`
+    }
     return (
         <div className={styles.container}>
 
@@ -139,9 +149,22 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
             </div>
 
             <div className={styles.videoPlaceholder}>
-                <div className={styles.videoIcon}>▶</div>
-                <p className={styles.videoText}>Vídeo demostratiu</p>
-                <p className={styles.videoSub}>(disponible aviat)</p>
+                {exercici.url_video?.[0] ? (
+                    <iframe
+                        className={styles.video}
+                        src={convertirYoutubeURL(exercici.url_video[0])}
+                        width="100%"
+                        allowFullScreen
+                        allow="autoplay"
+                        frameBorder="0"
+                    />
+                ) : (
+                    <>
+                        <div className={styles.videoIcon}>▶</div>
+                        <p className={styles.videoText}>Vídeo demostratiu</p>
+                        <p className={styles.videoSub}>(disponible aviat)</p>
+                    </>
+                )}
             </div>
 
             <div className={styles.cronometreWrapper}>

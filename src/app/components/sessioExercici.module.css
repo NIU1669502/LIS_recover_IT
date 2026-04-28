@@ -296,3 +296,18 @@
 .primaryButton:hover {
     background: #1d4ed8;
 }
+
+.videoPlaceholder {
+    width: 100%;
+    aspect-ratio: 16 / 9;  /* proporción correcta de YouTube */
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+}
+
+.video {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
