@@ -127,7 +127,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
                             <h3 className={styles.exerciciNom}>{ex.nom}</h3>
                             <div className={styles.exerciciMeta}>
                                 <span>⏱ {ex.duracio_segons}s</span>
-                                <span>🔁 {ex.repeticions} reps</span>
+                                <span>🔁 {ex.Repeticions} reps</span>
                                 <span>⭐ {ex.punts * diagnostic.fase_actual} pts</span>
                             </div>
                         </div>
@@ -139,7 +139,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
                 className={styles.primaryButton}
                 onClick={() => onIniciarSessio(exercicis, diagnostic.fase_actual)}
             >
-                Iniciar sessió →
+                Iniciar sessió d'exercicis →
             </button>
         </div>
     )

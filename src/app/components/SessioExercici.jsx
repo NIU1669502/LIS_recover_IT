@@ -16,8 +16,8 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
     const intervalRef = useRef(null)
 
     const exercici = exercicis[index]
-    const totalReps = exercici?.repeticions || 1
-    const esUltimaRep = repActual >= totalReps
+    const totalReps = exercici.Repeticions
+    const esUltimaRep = true
     const esUltimExercici = index === exercicis.length - 1
 
     // Reset quan canvia d'exercici
@@ -59,14 +59,7 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
     }
 
     const handleCompletar = async () => {
-        if (!esUltimaRep) {
-            // Encara queden repeticions — reinicia cronòmetre per la següent
-            setRepActual(r => r + 1)
-            setTempsRestant(exercici.duracio_segons)
-            setCronometreActiu(false)
-            setCronometreFinalitzat(false)
-            return
-        }
+
 
         if (!esUltimExercici) {
             setIndex(i => i + 1)
@@ -118,7 +111,7 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
     if (!exercici) return null
 
     const textBoto = () => {
-        if (!esUltimaRep) return `Següent repetició → ${repActual + 1}/${totalReps}`
+
         if (!esUltimExercici) return `Següent exercici → ${exercicis[index + 1]?.nom}`
         return 'Completar sessió'
     }
@@ -142,13 +135,7 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
 
             {/* Tracker de repeticions */}
             <div className={styles.repsTracker}>
-                {Array.from({ length: totalReps }).map((_, i) => (
-                    <div
-                        key={i}
-                        className={`${styles.repDot} ${i < repActual - 1 ? styles.repDotDone : ''} ${i === repActual - 1 ? styles.repDotActive : ''}`}
-                    />
-                ))}
-                <span className={styles.repsLabel}>Rep {repActual}/{totalReps}</span>
+                <span className={styles.repsLabel}>Repeticions necessàries: {totalReps}</span>
             </div>
 
             <div className={styles.videoPlaceholder}>
