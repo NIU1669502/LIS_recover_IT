@@ -53,7 +53,7 @@ export default function ProgresPacient({ perfilUsuari, onNavagarTest }) {
                         await marcarLesioRecuperada(diag.id_diagnostic)
                     }
 
-                    return { 
+                    return {
                         ...diag,
                         id_lesio: diag.id_diagnostic, // Fem servir id_diagnostic com a ID únic per React
                         nom_lesio: diag.lesions?.nom || 'Lesió Desconeguda',
@@ -162,8 +162,8 @@ export default function ProgresPacient({ perfilUsuari, onNavagarTest }) {
             {/* Pestanyes */}
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', background: '#f3f4f6', borderRadius: '10px', padding: '4px' }}>
                 {[
-                    { id: 'progres', label: '📊 Progrés (RF-PAC-05)' },
-                    { id: 'historial', label: '📋 Sessions (RF-PAC-06)' },
+                    { id: 'progres', label: '📊 Progrés' },
+                    { id: 'historial', label: '📋 Sessions' },
                 ].map(tab => (
                     <button key={tab.id} onClick={() => setPestanya(tab.id)} style={{
                         flex: 1, padding: '0.6rem 1rem',
