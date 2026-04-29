@@ -4,21 +4,32 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../utils/supabase'
 import styles from './bibliotecaExercicis.module.css'
 
-// ============================================================
-// Component: BibliotecaExercicis
-// ============================================================
-
-const FILTRES = ['Tots', 'Quadríceps', 'Isquiotibials', 'Genoll', 'Turmell', 'Panxell', 'Maluc']
-
 export default function BibliotecaExercicis({ onTornar }) {
   const [exercicis, setExercicis] = useState([])
+  const [musculs, setMusculs] = useState([])
   const [filtreActiu, setFiltreActiu] = useState('Tots')
   const [carregant, setCarregant] = useState(true)
 
   useEffect(() => {
     const carregar = async () => {
-      const { data, error } = await supabase.from('exercicis').select('*')
-      if (!error) setExercicis(data)
+      // Exercicis amb els seus musculs via JOIN
+      const { data: exData } = await supabase
+        .from('exercicis')
+        .select(`
+          *,
+          exercici_muscul (
+            musculs ( id_cos, nom )
+          )
+        `)
+
+      // Musculs per als filtres
+      const { data: musData } = await supabase
+        .from('musculs')
+        .select('id_cos, nom')
+        .order('nom')
+
+      if (exData) setExercicis(exData)
+      if (musData) setMusculs(musData)
       setCarregant(false)
     }
     carregar()
@@ -26,7 +37,9 @@ export default function BibliotecaExercicis({ onTornar }) {
 
   const exercicisFiltrats = filtreActiu === 'Tots'
     ? exercicis
-    : exercicis.filter(ex => ex.zona === filtreActiu)
+    : exercicis.filter(ex =>
+      ex.exercici_muscul.some(em => em.musculs?.nom === filtreActiu)
+    )
 
   return (
     <div>
@@ -37,16 +50,25 @@ export default function BibliotecaExercicis({ onTornar }) {
       <h2 className={styles.title}>Biblioteca d'exercicis</h2>
 
       <div className={styles.filterContainer}>
-        <p className={styles.filterLabel}>Filtrar per zona corporal</p>
+        <p className={styles.filterLabel}>Filtrar per múscul</p>
 
         <div className={styles.filterButtons}>
-          {FILTRES.map(f => (
+          {/* Botó "Tots" */}
+          <button
+            onClick={() => setFiltreActiu('Tots')}
+            className={`${styles.filterButton} ${filtreActiu === 'Tots' ? styles.activeFilter : ''}`}
+          >
+            Tots
+          </button>
+
+          {/* Botons dinàmics de la DB */}
+          {musculs.map(m => (
             <button
-              key={f}
-              onClick={() => setFiltreActiu(f)}
-              className={`${styles.filterButton} ${filtreActiu === f ? styles.activeFilter : ''}`}
+              key={m.id_cos}
+              onClick={() => setFiltreActiu(m.nom)}
+              className={`${styles.filterButton} ${filtreActiu === m.nom ? styles.activeFilter : ''}`}
             >
-              {f}
+              {m.nom}
             </button>
           ))}
         </div>
@@ -61,6 +83,7 @@ export default function BibliotecaExercicis({ onTornar }) {
               <h3 className={styles.cardTitle}>{ex.nom}</h3>
               <p className={styles.cardDescription}>{ex.descripcio}</p>
               <p className={styles.cardDuration}>⏱ {ex.duracio_segons}s</p>
+
             </div>
           ))}
         </div>
