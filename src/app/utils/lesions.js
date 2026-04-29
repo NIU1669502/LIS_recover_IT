@@ -158,10 +158,20 @@ export async function processarTestDiagnostic(resultat, navegarA) {
             if (novaLesio) idLesioFinal = novaLesio.id_lesio;
         }
 
+        // Com que la base de dades requereix generar l'ID manualment:
+        const { data: ultim } = await supabase
+            .from('diagnostic')
+            .select('id_diagnostic')
+            .order('id_diagnostic', { ascending: false })
+            .limit(1)
+
+        const novaId = ultim && ultim.length > 0 ? ultim[0].id_diagnostic + 1 : 1
+
         // SEMPRE creem un nou historial (no sobreescrivim mai l'anterior)
         const { error } = await supabase
             .from('diagnostic')
             .insert([{
+                id_diagnostic: novaId,
                 id_lesio: idLesioFinal,
                 dni_pacient: userDni,
                 part_cos: idCos,
