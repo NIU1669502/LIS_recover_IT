@@ -43,9 +43,7 @@ export default function BibliotecaExercicis({ onTornar }) {
 
   return (
     <div>
-      <button className={styles.backButton} onClick={onTornar}>
-        ← Tornar a l'inici
-      </button>
+
 
       <h2 className={styles.title}>Biblioteca d'exercicis</h2>
 
