@@ -1,6 +1,5 @@
 /* WRAPPER */
 .wrapper {
-    min-height: 100vh;
     display: flex;
     justify-content: center;
     padding: 3rem 1rem;
@@ -9,12 +8,9 @@
     font-family: 'Inter', system-ui;
 }
 
-/* ORBS */
+/* ORBS - ocults */
 .orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(60px);
-    opacity: 0.5;
+    display: none;
 }
 
 .orb1 {
@@ -87,7 +83,6 @@
     background: white;
     border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
     animation: cardIn 0.6s ease;
 }
 
@@ -106,7 +101,7 @@
 /* HEADER */
 .header {
     background: linear-gradient(135deg, #3b82f6, #6366f1);
-    padding: 1.75rem;
+    padding: 1.2rem 1.75rem;
     color: white;
 }
 
@@ -126,7 +121,7 @@
 
 /* CONTENT */
 .content {
-    padding: 2rem;
+    padding: 1.25rem 2rem 1.5rem;
 }
 
 .title {
@@ -199,6 +194,7 @@
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    margin-top: 1rem;
 }
 
 /* shimmer */

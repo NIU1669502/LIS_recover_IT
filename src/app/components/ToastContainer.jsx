@@ -4,10 +4,10 @@ import { useState, useEffect, useCallback } from 'react'
 import styles from './toastContainer.module.css'
 
 const ICONS = {
-    success: '✓',
-    error: '✕',
-    warning: '⚠',
-    info: 'i',
+    success: '✅',
+    error: '❌',
+    warning: '⚠️',
+    info: '💡',
 }
 
 let toastCounter = 0

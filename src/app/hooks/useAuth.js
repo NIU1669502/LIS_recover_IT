@@ -105,9 +105,12 @@ export function useAuth(navegarA) {
             }
 
             if (signUpData.session?.user) {
-                setUsuariSessio(signUpData.session.user)
-                await obtenirPerfil(signUpData.session.user)
-                navegarA('test')
+                const user = signUpData.session.user
+                const { data: perfilData } = await supabase.from('usuaris').select('*').eq('dni', user.user_metadata.dni).maybeSingle()
+                navegarA('test', () => {
+                    setUsuariSessio(user)
+                    setPerfilUsuari(perfilData || null)
+                })
             } else {
                 navegarA('login')
                 showToast('Compte creat! Verifica el teu email abans d\'iniciar sessió. Revisa la carpeta de Spam si cal.', 'success')
@@ -134,18 +137,15 @@ export function useAuth(navegarA) {
         try {
             const { data, error } = await supabase.auth.signInWithPassword({ email, password })
             if (error) throw error
+            const user = data.user
+            const { data: perfilData } = await supabase.from('usuaris').select('*').eq('dni', user.user_metadata.dni).maybeSingle()
+            const { data: diagnostic } = await supabase.from('diagnostic').select('dni_pacient').eq('dni_pacient', user.user_metadata.dni).maybeSingle()
 
-            setUsuariSessio(data.user)
-            await obtenirPerfil(data.user)
-
-            const { data: diagnostic } = await supabase
-                .from('diagnostic')
-                .select('dni_pacient')
-                .eq('dni_pacient', data.user.user_metadata.dni)
-                .maybeSingle()
-
-            showToast(`Benvingut/da ${data.user.user_metadata?.nom || ''}`, 'success')
-            navegarA(diagnostic ? 'inici' : 'test')
+            navegarA(diagnostic ? 'inici' : 'test', () => {
+                setUsuariSessio(user)
+                setPerfilUsuari(perfilData || null)
+                showToast(`Benvingut/da ${user.user_metadata?.nom || ''}`, 'success')
+            })
         } catch (err) {
             setErrorAuth(err.message || 'Error inesperat en iniciar sessió.')
         } finally {
@@ -153,15 +153,15 @@ export function useAuth(navegarA) {
         }
     }
 
-    // ── RF-AUTH-04 — Tancament de sessió ─────────────────────
     const tancarSessio = async () => {
         await supabase.auth.signOut()
         const nomUsuari = perfilUsuari?.nom || ''
-        setUsuariSessio(null)
-        setPerfilUsuari(null)
-        setErrorAuth('')
-        showToast(`Has tancat la sessió, ${nomUsuari}. Esperem tornar a veure't aviat!`, 'info')
-        navegarA('inici')
+        navegarA('inici', () => {
+            setUsuariSessio(null)
+            setPerfilUsuari(null)
+            setErrorAuth('')
+            showToast(`Has tancat la sessió, ${nomUsuari}. Esperem tornar a veure't aviat!`, 'info')
+        })
     }
 
     // ── RF-AUTH-10 — Editar perfil ───────────────────────────

@@ -102,7 +102,7 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
                     +{resultCompletada.puntsGuanyats} punts guanyats
                 </div>
                 <button className={styles.primaryButton} onClick={onCompletarSessio}>
-                    Tornar als exercicis →
+                    Tornar als exercicis
                 </button>
             </div>
         )
@@ -112,7 +112,7 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
 
     const textBoto = () => {
 
-        if (!esUltimExercici) return `Següent exercici → ${exercicis[index + 1]?.nom}`
+        if (!esUltimExercici) return `Següent exercici: ${exercicis[index + 1]?.nom}`
         return 'Completar sessió'
     }
     const convertirYoutubeURL = (url) => {
