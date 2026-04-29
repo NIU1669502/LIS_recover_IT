@@ -30,23 +30,39 @@ export default function ProgresPacient({ perfilUsuari, onNavagarTest }) {
             if (usuariErr) throw usuariErr
             const puntsActuals = usuariData?.punts ?? 0
 
-            // Totes les lesions del pacient, ordenades de més recent a més antiga
-            const { data: lesionsData, error: lesionsErr } = await supabase
-                .from('lesions')
-                .select('*, parts_cos(nom, seccio)')
+            // Totes les lesions del pacient, ordenades de més recent a més antiga des de la taula diagnostic
+            const { data: diagnosticData, error: diagnosticErr } = await supabase
+                .from('diagnostic')
+                .select('*, lesions(nom), musculs(nom, seccio)')
                 .eq('dni_pacient', dni)
                 .order('data_inici', { ascending: false })
 
-            if (lesionsErr) throw lesionsErr
+            if (diagnosticErr) throw diagnosticErr
 
-            // ── Auto-recuperació: si punts >= objectiu, marcar automàticament ──
+            // ── Adaptació al frontend per mostrar el progrés i la recuperació ──
+            // Com que la taula diagnostic no té els camps, ho calculem aquí.
+            const OBJECTIU_PUNTS_FIX = 100; // Ho deixem fix a 100 punts de moment
+
             const lesionsActualitzades = await Promise.all(
-                (lesionsData || []).map(async (lesio) => {
-                    if (!lesio.recuperat && puntsActuals >= lesio.punts_recuperacio_objectiu) {
-                        await marcarLesioRecuperada(lesio.id_lesio)
-                        return { ...lesio, recuperat: true, data_fi: new Date().toISOString() }
+                (diagnosticData || []).map(async (diag) => {
+                    // Calculem la recuperació directament amb els punts de l'usuari
+                    const isRecuperat = puntsActuals >= OBJECTIU_PUNTS_FIX;
+
+                    if (isRecuperat) {
+                        // Crida per mostrar el toast (funció modificada per no petar a SQL)
+                        await marcarLesioRecuperada(diag.id_diagnostic)
                     }
-                    return lesio
+
+                    return { 
+                        ...diag,
+                        id_lesio: diag.id_diagnostic, // Fem servir id_diagnostic com a ID únic per React
+                        nom_lesio: diag.lesions?.nom || 'Lesió Desconeguda',
+                        parts_cos: diag.musculs,
+                        punts_recuperacio_objectiu: OBJECTIU_PUNTS_FIX,
+                        recuperat: isRecuperat,
+                        dia_rehabilitacio: diag.fase_actual || 1,
+                        data_fi: isRecuperat ? new Date().toISOString() : null
+                    }
                 })
             )
             setLesions(lesionsActualitzades)

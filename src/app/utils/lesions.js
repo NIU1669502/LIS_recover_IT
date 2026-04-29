@@ -40,20 +40,36 @@ export async function processarTestDiagnostic(resultat, navegarA) {
         const idxCos = TEST_STEPS[0].opcions.indexOf(resultat.muscle)
         const idCos = idxCos >= 0 ? idxCos + 1 : 1
 
-        // Sempre inserim una nova lesió — mai sobreescrivim les anteriors
-        // (la id_lesio la genera automàticament la seqüència de la BD)
-        const { error } = await supabase
+        // 1. Buscar o crear el tipus de lesió a la taula 'lesions'
+        let idLesioFinal = null;
+        const { data: lesioExistent } = await supabase
             .from('lesions')
+            .select('id_lesio')
+            .eq('nom', resultat.tipus)
+            .maybeSingle()
+            
+        if (lesioExistent) {
+            idLesioFinal = lesioExistent.id_lesio;
+        } else {
+            const { data: novaLesio } = await supabase
+                .from('lesions')
+                .insert([{ nom: resultat.tipus }])
+                .select('id_lesio')
+                .single()
+            if (novaLesio) idLesioFinal = novaLesio.id_lesio;
+        }
+
+        // 2. Inserir a la nova taula 'diagnostic' per mantenir l'historial del pacient
+        const { error } = await supabase
+            .from('diagnostic')
             .insert([{
                 dni_pacient: userDni,
-                id_cos: idCos,
-                nom_lesio: resultat.tipus,
+                id_lesio: idLesioFinal,
+                part_cos: idCos,
                 descripcio: resultat.descripcio || 'Sense descripció',
-                punts_recuperacio_objectiu: 100,
-                recuperat: false,
-                dia_rehabilitacio: 1,
                 data_inici: new Date().toISOString(),
-                data_fi: null,  // null = lesió activa
+                fase_actual: 1
+                // Els camps punts_recuperacio, recuperat, data_fi ja no estan a la BD actualment
             }])
 
         if (error) {
@@ -74,20 +90,23 @@ export async function processarTestDiagnostic(resultat, navegarA) {
 // Cridat AUTOMÀTICAMENT pel sistema quan punts >= objectiu.
 // El pacient NO pot invocar aquesta acció manualment.
 // ============================================================
-export async function marcarLesioRecuperada(idLesio) {
+export async function marcarLesioRecuperada(idDiagnostic) {
+    // NOTA: Ara mateix la BD (taula diagnostic) no té els camps 'recuperat' ni 'data_fi'.
+    // Així que de moment no fem l'update per no provocar un error d'SQL.
+    /*
     const { error } = await supabase
-        .from('lesions')
+        .from('diagnostic')
         .update({
             recuperat: true,
             data_fi: new Date().toISOString(),
         })
-        .eq('id_lesio', idLesio)
+        .eq('id_diagnostic', idDiagnostic)
 
     if (error) {
         showToast(`Error en marcar la lesió com a recuperada: ${error.message}`, 'error')
         return false
     }
-
+    */
     showToast('Enhorabona! Has completat la teva recuperació. 🎉', 'success')
     return true
 }
