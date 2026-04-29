@@ -155,6 +155,9 @@ export async function processarTestDiagnostic(resultat, navegarA) {
                 .insert([{ nom: resultat.tipus }])
                 .select('id_lesio')
                 .single()
+            if (novaLesio) idLesioFinal = novaLesio.id_lesio;
+        }
+
         // SEMPRE creem un nou historial. Com que a la BD ja s'autoincrementa, no hi passem l'id_diagnostic
         const { error } = await supabase
             .from('diagnostic')
