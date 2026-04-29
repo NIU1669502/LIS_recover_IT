@@ -103,6 +103,10 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
                     <span className={styles.tagLabel}>Fase</span>
                     <span className={styles.tagValue}>{diagnostic.fase_actual} / 3</span>
                 </div>
+                <div className={styles.rutinaTag}>
+                    <span className={styles.tagLabel}>Progrés</span>
+                    <span className={styles.tagValue}>{diagnostic.punts_recuperacio || 0} / 180 pts</span>
+                </div>
             </div>
 
             <div className={styles.faseProgress}>

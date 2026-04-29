@@ -28,6 +28,7 @@ export async function getDiagnosticActiu(userDni) {
         .from('diagnostic')
         .select('*')
         .eq('dni_pacient', userDni)
+        .eq('finalitzat', false)
         .order('id_diagnostic', { ascending: false })
         .limit(1)
         .single()
@@ -97,25 +98,27 @@ export async function completarSessio(userDni, puntsGuanyats) {
     const novaFase = diagnostic.fase_actual + 1
     const completada = novaFase > 3
 
-    // 2. Actualitzar fase (o marcar com completat)
+    // 2. Sumar punts al diagnòstic
+    const nousPunts = (diagnostic.punts_recuperacio || 0) + puntsGuanyats
+    let finalitzat = false;
+    let data_fi = null;
+
+    if (nousPunts >= 180) {
+        finalitzat = true;
+        data_fi = new Date().toISOString();
+        showToast('Enhorabona! Has completat la teva recuperació. 🎉', 'success')
+    }
+
+    // 3. Actualitzar fase i punts (marcar finalitzat si toca)
     await supabase
         .from('diagnostic')
-        .update({ fase_actual: completada ? 3 : novaFase })
+        .update({ 
+            fase_actual: completada ? 3 : novaFase,
+            punts_recuperacio: nousPunts,
+            finalitzat: finalitzat,
+            data_fi: data_fi
+        })
         .eq('id_diagnostic', diagnostic.id_diagnostic)
-
-    // 3. Sumar punts a l'usuari
-    const { data: usuari } = await supabase
-        .from('usuaris')
-        .select('punts')
-        .eq('dni', userDni)
-        .single()
-
-    if (usuari) {
-        await supabase
-            .from('usuaris')
-            .update({ punts: (usuari.punts || 0) + puntsGuanyats })
-            .eq('dni', userDni)
-    }
 
     return { completada, novaFase: completada ? null : novaFase }
 }
@@ -136,53 +139,42 @@ export async function processarTestDiagnostic(resultat, navegarA) {
         const idxCos = TEST_STEPS[0].opcions.indexOf(resultat.muscle)
         const idCos = idxCos >= 0 ? idxCos + 1 : 1
 
-        const { data: diagnosticAnterior } = await supabase
-            .from('diagnostic')
-            .select('id_diagnostic')
-            .eq('dni_pacient', userDni)
-            .limit(1)
-
-        if (diagnosticAnterior && diagnosticAnterior.length > 0) {
-            const { error } = await supabase
-                .from('diagnostic')
-                .update({
-                    part_cos: idCos,
-                    id_lesio: resultat.id_lesio,
-                    descripcio: resultat.descripcio || 'Sense descripció',
-                    fase_actual: 1,
-                })
-                .eq('id_diagnostic', diagnosticAnterior[0].id_diagnostic)
-
-            if (error) {
-                console.error('Error al actualitzar:', error)
-                showToast(`Hi ha hagut un problema: ${error.message}`, 'error')
-                return
-            }
+        // Substituïm id_lesio pel de catàleg per no fallar constraints
+        let idLesioFinal = resultat.id_lesio;
+        const { data: lesioExistent, error: errExist } = await supabase
+            .from('lesions')
+            .select('id_lesio')
+            .eq('nom', resultat.tipus)
+            .maybeSingle()
+            
+        if (lesioExistent && lesioExistent.id_lesio) {
+            idLesioFinal = lesioExistent.id_lesio;
         } else {
-            const { data: ultim } = await supabase
-                .from('diagnostic')
-                .select('id_diagnostic')
-                .order('id_diagnostic', { ascending: false })
-                .limit(1)
+            const { data: novaLesio, error: errNova } = await supabase
+                .from('lesions')
+                .insert([{ nom: resultat.tipus }])
+                .select('id_lesio')
+                .single()
+            if (novaLesio) idLesioFinal = novaLesio.id_lesio;
+        }
 
-            const novaId = ultim && ultim.length > 0 ? ultim[0].id_diagnostic + 1 : 1
+        // SEMPRE creem un nou historial (no sobreescrivim mai l'anterior)
+        const { error } = await supabase
+            .from('diagnostic')
+            .insert([{
+                id_lesio: idLesioFinal,
+                dni_pacient: userDni,
+                part_cos: idCos,
+                descripcio: resultat.descripcio || 'Sense descripció',
+                fase_actual: 1,
+                punts_recuperacio: 0,
+                finalitzat: false
+            }])
 
-            const { error } = await supabase
-                .from('diagnostic')
-                .insert([{
-                    id_diagnostic: novaId,
-                    id_lesio: resultat.id_lesio,
-                    dni_pacient: userDni,
-                    part_cos: idCos,
-                    descripcio: resultat.descripcio || 'Sense descripció',
-                    fase_actual: 1,
-                }])
-
-            if (error) {
-                console.error('Error al guardar:', error)
-                showToast(`Hi ha hagut un problema: ${error.message}`, 'error')
-                return
-            }
+        if (error) {
+            console.error('Error al guardar:', error)
+            showToast(`Hi ha hagut un problema: ${error.message}`, 'error')
+            return
         }
 
         showToast('Diagnòstic completat i guardat amb èxit!', 'success')

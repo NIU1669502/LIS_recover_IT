@@ -49,8 +49,9 @@ export function useAuth(navegarA) {
                 .from('diagnostic')
                 .select('dni_pacient')
                 .eq('dni_pacient', user.user_metadata?.dni)
+                .eq('finalitzat', false)
                 .maybeSingle()
-            navegarA(diagnostic ? 'inici' : 'test')
+            navegarA(diagnostic ? 'exercicis-en-curs' : 'test')
         }
     }
 
@@ -139,9 +140,14 @@ export function useAuth(navegarA) {
             if (error) throw error
             const user = data.user
             const { data: perfilData } = await supabase.from('usuaris').select('*').eq('dni', user.user_metadata.dni).maybeSingle()
-            const { data: diagnostic } = await supabase.from('diagnostic').select('dni_pacient').eq('dni_pacient', user.user_metadata.dni).maybeSingle()
+            const { data: diagnostic } = await supabase
+                .from('diagnostic')
+                .select('dni_pacient')
+                .eq('dni_pacient', user.user_metadata.dni)
+                .eq('finalitzat', false)
+                .maybeSingle()
 
-            navegarA(diagnostic ? 'inici' : 'test', () => {
+            navegarA(diagnostic ? 'exercicis-en-curs' : 'test', () => {
                 setUsuariSessio(user)
                 setPerfilUsuari(perfilData || null)
                 showToast(`Benvingut/da ${user.user_metadata?.nom || ''}`, 'success')
