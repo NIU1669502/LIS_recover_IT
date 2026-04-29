@@ -25,6 +25,8 @@ export default function Page() {
   const [faseActual, setFaseActual] = useState(1)
   const [pageVisible, setPageVisible] = useState(true)
   const transitionRef = useRef(null)
+  const [musculActual, setMusculActual] = useState(null)
+
 
   const navegarA = (novaVista, onTransition) => {
     if (transitionRef.current) clearTimeout(transitionRef.current)
@@ -126,6 +128,7 @@ export default function Page() {
                 exercicis={exercicisRutina}
                 indexInicial={indexExercici}
                 fase={faseActual}
+                musculActual={musculActual}
                 onCompletarSessio={() => navegarA('exercicis-en-curs')}
               />
             </div>
@@ -142,10 +145,11 @@ export default function Page() {
           {vistaActual === 'exercicis-en-curs' && (
             <ExercicisEnCurs
               onNavegar={navegarA}
-              onIniciarSessio={(exercicis, fase) => {
+              onIniciarSessio={(exercicis, fase, muscul) => {
                 setExercicisRutina(exercicis)
                 setFaseActual(fase)
                 setIndexExercici(0)
+                setMusculActual(muscul)
                 navegarA('exercici')
               }}
             />

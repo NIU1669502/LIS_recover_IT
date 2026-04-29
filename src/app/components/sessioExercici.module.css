@@ -1,4 +1,5 @@
 .container {
+    width: 100%;
     max-width: 520px;
     margin: 0 auto;
     padding: 2rem 1rem 4rem;
@@ -39,13 +40,30 @@
     transition: width 0.4s ease;
 }
 
-/* Nom i reps */
 .exerciciNom {
     font-size: 1.6rem;
     font-weight: 800;
     color: #0f172a;
     text-align: center;
     margin: 0;
+    min-height: 4.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.repsTracker {
+    text-align: center;
+    min-height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.repsLabel {
+    font-size: 0.95rem;
+    color: #64748b;
+    font-weight: 500;
 }
 
 .exerciciReps {
@@ -54,19 +72,7 @@
     margin: 0;
 }
 
-/* Video placeholder */
-.videoPlaceholder {
-    width: 100%;
-    aspect-ratio: 16/7;
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    border: 1px solid #334155;
-}
+
 
 .videoIcon {
     width: 48px;
@@ -299,10 +305,16 @@
 
 .videoPlaceholder {
     width: 100%;
-    aspect-ratio: 16 / 9;  /* proporción correcta de YouTube */
-    border-radius: 12px;
-    overflow: hidden;
+    aspect-ratio: 16 / 9;
     background: #000;
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #334155;
+    flex-shrink: 0;
 }
 
 .video {
@@ -310,4 +322,5 @@
     height: 100%;
     border: none;
     display: block;
+    object-fit: cover;
 }

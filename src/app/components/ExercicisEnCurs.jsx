@@ -137,7 +137,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
 
             <button
                 className={styles.primaryButton}
-                onClick={() => onIniciarSessio(exercicis, diagnostic.fase_actual)}
+                onClick={() => onIniciarSessio(exercicis, diagnostic.fase_actual, diagnostic.part_cos)}
             >
                 Iniciar sessió d'exercicis →
             </button>

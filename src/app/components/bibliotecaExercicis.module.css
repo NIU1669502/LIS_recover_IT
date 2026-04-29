@@ -96,7 +96,6 @@
     transition: all 0.2s;
 }
 
-/* 🔥 mejora UX (extra que no rompe diseño) */
 .card:hover {
     transform: translateY(-3px);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);

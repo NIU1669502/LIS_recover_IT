@@ -136,57 +136,27 @@ export async function processarTestDiagnostic(resultat, navegarA) {
         const idxCos = TEST_STEPS[0].opcions.indexOf(resultat.muscle)
         const idCos = idxCos >= 0 ? idxCos + 1 : 1
 
-        const { data: diagnosticAnterior } = await supabase
+
+        const { error } = await supabase
             .from('diagnostic')
-            .select('id_diagnostic')
-            .eq('dni_pacient', userDni)
-            .limit(1)
+            .insert([{
+                id_lesio: resultat.id_lesio,
+                dni_pacient: userDni,
+                part_cos: idCos,
+                descripcio: resultat.descripcio || 'Sense descripció',
+                fase_actual: 1,
+                num_sessions: 0,
+            }])
 
-        if (diagnosticAnterior && diagnosticAnterior.length > 0) {
-            const { error } = await supabase
-                .from('diagnostic')
-                .update({
-                    part_cos: idCos,
-                    id_lesio: resultat.id_lesio,
-                    descripcio: resultat.descripcio || 'Sense descripció',
-                    fase_actual: 1,
-                })
-                .eq('id_diagnostic', diagnosticAnterior[0].id_diagnostic)
-
-            if (error) {
-                console.error('Error al actualitzar:', error)
-                showToast(`Hi ha hagut un problema: ${error.message}`, 'error')
-                return
-            }
-        } else {
-            const { data: ultim } = await supabase
-                .from('diagnostic')
-                .select('id_diagnostic')
-                .order('id_diagnostic', { ascending: false })
-                .limit(1)
-
-            const novaId = ultim && ultim.length > 0 ? ultim[0].id_diagnostic + 1 : 1
-
-            const { error } = await supabase
-                .from('diagnostic')
-                .insert([{
-                    id_diagnostic: novaId,
-                    id_lesio: resultat.id_lesio,
-                    dni_pacient: userDni,
-                    part_cos: idCos,
-                    descripcio: resultat.descripcio || 'Sense descripció',
-                    fase_actual: 1,
-                }])
-
-            if (error) {
-                console.error('Error al guardar:', error)
-                showToast(`Hi ha hagut un problema: ${error.message}`, 'error')
-                return
-            }
+        if (error) {
+            console.error('Error al guardar:', error)
+            showToast(`Hi ha hagut un problema: ${error.message}`, 'error')
+            return
         }
 
         showToast('Diagnòstic completat i guardat amb èxit!', 'success')
         navegarA('exercicis-en-curs')
+
     } catch (err) {
         console.error('Error inesperat:', err)
     }
