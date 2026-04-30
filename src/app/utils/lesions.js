@@ -94,16 +94,61 @@ export async function completarSessio(userDni, puntsGuanyats) {
     const diagnostic = await getDiagnosticActiu(userDni)
     if (!diagnostic) return { completada: false }
 
-    const novaFase = diagnostic.fase_actual + 1
-    const completada = novaFase > 3
+    // 2. Determinar n_sessions requerides per a la fase actual
+    const { data: rutina } = await supabase
+        .from('rutines_lesio')
+        .select('id_fase_1, id_fase_2, id_fase_3')
+        .eq('id_muscul', diagnostic.part_cos)
+        .eq('id_lesio', diagnostic.id_lesio)
+        .single()
 
-    // 2. Actualitzar fase (o marcar com completat)
+    let idFase;
+    if (diagnostic.fase_actual === 1) idFase = rutina?.id_fase_1;
+    else if (diagnostic.fase_actual === 2) idFase = rutina?.id_fase_2;
+    else idFase = rutina?.id_fase_3;
+
+    let nSessionsRequerides = 1; // Per defecte
+    if (idFase) {
+        const { data: faseInfo } = await supabase
+            .from('fases')
+            .select('n_sessions')
+            .eq('id_fase', idFase)
+            .single()
+        if (faseInfo && faseInfo.n_sessions) {
+            nSessionsRequerides = faseInfo.n_sessions;
+        }
+    }
+
+    // 3. Incrementar sessions completades i avaluar si s'avança de fase
+    const numSessionsActualitzat = (diagnostic.num_sessions || 0) + 1
+
+    let novaFase = diagnostic.fase_actual
+    let nouNumSessions = numSessionsActualitzat
+    let completada = false
+    let faseAvançada = false
+
+    if (numSessionsActualitzat >= nSessionsRequerides) {
+        if (diagnostic.fase_actual === 3) {
+            completada = true
+            novaFase = 3
+            nouNumSessions = numSessionsActualitzat // Conservem el total de sessions per saber que està completat
+        } else {
+            novaFase = diagnostic.fase_actual + 1
+            nouNumSessions = 0
+            faseAvançada = true
+        }
+    }
+
+    // 4. Actualitzar fase i num_sessions a la BD
     await supabase
         .from('diagnostic')
-        .update({ fase_actual: completada ? 3 : novaFase })
+        .update({
+            fase_actual: novaFase,
+            num_sessions: nouNumSessions
+        })
         .eq('id_diagnostic', diagnostic.id_diagnostic)
 
-    // 3. Sumar punts a l'usuari
+    // 5. Sumar punts a l'usuari
     const { data: usuari } = await supabase
         .from('usuaris')
         .select('punts')
@@ -117,7 +162,7 @@ export async function completarSessio(userDni, puntsGuanyats) {
             .eq('dni', userDni)
     }
 
-    return { completada, novaFase: completada ? null : novaFase }
+    return { completada, novaFase: completada ? null : novaFase, faseAvançada, nSessionsRestants: nSessionsRequerides - nouNumSessions }
 }
 
 // ============================================================
@@ -160,4 +205,52 @@ export async function processarTestDiagnostic(resultat, navegarA) {
     } catch (err) {
         console.error('Error inesperat:', err)
     }
+
+}
+
+// ============================================================
+// Obté el resum global de sessions del diagnòstic (fetes i totals)
+// ============================================================
+export async function getResumSessions(diagnostic) {
+    if (!diagnostic) return { fetes: 0, totals: 0 }
+
+    // Obtenir ids de les tres fases
+    const { data: rutina } = await supabase
+        .from('rutines_lesio')
+        .select('id_fase_1, id_fase_2, id_fase_3')
+        .eq('id_muscul', diagnostic.part_cos)
+        .eq('id_lesio', diagnostic.id_lesio)
+        .single()
+
+    if (!rutina) return { fetes: 0, totals: 0 }
+
+    const ids = [rutina.id_fase_1, rutina.id_fase_2, rutina.id_fase_3].filter(Boolean)
+    
+    // Obtenir n_sessions de cadascuna
+    const { data: fases } = await supabase
+        .from('fases')
+        .select('id_fase, n_sessions')
+        .in('id_fase', ids)
+
+    if (!fases) return { fetes: 0, totals: 0 }
+
+    const mapFases = {}
+    fases.forEach(f => mapFases[f.id_fase] = f.n_sessions || 0)
+
+    const req1 = mapFases[rutina.id_fase_1] || 0
+    const req2 = mapFases[rutina.id_fase_2] || 0
+    const req3 = mapFases[rutina.id_fase_3] || 0
+
+    const totals = req1 + req2 + req3
+
+    let fetes = 0
+    if (diagnostic.fase_actual === 1) {
+        fetes = diagnostic.num_sessions || 0
+    } else if (diagnostic.fase_actual === 2) {
+        fetes = req1 + (diagnostic.num_sessions || 0)
+    } else if (diagnostic.fase_actual === 3) {
+        fetes = req1 + req2 + (diagnostic.num_sessions || 0)
+    }
+
+    return { fetes, totals }
 }

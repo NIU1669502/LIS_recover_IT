@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '../../utils/supabase'
-import { getDiagnosticActiu, getExercicisDelaFase } from '../utils/lesions'
+import { getDiagnosticActiu, getExercicisDelaFase, getResumSessions } from '../utils/lesions'
 import styles from './exercicisEnCurs.module.css'
 
 export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
@@ -10,6 +10,8 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
     const [exercicis, setExercicis] = useState([])
     const [nomMuscul, setNomMuscul] = useState('')
     const [nomLesio, setNomLesio] = useState('')
+    const [sessionsFetes, setSessionsFetes] = useState(0)
+    const [sessionsTotals, setSessionsTotals] = useState(0)
     const [carregant, setCarregant] = useState(true)
 
     useEffect(() => {
@@ -43,6 +45,11 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
             const exs = await getExercicisDelaFase(diag)
             setExercicis(exs)
 
+            // Resum global de sessions
+            const { fetes, totals } = await getResumSessions(diag)
+            setSessionsFetes(fetes)
+            setSessionsTotals(totals)
+
             setCarregant(false)
         }
         carregar()
@@ -71,13 +78,15 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
         )
     }
 
-    if (diagnostic.fase_actual > 3) {
+    const estaCompletat = sessionsTotals > 0 && sessionsFetes >= sessionsTotals;
+
+    if (estaCompletat) {
         return (
             <div className={styles.emptyContainer}>
                 <div className={styles.emptyIcon}>🎉</div>
                 <h2 className={styles.emptyTitle}>Programa completat!</h2>
                 <p className={styles.emptyText}>
-                    Has completat totes les fases de recuperació. Enhorabona!
+                    Has completat totes les sessions de la teva recuperació. Enhorabona!
                 </p>
                 <button className={styles.primaryButton} onClick={() => onNavegar('test')}>
                     Fer un nou test →
@@ -103,6 +112,11 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
                     <span className={styles.tagLabel}>Fase</span>
                     <span className={styles.tagValue}>{diagnostic.fase_actual} / 3</span>
                 </div>
+            </div>
+
+            <div className={styles.sessionsCounter}>
+                <span>Sessions totals (fetes / requerides): </span>
+                <strong>{sessionsFetes} / {sessionsTotals}</strong>
             </div>
 
             <div className={styles.faseProgress}>
