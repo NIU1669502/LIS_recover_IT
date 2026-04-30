@@ -1,107 +1,142 @@
-/* Contenedor */
+/* ======================================
+   Premium Theme - Perfil d'Usuari
+   ====================================== */
 .container {
-    max-width: 520px;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
 }
 
-/* Título */
 .title {
-    font-size: 1.5rem;
-    font-weight: 800;
-    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    font-weight: 900;
+    color: #0f172a;
+    margin-bottom: 2rem;
+    letter-spacing: -0.02em;
 }
 
-/* Card */
 .card {
     background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 16px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 15px 35px -5px rgba(37, 99, 235, 0.08);
+    border: 1px solid #e2e8f0;
 }
 
-/* Field */
 .field {
-    margin-bottom: 1rem;
+    margin-bottom: 1.75rem;
 }
 
-/* Label */
+.field:last-child {
+    margin-bottom: 0;
+}
+
 .label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #6b7280;
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #64748b;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
 }
 
-/* Value */
 .value {
-    margin-top: 0.4rem;
-    font-size: 1rem;
+    font-size: 1.15rem;
     font-weight: 600;
-    color: #111827;
+    color: #0f172a;
 }
 
-/* Divider */
 .divider {
     height: 1px;
-    background: #f3f4f6;
-    margin: 1rem 0;
+    background: #e2e8f0;
+    margin: 1.75rem 0;
 }
 
-/* Edición */
 .editRow {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 0.4rem;
-    align-items: center;
-}
-
-.inputEdit {
-    flex: 1;
-    padding: 0.55rem 0.85rem;
-    border-radius: 8px;
-    border: 2px solid #3b82f6;
-    background: #f0f7ff;
-    font-size: 0.95rem;
-    outline: none;
-}
-
-/* Botones */
-.saveButton {
-    padding: 0.55rem 1rem;
-    background: #3b82f6;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-}
-
-.cancelButton {
-    padding: 0.55rem 0.8rem;
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.displayRow {
     display: flex;
     align-items: center;
     gap: 0.75rem;
 }
 
-.editInlineButton {
-    padding: 0.3rem 0.7rem;
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    font-weight: 600;
+.inputEdit {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid #cbd5e1;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #0f172a;
+    transition: all 0.2s;
+    background: #f8fafc;
 }
 
-/* Texto muted */
+.inputEdit:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+.saveButton {
+    padding: 0.75rem 1.25rem;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    transition: all 0.2s;
+}
+
+.saveButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.cancelButton {
+    padding: 0.75rem 1rem;
+    background: #f1f5f9;
+    color: #64748b;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancelButton:hover {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.displayRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.editInlineButton {
+    padding: 0.4rem 0.8rem;
+    background: transparent;
+    color: #3b82f6;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.editInlineButton:hover {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
 .textMuted {
-    color: #6b7280;
+    color: #94a3b8;
+    font-style: italic;
 }
