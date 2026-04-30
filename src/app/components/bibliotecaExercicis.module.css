@@ -1,0 +1,120 @@
+/* ======================================
+   Botón volver
+====================================== */
+.backButton {
+    background: none;
+    border: none;
+    color: #3b82f6;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.backButton:hover {
+    text-decoration: underline;
+}
+
+/* ======================================
+   Título
+====================================== */
+.title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+}
+
+/* ======================================
+   Filtro
+====================================== */
+.filterContainer {
+    margin-bottom: 1.5rem;
+}
+
+.filterLabel {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.filterButtons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.filterButton {
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+/* 🔥 mejora UX (no estaba en inline) */
+.filterButton:hover {
+    transform: translateY(-2px);
+}
+
+/* estado activo */
+.activeFilter {
+    background: #3b82f6;
+    color: #ffffff;
+}
+
+/* ======================================
+   Loading
+====================================== */
+.loadingText {
+    color: #6b7280;
+}
+
+/* ======================================
+   Grid
+====================================== */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+/* ======================================
+   Card
+====================================== */
+.card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.cardTitle {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #111827;
+}
+
+.cardDescription {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+}
+
+.cardDuration {
+    color: #3b82f6;
+    font-size: 0.875rem;
+    font-weight: 500;
+}

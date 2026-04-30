@@ -1,0 +1,154 @@
+.wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 3rem 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ORBS - ocults */
+.orb {
+    display: none;
+}
+
+.orb1 {
+    width: 420px;
+    height: 420px;
+    background: radial-gradient(circle, #bfdbfe, #818cf8);
+    top: -100px;
+    left: -120px;
+    animation: float1 9s infinite ease-in-out;
+}
+
+.orb2 {
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, #bbf7d0, #6ee7b7);
+    bottom: -80px;
+    right: -100px;
+    animation: float2 11s infinite ease-in-out;
+}
+
+.orb3 {
+    width: 260px;
+    height: 260px;
+    background: radial-gradient(circle, #fde68a, #fca5a5);
+    top: 40%;
+    right: 5%;
+    animation: float3 13s infinite ease-in-out;
+}
+
+/* CARD */
+.card {
+    width: 100%;
+    max-width: 420px;
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    animation: cardIn 0.6s ease;
+}
+
+/* HEADER */
+.header {
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    padding: 1.2rem 1.75rem;
+    color: white;
+}
+
+/* CONTENT */
+.content {
+    padding: 1.25rem 2rem 1.5rem;
+}
+
+/* INPUT */
+.input {
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: 10px;
+    border: 2px solid #e5e7eb;
+    background: #f9fafb;
+    transition: all 0.25s;
+    box-sizing: border-box;
+}
+
+.inputFocus {
+    border-color: #3b82f6;
+    background: #f0f7ff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+/* ERROR */
+.error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    padding: 0.7rem;
+    border-radius: 8px;
+    color: #dc2626;
+    margin-bottom: 1rem;
+    animation: shake 0.3s;
+}
+
+/* BUTTON */
+.button {
+    width: 100%;
+    padding: 0.9rem;
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+/* LOADING */
+.loadingDots span {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin: 0 2px;
+    background: white;
+    border-radius: 50%;
+    animation: bounce 1s infinite;
+}
+
+/* ANIMACIONES */
+.anim {
+    opacity: 0;
+    animation: fadeUp 0.5s forwards;
+}
+
+.anim1 {
+    animation-delay: 0.1s
+}
+
+.anim2 {
+    animation-delay: 0.2s
+}
+
+.anim3 {
+    animation-delay: 0.3s
+}
+
+.anim4 {
+    animation-delay: 0.4s
+}
+
+.anim5 {
+    animation-delay: 0.5s
+}
+
+.anim6 {
+    animation-delay: 0.6s
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

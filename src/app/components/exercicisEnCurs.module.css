@@ -1,0 +1,208 @@
+.container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 1.5rem;
+}
+
+/* Rutina info tags */
+.rutinaInfo {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
+.rutinaTag {
+    display: flex;
+    flex-direction: column;
+    background: #f1f5f9;
+    border-radius: 10px;
+    padding: 0.6rem 1rem;
+    min-width: 100px;
+}
+
+.tagLabel {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+}
+
+.tagValue {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1e40af;
+    margin-top: 0.1rem;
+}
+
+/* Fase progress */
+.faseProgress {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.faseProgress::before {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    right: 18px;
+    height: 2px;
+    background: #e2e8f0;
+    z-index: 0;
+}
+
+.faseDot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.faseNum {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.faseDotActive .faseNum {
+    background: #2563eb;
+    color: white;
+}
+
+.faseDotDone .faseNum {
+    background: #22c55e;
+    color: white;
+}
+
+.faseLabel {
+    font-size: 0.7rem;
+    color: #64748b;
+    margin-top: 0.4rem;
+    text-align: center;
+}
+
+.faseDotActive .faseLabel {
+    color: #2563eb;
+    font-weight: 600;
+}
+
+/* Exercicis */
+.exercicisList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.exerciciCard {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    transition: box-shadow 0.15s;
+}
+
+.exerciciCard:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+}
+
+.exerciciNum {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.exerciciInfo {
+    flex: 1;
+}
+
+.exerciciNom {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0 0 0.35rem;
+}
+
+.exerciciMeta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+/* Buttons */
+.primaryButton {
+    width: 100%;
+    padding: 0.85rem;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.primaryButton:hover {
+    background: #1d4ed8;
+}
+
+/* Empty state */
+.emptyContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    gap: 1rem;
+}
+
+.emptyIcon {
+    font-size: 3.5rem;
+}
+
+.emptyTitle {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.emptyText {
+    color: #64748b;
+    max-width: 360px;
+    line-height: 1.6;
+}
