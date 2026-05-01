@@ -5,7 +5,7 @@ import { supabase } from '../../utils/supabase'
 import { completarSessio } from '../utils/lesions'
 import styles from './sessioExercici.module.css'
 
-export default function SessioExercici({ exercicis = [], indexInicial = 0, fase = 1, onCompletarSessio }) {
+export default function SessioExercici({ exercicis = [], indexInicial = 0, fase = 1, onCompletarSessio, musculActual }) {
     const [index, setIndex] = useState(indexInicial)
     const [repActual, setRepActual] = useState(1)
     const [tempsRestant, setTempsRestant] = useState(null)
@@ -14,6 +14,7 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
     const [mostrarCompletada, setMostrarCompletada] = useState(false)
     const [resultCompletada, setResultCompletada] = useState(null)
     const intervalRef = useRef(null)
+    const [urlsVideo, setUrlsVideo] = useState({})
 
     const exercici = exercicis[index]
     const totalReps = exercici.Repeticions
@@ -74,6 +75,26 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
         setResultCompletada({ ...resultat, puntsGuanyats })
         setMostrarCompletada(true)
     }
+
+    useEffect(() => {
+        const carregarUrls = async () => {
+            const ids = exercicis.map(e => e.id_exercici)
+
+            const { data } = await supabase
+                .from('exercici_muscul')
+                .select('id_exercici, url_video')
+                .in('id_exercici', ids)
+                .eq('id_cos', musculActual)
+
+            if (data) {
+                const mapa = {}
+                data.forEach(row => { mapa[row.id_exercici] = row.url_video })
+                setUrlsVideo(mapa)
+            }
+        }
+
+        if (musculActual && exercicis.length > 0) carregarUrls()
+    }, [musculActual, exercicis])
 
     const formatTemps = (s) => {
         const m = Math.floor(s / 60)
@@ -149,10 +170,10 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
             </div>
 
             <div className={styles.videoPlaceholder}>
-                {exercici.url_video?.[0] ? (
+                {urlsVideo[exercici.id_exercici] ? (
                     <iframe
                         className={styles.video}
-                        src={convertirYoutubeURL(exercici.url_video[0])}
+                        src={convertirYoutubeURL(urlsVideo[exercici.id_exercici])}
                         width="100%"
                         allowFullScreen
                         allow="autoplay"

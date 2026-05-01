@@ -1,121 +1,141 @@
 /* ======================================
-   Botón volver
-====================================== */
+   Premium Theme - Biblioteca d'Exercicis
+   ====================================== */
 .backButton {
-    background: none;
+    background: transparent;
     border: none;
-    color: #3b82f6;
+    color: #64748b;
     cursor: pointer;
-    font-weight: 500;
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
-    padding: 0;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+    transition: all 0.2s;
 }
 
 .backButton:hover {
-    text-decoration: underline;
+    color: #2563eb;
+    transform: translateX(-4px);
 }
 
-/* ======================================
-   Título
-====================================== */
 .title {
-    font-size: 1.75rem;
-    font-weight: 800;
-    margin-bottom: 1.5rem;
+    font-size: 2.25rem;
+    font-weight: 900;
+    color: #0f172a;
+    margin-bottom: 2rem;
+    letter-spacing: -0.03em;
 }
 
-/* ======================================
-   Filtro
-====================================== */
 .filterContainer {
-    margin-bottom: 1.5rem;
+    background: #ffffff;
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.08);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 2.5rem;
 }
 
 .filterLabel {
-    font-weight: 600;
-    margin-bottom: 0.75rem;
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
 }
 
 .filterButtons {
     display: flex;
-    gap: 0.5rem;
     flex-wrap: wrap;
+    gap: 0.75rem;
 }
 
 .filterButton {
-    padding: 0.5rem 1rem;
-    border-radius: 999px;
-    border: 1px solid #d1d5db;
-    background: #ffffff;
-    color: #374151;
+    padding: 0.6rem 1.25rem;
+    background: #f1f5f9;
+    border: 2px solid #e2e8f0;
+    border-radius: 99px;
+    color: #475569;
+    font-size: 0.9rem;
+    font-weight: 600;
     cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
 }
 
-/* 🔥 mejora UX (no estaba en inline) */
 .filterButton:hover {
-    transform: translateY(-2px);
+    background: #e2e8f0;
+    color: #0f172a;
 }
 
-/* estado activo */
 .activeFilter {
-    background: #3b82f6;
-    color: #ffffff;
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
-/* ======================================
-   Loading
-====================================== */
+.activeFilter:hover {
+    background: linear-gradient(135deg, #1e40af, #1d4ed8);
+    color: white;
+}
+
 .loadingText {
-    color: #6b7280;
+    text-align: center;
+    color: #64748b;
+    font-size: 1.1rem;
+    padding: 3rem;
+    font-weight: 500;
 }
 
-/* ======================================
-   Grid
-====================================== */
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
 }
 
-/* ======================================
-   Card
-====================================== */
 .card {
     background: #ffffff;
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e5e7eb;
-    transition: all 0.2s;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.05);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
 }
 
-/* 🔥 mejora UX (extra que no rompe diseño) */
 .card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.1);
+    border-color: #bfdbfe;
 }
 
 .cardTitle {
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    color: #111827;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 0.75rem;
+    line-height: 1.3;
 }
 
 .cardDescription {
-    color: #6b7280;
-    font-size: 0.875rem;
-    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
+    flex: 1;
 }
 
 .cardDuration {
-    color: #3b82f6;
-    font-size: 0.875rem;
-    font-weight: 500;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
 }
