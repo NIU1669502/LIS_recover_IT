@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import styles from './perfilUsuari.module.css'
 
 // ============================================================
@@ -9,6 +9,17 @@ import styles from './perfilUsuari.module.css'
 export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
     const [editant, setEditant] = useState(false)
     const [nouNom, setNouNom] = useState('')
+    const [animant, setAnimant] = useState(false)
+    const puntsAnteriors = useRef(perfilUsuari?.punts_recuperacio ?? 0)
+
+    useEffect(() => {
+        const nous = perfilUsuari?.punts_recuperacio ?? 0
+        if (nous > puntsAnteriors.current) {
+            setAnimant(true)
+            setTimeout(() => setAnimant(false), 600)
+        }
+        puntsAnteriors.current = nous
+    }, [perfilUsuari?.punts_recuperacio])
 
     const iniciarEdicio = () => {
         setNouNom(perfilUsuari?.nom || '')
@@ -87,10 +98,31 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
 
                     <div className={styles.divider} />
 
-                    {/* Punts */}
+                    {/* Progrés de recuperació */}
                     <div className={styles.field}>
-                        <span className={styles.label}>Punts</span>
-                        <p className={styles.value}>{perfilUsuari.punts ?? 0}</p>
+                        <span className={styles.label}>Progrés de recuperació</span>
+
+                        <div className={styles.progressInfo}>
+                            <span className={styles.progressText}>
+                                {perfilUsuari.punts_recuperacio ?? 0} / {perfilUsuari.puntsFinals ?? 0} punts
+                            </span>
+                            <span className={`${styles.progressPercent} ${animant ? styles.puntsAnimat : ''}`}>
+                                {perfilUsuari?.puntsFinals > 0
+                                    ? Math.round((perfilUsuari.punts_recuperacio / perfilUsuari.puntsFinals) * 100)
+                                    : 0}%
+                            </span>
+                        </div>
+
+                        <div className={styles.progressBar}>
+                            <div
+                                className={styles.progressFill}
+                                style={{
+                                    width: perfilUsuari.puntsFinals > 0
+                                        ? `${Math.min((perfilUsuari.punts_recuperacio / perfilUsuari.puntsFinals) * 100, 100)}%`
+                                        : '0%'
+                                }}
+                            />
+                        </div>
                     </div>
 
                     <div className={styles.divider} />

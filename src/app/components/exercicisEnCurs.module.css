@@ -115,7 +115,7 @@
     justify-content: center;
     font-weight: 800;
     font-size: 1rem;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
 }
 
@@ -239,7 +239,7 @@
 
 .emptyIcon {
     font-size: 4rem;
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
 }
 
 .emptyTitle {
@@ -254,3 +254,4 @@
     line-height: 1.6;
     font-size: 1.05rem;
 }
+

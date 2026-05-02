@@ -3,8 +3,10 @@
    ====================================== */
 .container {
     min-height: 100vh;
-    background: #f4f7fc; /* Blau molt clar/gel */
-    color: #0f172a; /* Blau fosc intens */
+    background: #f4f7fc;
+    /* Blau molt clar/gel */
+    color: #0f172a;
+    /* Blau fosc intens */
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
@@ -15,6 +17,7 @@
         transform: translateY(16px);
         filter: blur(4px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -144,7 +147,8 @@
    BOTONES
    ====================================== */
 
-.loginButton, .bigButton {
+.loginButton,
+.bigButton {
     padding: 0.85rem 2rem;
     background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
     color: #ffffff;
@@ -157,7 +161,8 @@
     transition: all 0.25s ease;
 }
 
-.loginButton:hover, .bigButton:hover {
+.loginButton:hover,
+.bigButton:hover {
     transform: translateY(-3px);
     box-shadow: 0 12px 25px -8px rgba(37, 99, 235, 0.6);
 }
