@@ -41,18 +41,18 @@ export default function Page() {
       setPageVisible(true)
     }, 220)
   }
-useEffect(() => {
+  useEffect(() => {
     if (vistaActual === 'perfil' && usuariSessio) {
-        obtenirPerfil(usuariSessio)
+      obtenirPerfil(usuariSessio)
     }
-}, [vistaActual])
+  }, [vistaActual])
   const {
     usuariSessio, perfilUsuari,
     errorAuth,
     carregantAuth,
     registreForm, setRegistreForm,
     loginForm, setLoginForm,
-    registrarUsuari, iniciarSessio, tancarSessio, editarPerfil,obtenirPerfil
+    registrarUsuari, iniciarSessio, tancarSessio, editarPerfil, obtenirPerfil
   } = useAuth(navegarA)
 
   const esFisio = perfilUsuari?.es_fisioterapeuta === true

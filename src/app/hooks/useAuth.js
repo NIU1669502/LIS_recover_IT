@@ -19,11 +19,13 @@ export function useAuth(navegarA) {
             return
         }
 
-        // Pacient: comprovar si té diagnòstic
+        // Pacient: comprovar si té diagnòstic actiu
         const { data: diagnostic } = await supabase
             .from('diagnostic')
             .select('dni_pacient')
             .eq('dni_pacient', user.user_metadata?.dni)
+            .eq('finalitzat', false)
+            .limit(1)
             .maybeSingle()
 
         navegarA(diagnostic ? 'inici' : 'test')
@@ -49,10 +51,7 @@ export function useAuth(navegarA) {
             return null
         }
 
-<<<<<<< HEAD
-        setPerfilUsuari(data || null)
-        return data || null
-=======
+        // ✅ Afegim punts del diagnòstic actiu al perfil
         const { data: diagnosticData } = await supabase
             .from('diagnostic')
             .select('punts_recuperacio, puntsFinals')
@@ -64,11 +63,14 @@ export function useAuth(navegarA) {
 
         // ✅ Spread per evitar mutar l'objecte original
         // ✅ ?? en lloc de || per no sobreescriure el valor 0
-        const perfil = data ? { ...data, punts_recuperacio: diagnosticData?.punts_recuperacio ?? 0, puntsFinals: diagnosticData?.puntsFinals ?? 0 } : null
+        const perfil = data ? {
+            ...data,
+            punts_recuperacio: diagnosticData?.punts_recuperacio ?? 0,
+            puntsFinals: diagnosticData?.puntsFinals ?? 0
+        } : null
 
         setPerfilUsuari(perfil)
         return perfil
->>>>>>> main
     }
 
     // ── RF-AUTH-05 — Mantenir sessió ─────────────────────────
@@ -80,25 +82,8 @@ export function useAuth(navegarA) {
         setUsuariSessio(user)
 
         if (user) {
-<<<<<<< HEAD
             const perfil = await obtenirPerfil(user)
             await navegarSegunsTipus(user, perfil)
-=======
-            // ✅ obtenirPerfil ja consulta el diagnòstic, reutilitzem el resultat
-            const perfil = await obtenirPerfil(user)
-            const teDiagnostic = perfil !== null
-
-            // ✅ Consultem si existeix diagnòstic actiu per decidir la vista
-            const { data: diagnostic } = await supabase
-                .from('diagnostic')
-                .select('dni_pacient, punts_recuperacio') // ✅ ara seleccionem punts_recuperacio també
-                .eq('dni_pacient', user.user_metadata?.dni)
-                .eq('finalitzat', false)
-                .limit(1)
-                .maybeSingle()
-
-            navegarA(diagnostic ? 'inici' : 'test')
->>>>>>> main
         }
     }
 
@@ -179,12 +164,10 @@ export function useAuth(navegarA) {
     }
 
     // ── RF-AUTH-02 — Inici de sessió ─────────────────────────
-    // ── RF-AUTH-02 — Inici de sessió ─────────────────────────
-const iniciarSessio = async () => {
-    const email = loginForm.email.trim()
-    const password = loginForm.password
+    const iniciarSessio = async () => {
+        const email = loginForm.email.trim()
+        const password = loginForm.password
 
-<<<<<<< HEAD
         if (!email || !password) {
             setErrorAuth('Introdueix email i contrasenya.')
             return
@@ -195,31 +178,31 @@ const iniciarSessio = async () => {
         try {
             const { data, error } = await supabase.auth.signInWithPassword({ email, password })
             if (error) throw error
-            const user = data.user
-            const { data: perfilData } = await supabase
-                .from('usuaris')
-                .select('*')
-                .eq('dni', user.user_metadata.dni)
-                .maybeSingle()
 
-            const esFisio = perfilData?.es_fisioterapeuta === true
+            const user = data.user
+
+            // ✅ obtenirPerfil ja fa totes les consultes necessàries (punts inclosos)
+            const perfil = await obtenirPerfil(user)
+
+            const esFisio = perfil?.es_fisioterapeuta === true
 
             if (esFisio) {
                 navegarA('inici-fisio', () => {
                     setUsuariSessio(user)
-                    setPerfilUsuari(perfilData || null)
-                    showToast(`Benvingut/da, Dr./Dra. ${perfilData?.nom || ''}`, 'success')
+                    showToast(`Benvingut/da, Dr./Dra. ${perfil?.nom || ''}`, 'success')
                 })
             } else {
+                // ✅ Consulta lleugera només per saber a quina vista anar
                 const { data: diagnostic } = await supabase
                     .from('diagnostic')
-                    .select('dni_pacient')
+                    .select('id_diagnostic')
                     .eq('dni_pacient', user.user_metadata.dni)
+                    .eq('finalitzat', false)
+                    .limit(1)
                     .maybeSingle()
 
                 navegarA(diagnostic ? 'inici' : 'test', () => {
                     setUsuariSessio(user)
-                    setPerfilUsuari(perfilData || null)
                     showToast(`Benvingut/da ${user.user_metadata?.nom || ''}`, 'success')
                 })
             }
@@ -228,43 +211,7 @@ const iniciarSessio = async () => {
         } finally {
             setCarregantAuth(false)
         }
-=======
-    if (!email || !password) {
-        setErrorAuth('Introdueix email i contrasenya.')
-        return
->>>>>>> main
     }
-
-    setErrorAuth('')
-    setCarregantAuth(true)
-    try {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-        if (error) throw error
-
-        const user = data.user
-
-        // ✅ obtenirPerfil ja fa totes les consultes necessàries
-        const perfil = await obtenirPerfil(user)
-
-        // ✅ Consulta lleugera només per saber a quina vista anar
-        const { data: diagnostic } = await supabase
-            .from('diagnostic')
-            .select('id_diagnostic')
-            .eq('dni_pacient', user.user_metadata.dni)
-            .eq('finalitzat', false)
-            .limit(1)
-            .maybeSingle()
-
-        navegarA(diagnostic ? 'inici' : 'test', () => {
-            setUsuariSessio(user)
-            showToast(`Benvingut/da ${user.user_metadata?.nom || ''}`, 'success')
-        })
-    } catch (err) {
-        setErrorAuth(err.message || 'Error inesperat en iniciar sessió.')
-    } finally {
-        setCarregantAuth(false)
-    }
-}
 
     // ── RF-AUTH-03 — Tancar sessió ───────────────────────────
     const tancarSessio = async () => {
@@ -310,6 +257,6 @@ const iniciarSessio = async () => {
         iniciarSessio,
         tancarSessio,
         editarPerfil,
-        obtenirPerfil
+        obtenirPerfil,
     }
 }
