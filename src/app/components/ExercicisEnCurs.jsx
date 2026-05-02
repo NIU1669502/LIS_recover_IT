@@ -115,7 +115,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
             </div>
 
             <div className={styles.sessionsCounter}>
-                <span>Sessions totals (fetes / requerides): </span>
+                <span>Sessions necessàries/dia per superar la fase (fetes / requerides): </span>
                 <strong>{sessionsFetes} / {sessionsTotals}</strong>
             </div>
 

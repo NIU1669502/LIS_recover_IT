@@ -117,7 +117,7 @@
     font-size: 1.5rem;
     color: white;
     margin-bottom: 0.5rem;
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .videoText {
@@ -234,6 +234,26 @@
     background: #e2e8f0;
 }
 
+.doneButton {
+    padding: 0.8rem 1.25rem;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 99px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+.doneButton:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(16, 185, 129, 0.4);
+}
+
+
 .resetButton {
     padding: 0.8rem 1.25rem;
     background: transparent;
@@ -308,7 +328,7 @@
 
 .completadaIcon {
     font-size: 5rem;
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
 }
 
 .completadaTitle {
@@ -354,4 +374,104 @@
 .primaryButton:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 25px -8px rgba(37, 99, 235, 0.6);
+}
+
+/* ── Cronòmetre pulsant quan està actiu ── */
+@keyframes pulsarCronometre {
+    0%, 100% { transform: scale(1); }
+    50%       { transform: scale(1.04); }
+}
+
+.cronometreWrapper.actiu {
+    animation: pulsarCronometre 1s ease-in-out infinite;
+}
+
+/* ── Canvi de color quan queda poc temps ── */
+.progressCircleWarning {
+    stroke: #f59e0b !important;
+    transition: stroke 0.5s ease;
+}
+
+.progressCircleUrgent {
+    stroke: #ef4444 !important;
+    transition: stroke 0.5s ease;
+}
+
+.cronometreTempsWarning {
+    color: #f59e0b !important;
+    transition: color 0.5s ease;
+}
+
+.cronometreTempsUrgent {
+    color: #ef4444 !important;
+    animation: tempsUrgent 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes tempsUrgent {
+    from { transform: scale(1); }
+    to   { transform: scale(1.08); }
+}
+
+/* ── Badge de punts guanyats ── */
+@keyframes entradaPunts {
+    0%   { opacity: 0; transform: translateY(30px) scale(0.8); }
+    60%  { transform: translateY(-8px) scale(1.1); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes brillarPunts {
+    0%, 100% { box-shadow: 0 0 0px rgba(34, 197, 94, 0); }
+    50%       { box-shadow: 0 0 24px rgba(34, 197, 94, 0.6); }
+}
+
+.puntsBadge {
+    animation: entradaPunts 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+               brillarPunts 1.5s ease-in-out 0.7s infinite;
+}
+
+/* ── Pantalla completada ── */
+@keyframes entradaCompletada {
+    0%   { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.completadaContainer {
+    animation: entradaCompletada 0.5s ease forwards;
+}
+
+@keyframes botarIcon {
+    0%, 100% { transform: translateY(0); }
+    30%       { transform: translateY(-16px); }
+    60%       { transform: translateY(-8px); }
+}
+
+.completadaTitle {
+    animation: entradaCompletada 0.5s ease 0.2s both;
+}
+
+.completadaText {
+    animation: entradaCompletada 0.5s ease 0.35s both;
+}
+.puntsFlash {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    font-size: 2rem;
+    font-weight: 800;
+    padding: 20px 40px;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(34, 197, 94, 0.4);
+    z-index: 999;
+    pointer-events: none;
+    animation: flashPunts 2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes flashPunts {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    20%  { opacity: 1; transform: translate(-50%, -60%) scale(1.1); }
+    70%  { opacity: 1; transform: translate(-50%, -60%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -80%) scale(0.9); }
 }

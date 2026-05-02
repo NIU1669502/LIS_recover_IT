@@ -2,9 +2,6 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../utils/supabase'
 import { showToast } from '../utils/toast'
 
-// ============================================================
-// Hook personalitzat que centralitza tota la lògica d'autenticació
-// ============================================================
 export function useAuth(navegarA) {
     const [usuariSessio, setUsuariSessio] = useState(null)
     const [perfilUsuari, setPerfilUsuari] = useState(null)
@@ -19,7 +16,7 @@ export function useAuth(navegarA) {
         const dni = user?.user_metadata?.dni
         if (!dni) {
             setPerfilUsuari(null)
-            return
+            return null
         }
 
         const { data, error } = await supabase
@@ -30,10 +27,24 @@ export function useAuth(navegarA) {
 
         if (error) {
             setErrorAuth(error.message)
-            return
+            return null
         }
 
-        setPerfilUsuari(data || null)
+        const { data: diagnosticData } = await supabase
+            .from('diagnostic')
+            .select('punts_recuperacio, puntsFinals')
+            .eq('dni_pacient', dni)
+            .eq('finalitzat', false)
+            .order('id_diagnostic', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+        // ✅ Spread per evitar mutar l'objecte original
+        // ✅ ?? en lloc de || per no sobreescriure el valor 0
+        const perfil = data ? { ...data, punts_recuperacio: diagnosticData?.punts_recuperacio ?? 0, puntsFinals: diagnosticData?.puntsFinals ?? 0 } : null
+
+        setPerfilUsuari(perfil)
+        return perfil
     }
 
     // ── RF-AUTH-05 — Mantenir sessió ─────────────────────────
@@ -43,13 +54,21 @@ export function useAuth(navegarA) {
 
         const user = data.session?.user ?? null
         setUsuariSessio(user)
+
         if (user) {
-            await obtenirPerfil(user)
+            // ✅ obtenirPerfil ja consulta el diagnòstic, reutilitzem el resultat
+            const perfil = await obtenirPerfil(user)
+            const teDiagnostic = perfil !== null
+
+            // ✅ Consultem si existeix diagnòstic actiu per decidir la vista
             const { data: diagnostic } = await supabase
                 .from('diagnostic')
-                .select('dni_pacient')
+                .select('dni_pacient, punts_recuperacio') // ✅ ara seleccionem punts_recuperacio també
                 .eq('dni_pacient', user.user_metadata?.dni)
+                .eq('finalitzat', false)
+                .limit(1)
                 .maybeSingle()
+
             navegarA(diagnostic ? 'inici' : 'test')
         }
     }
@@ -106,14 +125,22 @@ export function useAuth(navegarA) {
 
             if (signUpData.session?.user) {
                 const user = signUpData.session.user
-                const { data: perfilData } = await supabase.from('usuaris').select('*').eq('dni', user.user_metadata.dni).maybeSingle()
+                const { data: perfilData } = await supabase
+                    .from('usuaris')
+                    .select('*')
+                    .eq('dni', user.user_metadata.dni)
+                    .maybeSingle()
+
+                // ✅ Nou usuari, punts_recuperacio serà 0
+                const perfil = perfilData ? { ...perfilData, punts_recuperacio: 0 } : null
+
                 navegarA('test', () => {
                     setUsuariSessio(user)
-                    setPerfilUsuari(perfilData || null)
+                    setPerfilUsuari(perfil)
                 })
             } else {
                 navegarA('login')
-                showToast('Compte creat! Verifica el teu email abans d\'iniciar sessió. Revisa la carpeta de Spam si cal.', 'success')
+                showToast("Compte creat! Verifica el teu email abans d'iniciar sessió. Revisa la carpeta de Spam si cal.", 'success')
             }
         } catch (err) {
             setErrorAuth(err.message || 'Error inesperat al registrar usuari.')
@@ -123,36 +150,48 @@ export function useAuth(navegarA) {
     }
 
     // ── RF-AUTH-02 — Inici de sessió ─────────────────────────
-    const iniciarSessio = async () => {
-        const email = loginForm.email.trim()
-        const password = loginForm.password
+    // ── RF-AUTH-02 — Inici de sessió ─────────────────────────
+const iniciarSessio = async () => {
+    const email = loginForm.email.trim()
+    const password = loginForm.password
 
-        if (!email || !password) {
-            setErrorAuth('Introdueix email i contrasenya.')
-            return
-        }
-
-        setErrorAuth('')
-        setCarregantAuth(true)
-        try {
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-            if (error) throw error
-            const user = data.user
-            const { data: perfilData } = await supabase.from('usuaris').select('*').eq('dni', user.user_metadata.dni).maybeSingle()
-            const { data: diagnostic } = await supabase.from('diagnostic').select('dni_pacient').eq('dni_pacient', user.user_metadata.dni).maybeSingle()
-
-            navegarA(diagnostic ? 'inici' : 'test', () => {
-                setUsuariSessio(user)
-                setPerfilUsuari(perfilData || null)
-                showToast(`Benvingut/da ${user.user_metadata?.nom || ''}`, 'success')
-            })
-        } catch (err) {
-            setErrorAuth(err.message || 'Error inesperat en iniciar sessió.')
-        } finally {
-            setCarregantAuth(false)
-        }
+    if (!email || !password) {
+        setErrorAuth('Introdueix email i contrasenya.')
+        return
     }
 
+    setErrorAuth('')
+    setCarregantAuth(true)
+    try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+        if (error) throw error
+
+        const user = data.user
+
+        // ✅ obtenirPerfil ja fa totes les consultes necessàries
+        const perfil = await obtenirPerfil(user)
+
+        // ✅ Consulta lleugera només per saber a quina vista anar
+        const { data: diagnostic } = await supabase
+            .from('diagnostic')
+            .select('id_diagnostic')
+            .eq('dni_pacient', user.user_metadata.dni)
+            .eq('finalitzat', false)
+            .limit(1)
+            .maybeSingle()
+
+        navegarA(diagnostic ? 'inici' : 'test', () => {
+            setUsuariSessio(user)
+            showToast(`Benvingut/da ${user.user_metadata?.nom || ''}`, 'success')
+        })
+    } catch (err) {
+        setErrorAuth(err.message || 'Error inesperat en iniciar sessió.')
+    } finally {
+        setCarregantAuth(false)
+    }
+}
+
+    // ── RF-AUTH-03 — Tancar sessió ───────────────────────────
     const tancarSessio = async () => {
         await supabase.auth.signOut()
         const nomUsuari = perfilUsuari?.nom || ''
@@ -183,7 +222,6 @@ export function useAuth(navegarA) {
     }
 
     return {
-        // Estat
         usuariSessio,
         perfilUsuari,
         errorAuth,
@@ -193,10 +231,10 @@ export function useAuth(navegarA) {
         setRegistreForm,
         loginForm,
         setLoginForm,
-        // Accions
         registrarUsuari,
         iniciarSessio,
         tancarSessio,
         editarPerfil,
+        obtenirPerfil
     }
 }

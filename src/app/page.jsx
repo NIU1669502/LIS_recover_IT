@@ -38,14 +38,18 @@ export default function Page() {
       setPageVisible(true)
     }, 220)
   }
-
+useEffect(() => {
+    if (vistaActual === 'perfil' && usuariSessio) {
+        obtenirPerfil(usuariSessio)
+    }
+}, [vistaActual])
   const {
     usuariSessio, perfilUsuari,
     errorAuth,
     carregantAuth,
     registreForm, setRegistreForm,
     loginForm, setLoginForm,
-    registrarUsuari, iniciarSessio, tancarSessio, editarPerfil,
+    registrarUsuari, iniciarSessio, tancarSessio, editarPerfil,obtenirPerfil
   } = useAuth(navegarA)
 
   const esPantallaAuth = vistaActual === 'login' || vistaActual === 'registre'

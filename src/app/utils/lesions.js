@@ -139,29 +139,26 @@ export async function completarSessio(userDni, puntsGuanyats) {
         }
     }
 
-    // 4. Actualitzar fase i num_sessions a la BD
+    const nousPuntsRecuperacio = (diagnostic.punts_recuperacio || 0) + puntsGuanyats
+
+    // 4. Actualitzar fase, num_sessions i punts_recuperacio a la BD
+    const actualitzacio = {
+        fase_actual: novaFase,
+        num_sessions: nouNumSessions,
+        punts_recuperacio: nousPuntsRecuperacio
+    }
+
+    if (completada) {
+        actualitzacio.finalitzat = true
+        actualitzacio.data_fi = new Date().toISOString()
+    }
+
     await supabase
         .from('diagnostic')
-        .update({
-            fase_actual: novaFase,
-            num_sessions: nouNumSessions
-        })
+        .update(actualitzacio)
         .eq('id_diagnostic', diagnostic.id_diagnostic)
 
     // 5. Sumar punts a l'usuari
-    const { data: usuari } = await supabase
-        .from('usuaris')
-        .select('punts')
-        .eq('dni', userDni)
-        .single()
-
-    if (usuari) {
-        await supabase
-            .from('usuaris')
-            .update({ punts: (usuari.punts || 0) + puntsGuanyats })
-            .eq('dni', userDni)
-    }
-
     return { completada, novaFase: completada ? null : novaFase, faseAvançada, nSessionsRestants: nSessionsRequerides - nouNumSessions }
 }
 
@@ -181,7 +178,58 @@ export async function processarTestDiagnostic(resultat, navegarA) {
         const idxCos = TEST_STEPS[0].opcions.indexOf(resultat.muscle)
         const idCos = idxCos >= 0 ? idxCos + 1 : 1
 
+        // ── Obtenir ids de fases ─────────────────────────────
+        const { data: idFases } = await supabase
+            .from('rutines_lesio')
+            .select('id_fase_1, id_fase_2, id_fase_3')
+            .eq('id_muscul', idCos)
+            .eq('id_lesio', resultat.id_lesio)
+            .single()
 
+        // ── Obtenir info de les 3 fases en paral·lel ────────
+        const [
+            { data: multifase1 },
+            { data: multifase2 },
+            { data: multifase3 },
+            { data: infoFase1 },
+            { data: infoFase2 },
+            { data: infoFase3 },
+        ] = await Promise.all([
+            supabase.from('fases').select('multiplicador').eq('id_fase', idFases.id_fase_1).single(),
+            supabase.from('fases').select('multiplicador').eq('id_fase', idFases.id_fase_2).single(),
+            supabase.from('fases').select('multiplicador').eq('id_fase', idFases.id_fase_3).single(),
+            supabase.from('fases').select('exercici_1, exercici_2, exercici_3, n_sessions').eq('id_fase', idFases.id_fase_1).single(),
+            supabase.from('fases').select('exercici_1, exercici_2, exercici_3, n_sessions').eq('id_fase', idFases.id_fase_2).single(),
+            supabase.from('fases').select('exercici_1, exercici_2, exercici_3, n_sessions').eq('id_fase', idFases.id_fase_3).single(),
+        ])
+
+        // ── Obtenir punts de tots els exercicis ──────────────
+        const idsExercicis = [...new Set([
+            infoFase1.exercici_1, infoFase1.exercici_2, infoFase1.exercici_3,
+            infoFase2.exercici_1, infoFase2.exercici_2, infoFase2.exercici_3,
+            infoFase3.exercici_1, infoFase3.exercici_2, infoFase3.exercici_3,
+        ].filter(Boolean))]
+
+        const { data: exercicisInfo } = await supabase
+            .from('exercicis')
+            .select('id_exercici, punts')
+            .in('id_exercici', idsExercicis)
+
+        const puntsPer = Object.fromEntries(
+            exercicisInfo.map(e => [e.id_exercici, e.punts])
+        )
+
+        const calcularPuntsFase = (infoFase, multiplicador) =>
+            [infoFase.exercici_1, infoFase.exercici_2, infoFase.exercici_3]
+                .filter(Boolean)
+                .reduce((acc, id) => acc + (puntsPer[id] ?? 0), 0) * (multiplicador ?? 1) * (infoFase.n_sessions ?? 1)
+
+        const puntsFase1 = calcularPuntsFase(infoFase1, multifase1?.multiplicador)
+        const puntsFase2 = calcularPuntsFase(infoFase2, multifase2?.multiplicador)
+        const puntsFase3 = calcularPuntsFase(infoFase3, multifase3?.multiplicador)
+        const puntsTotal = puntsFase1 + puntsFase2 + puntsFase3
+
+        // ── Guardar diagnòstic ───────────────────────────────
         const { error } = await supabase
             .from('diagnostic')
             .insert([{
@@ -191,6 +239,8 @@ export async function processarTestDiagnostic(resultat, navegarA) {
                 descripcio: resultat.descripcio || 'Sense descripció',
                 fase_actual: 1,
                 num_sessions: 0,
+                punts_recuperacio: 0,
+                puntsFinals: puntsTotal,
             }])
 
         if (error) {
@@ -205,8 +255,8 @@ export async function processarTestDiagnostic(resultat, navegarA) {
     } catch (err) {
         console.error('Error inesperat:', err)
     }
-
 }
+
 
 // ============================================================
 // Obté el resum global de sessions del diagnòstic (fetes i totals)
@@ -225,7 +275,7 @@ export async function getResumSessions(diagnostic) {
     if (!rutina) return { fetes: 0, totals: 0 }
 
     const ids = [rutina.id_fase_1, rutina.id_fase_2, rutina.id_fase_3].filter(Boolean)
-    
+
     // Obtenir n_sessions de cadascuna
     const { data: fases } = await supabase
         .from('fases')
@@ -241,16 +291,12 @@ export async function getResumSessions(diagnostic) {
     const req2 = mapFases[rutina.id_fase_2] || 0
     const req3 = mapFases[rutina.id_fase_3] || 0
 
-    const totals = req1 + req2 + req3
+    let totals = 0
+    if (diagnostic.fase_actual === 1) totals = req1
+    else if (diagnostic.fase_actual === 2) totals = req2
+    else if (diagnostic.fase_actual === 3) totals = req3
 
-    let fetes = 0
-    if (diagnostic.fase_actual === 1) {
-        fetes = diagnostic.num_sessions || 0
-    } else if (diagnostic.fase_actual === 2) {
-        fetes = req1 + (diagnostic.num_sessions || 0)
-    } else if (diagnostic.fase_actual === 3) {
-        fetes = req1 + req2 + (diagnostic.num_sessions || 0)
-    }
+    let fetes = diagnostic.num_sessions || 0
 
     return { fetes, totals }
 }
