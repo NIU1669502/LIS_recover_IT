@@ -20,7 +20,7 @@
 .orb1 {
     width: 500px;
     height: 500px;
-    background: radial-gradient(circle, rgba(37,99,235,0.4), rgba(59,130,246,0.1));
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.4), rgba(59, 130, 246, 0.1));
     top: -100px;
     left: -150px;
     animation: float1 12s infinite ease-in-out;
@@ -29,7 +29,7 @@
 .orb2 {
     width: 450px;
     height: 450px;
-    background: radial-gradient(circle, rgba(96,165,250,0.3), rgba(147,197,253,0.1));
+    background: radial-gradient(circle, rgba(96, 165, 250, 0.3), rgba(147, 197, 253, 0.1));
     bottom: -100px;
     right: -150px;
     animation: float2 15s infinite ease-in-out;
@@ -38,23 +38,46 @@
 .orb3 {
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, rgba(191,219,254,0.4), transparent);
+    background: radial-gradient(circle, rgba(191, 219, 254, 0.4), transparent);
     top: 40%;
     right: 15%;
     animation: float3 18s infinite ease-in-out;
 }
 
 @keyframes float1 {
-    0%, 100% { transform: translate(0, 0) }
-    50% { transform: translate(50px, 30px) }
+
+    0%,
+    100% {
+        transform: translate(0, 0)
+    }
+
+    50% {
+        transform: translate(50px, 30px)
+    }
 }
+
 @keyframes float2 {
-    0%, 100% { transform: translate(0, 0) }
-    50% { transform: translate(-40px, -40px) }
+
+    0%,
+    100% {
+        transform: translate(0, 0)
+    }
+
+    50% {
+        transform: translate(-40px, -40px)
+    }
 }
+
 @keyframes float3 {
-    0%, 100% { transform: translate(0, 0) }
-    50% { transform: translate(-30px, 50px) }
+
+    0%,
+    100% {
+        transform: translate(0, 0)
+    }
+
+    50% {
+        transform: translate(-30px, 50px)
+    }
 }
 
 /* CARD */
@@ -75,6 +98,7 @@
         opacity: 0;
         transform: translateY(40px) scale(0.98);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -163,14 +187,31 @@
     margin-bottom: 1.5rem;
     font-size: 0.9rem;
     font-weight: 500;
-    animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
 }
 
 @keyframes shake {
-    10%, 90% { transform: translate3d(-2px, 0, 0); }
-    20%, 80% { transform: translate3d(3px, 0, 0); }
-    30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
-    40%, 60% { transform: translate3d(5px, 0, 0); }
+
+    10%,
+    90% {
+        transform: translate3d(-2px, 0, 0);
+    }
+
+    20%,
+    80% {
+        transform: translate3d(3px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-5px, 0, 0);
+    }
+
+    40%,
+    60% {
+        transform: translate3d(5px, 0, 0);
+    }
 }
 
 /* BUTTON */
@@ -212,7 +253,9 @@
 }
 
 @keyframes shimmer {
-    100% { left: 200% }
+    100% {
+        left: 200%
+    }
 }
 
 /* LOADING */
@@ -226,12 +269,24 @@
     animation: bounce 1s infinite cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.loadingDots span:nth-child(2) { animation-delay: 0.15s }
-.loadingDots span:nth-child(3) { animation-delay: 0.3s }
+.loadingDots span:nth-child(2) {
+    animation-delay: 0.15s
+}
+
+.loadingDots span:nth-child(3) {
+    animation-delay: 0.3s
+}
 
 @keyframes bounce {
-    0%, 100% { transform: translateY(0) }
-    50% { transform: translateY(-6px) }
+
+    0%,
+    100% {
+        transform: translateY(0)
+    }
+
+    50% {
+        transform: translateY(-6px)
+    }
 }
 
 /* ANIM STAGGER */
@@ -240,20 +295,66 @@
     animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.anim1 { animation-delay: 0.1s }
-.anim2 { animation-delay: 0.2s }
-.anim3 { animation-delay: 0.3s }
-.anim4 { animation-delay: 0.4s }
-.anim5 { animation-delay: 0.5s }
-.anim6 { animation-delay: 0.6s }
+.anim1 {
+    animation-delay: 0.1s
+}
+
+.anim2 {
+    animation-delay: 0.2s
+}
+
+.anim3 {
+    animation-delay: 0.3s
+}
+
+.anim4 {
+    animation-delay: 0.4s
+}
+
+.anim5 {
+    animation-delay: 0.5s
+}
+
+.anim6 {
+    animation-delay: 0.6s
+}
 
 @keyframes fadeUp {
     from {
         opacity: 0;
         transform: translateY(15px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.forgotRow {
+    text-align: right;
+    margin: -0.5rem 0 0.75rem;
+}
+
+.forgotLink {
+    background: none;
+    border: none;
+    color: #2563eb;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0;
+}
+
+.forgotLink:hover {
+    text-decoration: underline;
+}
+
+.success {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
 }
