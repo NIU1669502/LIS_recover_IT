@@ -16,6 +16,10 @@ import TestDiagnostic from './components/TestDiagnostic'
 import BibliotecaExercicis from './components/BibliotecaExercicis'
 import ExercicisEnCurs from './components/ExercicisEnCurs'
 
+// Vistes del fisio
+import PanellFisio from './components/PanellFisio'
+import LlistaPacients from './components/LlistaPacients'
+
 import styles from './page.module.css'
 
 export default function Page() {
@@ -26,7 +30,6 @@ export default function Page() {
   const [pageVisible, setPageVisible] = useState(true)
   const transitionRef = useRef(null)
   const [musculActual, setMusculActual] = useState(null)
-
 
   const navegarA = (novaVista, onTransition) => {
     if (transitionRef.current) clearTimeout(transitionRef.current)
@@ -48,6 +51,7 @@ export default function Page() {
     registrarUsuari, iniciarSessio, tancarSessio, editarPerfil,
   } = useAuth(navegarA)
 
+  const esFisio = perfilUsuari?.es_fisioterapeuta === true
   const esPantallaAuth = vistaActual === 'login' || vistaActual === 'registre'
 
   return (
@@ -64,6 +68,7 @@ export default function Page() {
             vistaActual={vistaActual}
             onNavegar={navegarA}
             onTancarSessio={tancarSessio}
+            esFisio={esFisio}
           />
         )}
 
@@ -78,6 +83,8 @@ export default function Page() {
         )}
 
         <main key={vistaActual} className={`${esPantallaAuth ? styles.mainFull : styles.main} ${styles.pageEnter}`}>
+
+          {/* ── Vistes comunes ─────────────────────────── */}
 
           {vistaActual === 'login' && (
             <LoginForm
@@ -106,6 +113,23 @@ export default function Page() {
             />
           )}
 
+          {/* ── Vistes del fisioterapeuta ───────────────── */}
+
+          {vistaActual === 'inici-fisio' && (
+            <PanellFisio
+              perfilUsuari={perfilUsuari}
+              onNavegar={navegarA}
+            />
+          )}
+
+          {vistaActual === 'pacients' && (
+            <LlistaPacients
+              perfilUsuari={perfilUsuari}
+            />
+          )}
+
+          {/* ── Vistes del pacient ──────────────────────── */}
+
           {vistaActual === 'test' && (
             <section className={styles.testSection}>
               <div className={styles.testHeader}>
@@ -114,7 +138,6 @@ export default function Page() {
                 </div>
                 <h2 className={styles.testTitle}>Test diagnòstic</h2>
               </div>
-
               <TestDiagnostic
                 onGuardar={(resultat) => processarTestDiagnostic(resultat, navegarA)}
                 onCancel={() => navegarA('inici')}
@@ -157,22 +180,18 @@ export default function Page() {
 
           {vistaActual === 'inici' && (
             <section className={styles.homeSection}>
-
               <h1 className={styles.title}>
                 Recover<span className={styles.titleAccent}>IT</span>
               </h1>
-
               <p className={styles.subtitle}>
                 La teva plataforma de recuperació guiada i intel·ligent.
               </p>
-
               <div className={styles.buttonGroup}>
                 {!usuariSessio ? (
                   <>
                     <button onClick={() => navegarA('login')} className={styles.loginButton}>
                       Iniciar sessió
                     </button>
-
                     <button onClick={() => navegarA('registre')} className={styles.registerButton}>
                       Registrar-me
                     </button>
@@ -182,19 +201,16 @@ export default function Page() {
                     <button onClick={() => navegarA('test')} className={styles.testButton}>
                       Tornar a fer el test
                     </button>
-
                     <button onClick={() => navegarA('perfil')} className={styles.profileButton}>
                       Anar al meu perfil
                     </button>
                   </>
                 )}
               </div>
-
               <div className={styles.imageSection}>
                 <div className={styles.imageBox}>
                   [Imatge anatòmica]
                 </div>
-
                 <button
                   onClick={() => navegarA('biblioteca')}
                   className={styles.bigButton}
@@ -202,7 +218,6 @@ export default function Page() {
                   Veure exercicis
                 </button>
               </div>
-
             </section>
           )}
 

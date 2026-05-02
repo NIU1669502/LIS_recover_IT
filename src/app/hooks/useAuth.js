@@ -13,13 +13,32 @@ export function useAuth(navegarA) {
     const [registreForm, setRegistreForm] = useState({ nom: '', dni: '', email: '', password: '' })
     const [loginForm, setLoginForm] = useState({ email: '', password: '' })
 
+    // ── Determina on navegar segons el tipus d'usuari ────────
+    const navegarSegunsTipus = async (user, perfilData) => {
+        const esFisio = perfilData?.es_fisioterapeuta === true
+
+        if (esFisio) {
+            navegarA('inici-fisio')
+            return
+        }
+
+        // Pacient: comprovar si té diagnòstic
+        const { data: diagnostic } = await supabase
+            .from('diagnostic')
+            .select('dni_pacient')
+            .eq('dni_pacient', user.user_metadata?.dni)
+            .maybeSingle()
+
+        navegarA(diagnostic ? 'inici' : 'test')
+    }
+
     // ── RF-AUTH-09 — Obtenir perfil ──────────────────────────
     const obtenirPerfil = async (userParam) => {
         const user = userParam || usuariSessio
         const dni = user?.user_metadata?.dni
         if (!dni) {
             setPerfilUsuari(null)
-            return
+            return null
         }
 
         const { data, error } = await supabase
@@ -30,10 +49,11 @@ export function useAuth(navegarA) {
 
         if (error) {
             setErrorAuth(error.message)
-            return
+            return null
         }
 
         setPerfilUsuari(data || null)
+        return data || null
     }
 
     // ── RF-AUTH-05 — Mantenir sessió ─────────────────────────
@@ -44,13 +64,8 @@ export function useAuth(navegarA) {
         const user = data.session?.user ?? null
         setUsuariSessio(user)
         if (user) {
-            await obtenirPerfil(user)
-            const { data: diagnostic } = await supabase
-                .from('diagnostic')
-                .select('dni_pacient')
-                .eq('dni_pacient', user.user_metadata?.dni)
-                .maybeSingle()
-            navegarA(diagnostic ? 'inici' : 'test')
+            const perfil = await obtenirPerfil(user)
+            await navegarSegunsTipus(user, perfil)
         }
     }
 
@@ -138,14 +153,33 @@ export function useAuth(navegarA) {
             const { data, error } = await supabase.auth.signInWithPassword({ email, password })
             if (error) throw error
             const user = data.user
-            const { data: perfilData } = await supabase.from('usuaris').select('*').eq('dni', user.user_metadata.dni).maybeSingle()
-            const { data: diagnostic } = await supabase.from('diagnostic').select('dni_pacient').eq('dni_pacient', user.user_metadata.dni).maybeSingle()
+            const { data: perfilData } = await supabase
+                .from('usuaris')
+                .select('*')
+                .eq('dni', user.user_metadata.dni)
+                .maybeSingle()
 
-            navegarA(diagnostic ? 'inici' : 'test', () => {
-                setUsuariSessio(user)
-                setPerfilUsuari(perfilData || null)
-                showToast(`Benvingut/da ${user.user_metadata?.nom || ''}`, 'success')
-            })
+            const esFisio = perfilData?.es_fisioterapeuta === true
+
+            if (esFisio) {
+                navegarA('inici-fisio', () => {
+                    setUsuariSessio(user)
+                    setPerfilUsuari(perfilData || null)
+                    showToast(`Benvingut/da, Dr./Dra. ${perfilData?.nom || ''}`, 'success')
+                })
+            } else {
+                const { data: diagnostic } = await supabase
+                    .from('diagnostic')
+                    .select('dni_pacient')
+                    .eq('dni_pacient', user.user_metadata.dni)
+                    .maybeSingle()
+
+                navegarA(diagnostic ? 'inici' : 'test', () => {
+                    setUsuariSessio(user)
+                    setPerfilUsuari(perfilData || null)
+                    showToast(`Benvingut/da ${user.user_metadata?.nom || ''}`, 'success')
+                })
+            }
         } catch (err) {
             setErrorAuth(err.message || 'Error inesperat en iniciar sessió.')
         } finally {

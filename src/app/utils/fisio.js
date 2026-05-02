@@ -1,0 +1,180 @@
+import { supabase } from '../../utils/supabase'
+import { showToast } from '../utils/toast'
+
+// ============================================================
+// Obté tots els pacients vinculats a un fisioterapeuta
+// ============================================================
+export async function getPacientsDeFisio(dniFisio) {
+    const { data, error } = await supabase
+        .from('relacio_fisio_pacient')
+        .select('dni_pacient, data_vinculacio')
+        .eq('dni_fisio', dniFisio)
+
+    if (error || !data) return []
+
+    const dniPacients = data.map(r => r.dni_pacient)
+    if (dniPacients.length === 0) return []
+
+    // Obtenir dades bàsiques dels pacients
+    const { data: usuaris, error: usuarisError } = await supabase
+        .from('usuaris')
+        .select('dni, nom')
+        .in('dni', dniPacients)
+
+    if (usuarisError || !usuaris) return []
+
+    // Obtenir diagnòstics actius de cada pacient
+    const { data: diagnostics } = await supabase
+        .from('diagnostic')
+        .select('dni_pacient, id_diagnostic, fase_actual, num_sessions, finalitzat, id_lesio, part_cos')
+        .in('dni_pacient', dniPacients)
+        .order('id_diagnostic', { ascending: false })
+
+    // Obtenir noms de lesions
+    const idLesions = [...new Set((diagnostics || []).map(d => d.id_lesio).filter(Boolean))]
+    let nomLesions = {}
+    if (idLesions.length > 0) {
+        const { data: lesions } = await supabase
+            .from('lesions')
+            .select('id_lesio, nom')
+            .in('id_lesio', idLesions)
+        ;(lesions || []).forEach(l => { nomLesions[l.id_lesio] = l.nom })
+    }
+
+    // Obtenir noms de músculs
+    const idMusculs = [...new Set((diagnostics || []).map(d => d.part_cos).filter(Boolean))]
+    let nomMusculs = {}
+    if (idMusculs.length > 0) {
+        const { data: musculs } = await supabase
+            .from('musculs')
+            .select('id_cos, nom')
+            .in('id_cos', idMusculs)
+        ;(musculs || []).forEach(m => { nomMusculs[m.id_cos] = m.nom })
+    }
+
+    // Combinar dades
+    return usuaris.map(u => {
+        const vinculacio = data.find(r => r.dni_pacient === u.dni)
+        // Agafar el diagnòstic més recent
+        const diagnostic = (diagnostics || []).find(d => d.dni_pacient === u.dni) || null
+        return {
+            dni: u.dni,
+            nom: u.nom,
+            data_vinculacio: vinculacio?.data_vinculacio,
+            diagnostic: diagnostic ? {
+                ...diagnostic,
+                nom_lesio: nomLesions[diagnostic.id_lesio] || 'Desconeguda',
+                nom_muscul: nomMusculs[diagnostic.part_cos] || 'Desconegut',
+            } : null,
+        }
+    })
+}
+
+// ============================================================
+// Calcula el progrés global d'un pacient (0-100)
+// ============================================================
+export async function getProgresTotal(diagnostic) {
+    if (!diagnostic) return 0
+
+    const { data: rutina } = await supabase
+        .from('rutines_lesio')
+        .select('id_fase_1, id_fase_2, id_fase_3')
+        .eq('id_muscul', diagnostic.part_cos)
+        .eq('id_lesio', diagnostic.id_lesio)
+        .single()
+
+    if (!rutina) return 0
+
+    const ids = [rutina.id_fase_1, rutina.id_fase_2, rutina.id_fase_3].filter(Boolean)
+    const { data: fases } = await supabase
+        .from('fases')
+        .select('id_fase, n_sessions')
+        .in('id_fase', ids)
+
+    if (!fases) return 0
+
+    const mapFases = {}
+    fases.forEach(f => { mapFases[f.id_fase] = f.n_sessions || 0 })
+
+    const req1 = mapFases[rutina.id_fase_1] || 0
+    const req2 = mapFases[rutina.id_fase_2] || 0
+    const req3 = mapFases[rutina.id_fase_3] || 0
+    const totals = req1 + req2 + req3
+    if (totals === 0) return 0
+
+    let fetes = 0
+    if (diagnostic.fase_actual === 1) fetes = diagnostic.num_sessions || 0
+    else if (diagnostic.fase_actual === 2) fetes = req1 + (diagnostic.num_sessions || 0)
+    else if (diagnostic.fase_actual === 3) fetes = req1 + req2 + (diagnostic.num_sessions || 0)
+
+    if (diagnostic.finalitzat) return 100
+
+    return Math.round((fetes / totals) * 100)
+}
+
+// ============================================================
+// Vincula un pacient a un fisioterapeuta pel DNI del pacient
+// ============================================================
+export async function vincularPacient(dniFisio, dniPacient) {
+    // Verificar que el pacient existeix i NO és fisioterapeuta
+    const { data: pacient, error: pacientError } = await supabase
+        .from('usuaris')
+        .select('dni, nom, es_fisioterapeuta')
+        .eq('dni', dniPacient.trim())
+        .maybeSingle()
+
+    if (pacientError || !pacient) {
+        return { ok: false, missatge: 'No s\'han trobat cap usuari amb aquest DNI.' }
+    }
+
+    if (pacient.es_fisioterapeuta) {
+        return { ok: false, missatge: 'Aquest DNI correspon a un fisioterapeuta, no a un pacient.' }
+    }
+
+    // Verificar que no estan ja vinculats
+    const { data: existent } = await supabase
+        .from('relacio_fisio_pacient')
+        .select('dni_pacient')
+        .eq('dni_fisio', dniFisio)
+        .eq('dni_pacient', dniPacient.trim())
+        .maybeSingle()
+
+    if (existent) {
+        return { ok: false, missatge: 'Aquest pacient ja està vinculat al teu compte.' }
+    }
+
+    // Crear vinculació
+    const { error: insertError } = await supabase
+        .from('relacio_fisio_pacient')
+        .insert([{ dni_fisio: dniFisio, dni_pacient: dniPacient.trim() }])
+
+    if (insertError) {
+        return { ok: false, missatge: `Error en vincular: ${insertError.message}` }
+    }
+
+    return { ok: true, nomPacient: pacient.nom }
+}
+
+// ============================================================
+// Estadístiques globals del fisio per al panell
+// ============================================================
+export async function getEstadistiquesFisio(dniFisio) {
+    const pacients = await getPacientsDeFisio(dniFisio)
+
+    let actius = 0
+    let enRecuperacio = 0
+    let finalitzats = 0
+
+    for (const p of pacients) {
+        if (!p.diagnostic) {
+            actius++ // pacient sense diagnòstic, actiu però sense pla
+        } else if (p.diagnostic.finalitzat) {
+            finalitzats++
+        } else {
+            enRecuperacio++
+            actius++
+        }
+    }
+
+    return { total: pacients.length, actius, enRecuperacio, finalitzats, pacients }
+}
