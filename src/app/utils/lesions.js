@@ -236,6 +236,7 @@ export async function processarTestDiagnostic(resultat, navegarA) {
             .insert([{
                 dni_pacient: userDni,
                 part_cos: idCos,
+                id_lesio: resultat.id_lesio,
                 descripcio: resultat.descripcio || 'Sense descripció',
                 fase_actual: 1,
                 num_sessions: 0,
