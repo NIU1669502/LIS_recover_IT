@@ -6,7 +6,7 @@ import { processarTestDiagnostic } from './utils/lesions'
 import SessioExercici from './components/SessioExercici'
 import ToastContainer from './components/ToastContainer'
 
-import HistorialSessions from './components/HistorialSessions'
+
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
 import LoginForm from './components/LoginForm'
@@ -166,14 +166,12 @@ export default function Page() {
             <BibliotecaExercicis onTornar={() => navegarA('inici')} />
           )}
 
-          {vistaActual === 'historial' && (
-            <HistorialSessions perfilUsuari={perfilUsuari} />
-          )}
+
 
           {vistaActual === 'progres' && (
-            <HistorialDiagnostics 
-              perfilUsuari={perfilUsuari} 
-              onNavegar={navegarA} 
+            <HistorialDiagnostics
+              perfilUsuari={perfilUsuari}
+              onNavegar={navegarA}
             />
           )}
 

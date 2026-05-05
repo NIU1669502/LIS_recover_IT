@@ -6,7 +6,6 @@ const seccionsPackient = [
     { id: 'inici', label: 'Inici' },
     { id: 'progres', label: 'Progrés i Historial' },
     { id: 'exercicis-en-curs', label: 'Exercicis en curs' },
-    { id: 'historial', label: 'Historial de sessions' },
     { id: 'perfil', label: 'El meu perfil' },
 ]
 
