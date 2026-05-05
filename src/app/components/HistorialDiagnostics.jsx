@@ -50,7 +50,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar }) {
         return <div className={styles.container}><p>Carregant l'historial de lesions...</p></div>
     }
 
-    const OBJECTIU_PUNTS = 180;
+
 
     return (
         <section className={styles.container}>
@@ -70,7 +70,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar }) {
                 ) : (
                     <div className={styles.grid}>
                         {actives.map(diag => {
-                            const pct = Math.min(100, ((diag.punts_recuperacio || 0) / OBJECTIU_PUNTS) * 100);
+                            const pct = Math.min(100, ((diag.punts_recuperacio || 0) / (diag.puntsFinals || 1)) * 100);
                             return (
                                 <div key={diag.id_diagnostic} className={styles.card}>
                                     <div className={styles.cardHeader}>
@@ -92,7 +92,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar }) {
                                     <div className={styles.progressContainer}>
                                         <div className={styles.progressHeader}>
                                             <span>Progrés de recuperació</span>
-                                            <span>{diag.punts_recuperacio || 0} / {OBJECTIU_PUNTS} pts</span>
+                                            <span>{diag.punts_recuperacio || 0} / {diag.puntsFinals || '?'} pts</span>
                                         </div>
                                         <div className={styles.progressBar}>
                                             <div className={styles.progressFill} style={{ width: `${pct}%` }}></div>
@@ -145,7 +145,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar }) {
                                     <div className={styles.progressContainer}>
                                         <div className={styles.progressHeader}>
                                             <span>Puntuació final assolida</span>
-                                            <span style={{color: '#166534'}}>{diag.punts_recuperacio || OBJECTIU_PUNTS} pts</span>
+                                            <span style={{color: '#166534'}}>{diag.punts_recuperacio || 0} / {diag.puntsFinals || '?'} pts</span>
                                         </div>
                                     </div>
                                 </div>

@@ -114,7 +114,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
                 </div>
                 <div className={styles.rutinaTag}>
                     <span className={styles.tagLabel}>Progrés</span>
-                    <span className={styles.tagValue}>{diagnostic.punts_recuperacio || 0} / 180 pts</span>
+                    <span className={styles.tagValue}>{diagnostic.punts_recuperacio || 0} / {diagnostic.puntsFinals || '?'} pts</span>
                 </div>
             </div>
 
