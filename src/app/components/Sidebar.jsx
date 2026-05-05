@@ -2,15 +2,23 @@
 
 import styles from './Sidebar.module.css'
 
-const seccions = [
+const seccionsPackient = [
     { id: 'inici', label: 'Inici' },
     { id: 'progres', label: 'Progrés i Historial' },
     { id: 'exercicis-en-curs', label: 'Exercicis en curs' },
-    { id: 'perfil', label: 'El meu perfil' },
     { id: 'historial', label: 'Historial de sessions' },
+    { id: 'perfil', label: 'El meu perfil' },
 ]
 
-export default function Sidebar({ vistaActual, onNavegar, onTancarSessio }) {
+const secciosFisio = [
+    { id: 'inici-fisio', label: 'Inici' },
+    { id: 'pacients', label: 'Pacients' },
+    { id: 'perfil', label: 'Perfil' },
+]
+
+export default function Sidebar({ vistaActual, onNavegar, onTancarSessio, esFisio }) {
+    const seccions = esFisio ? secciosFisio : seccionsPackient
+
     return (
         <aside className={styles.sidebar}>
             <div className={styles.logo}>
@@ -20,12 +28,13 @@ export default function Sidebar({ vistaActual, onNavegar, onTancarSessio }) {
             </div>
 
             <nav className={styles.nav}>
-                {seccions.map(({ id, label }) => (
+                {seccions.map(({ id, label, icon }) => (
                     <button
                         key={id}
                         onClick={() => onNavegar(id)}
                         className={`${styles.navItem} ${vistaActual === id ? styles.navItemActive : ''}`}
                     >
+                        <span className={styles.navIcon}>{icon}</span>
                         <span className={styles.navLabel}>{label}</span>
                         {vistaActual === id && <span className={styles.activeIndicator} />}
                     </button>

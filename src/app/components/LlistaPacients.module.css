@@ -1,0 +1,303 @@
+/* ── CSS original conservat íntegrament ── */
+
+.contenidor {
+    padding: 40px 48px;
+    max-width: 960px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.topBar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.titol {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #111;
+    margin: 0 0 4px;
+    letter-spacing: -0.02em;
+}
+
+.subtitol {
+    font-size: 0.9rem;
+    color: #888;
+    margin: 0;
+}
+
+.afegirBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+}
+
+.afegirBtn:hover {
+    background: #1d4ed8;
+}
+
+.afegirBtn:active {
+    transform: scale(0.98);
+}
+
+/* Cerca */
+.cercaBox {
+    position: relative;
+    margin-bottom: 32px;
+}
+
+.cercaIcon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+.cercaInput {
+    width: 100%;
+    padding: 12px 16px 12px 44px;
+    border: 1.5px solid #e8e8e8;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    color: #111;
+    background: #fafafa;
+    box-sizing: border-box;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.cercaInput:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+    background: #fff;
+}
+
+/* Grid de tarjetes */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.tarjeta {
+    background: #fff;
+    border: 1.5px solid #f0f0f0;
+    border-radius: 16px;
+    padding: 24px;
+    transition: box-shadow 0.15s, transform 0.12s;
+}
+
+.tarjeta:hover {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.tarjetaTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #e8f0ff;
+    color: #2563eb;
+    font-weight: 700;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 99px;
+}
+
+.badgeFase {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.badgeComplet {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+.badgeSensePla {
+    background: #f5f5f5;
+    color: #999;
+}
+
+/* ── Nou: badge de pla en confirmació (taronja) ── */
+.badgePendent {
+    background: #fff7ed;
+    color: #ea580c;
+}
+
+.nom {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 4px;
+}
+
+.dni {
+    font-size: 0.8rem;
+    color: #aaa;
+    margin: 0 0 8px;
+    font-family: monospace;
+}
+
+.lesio {
+    font-size: 0.85rem;
+    color: #666;
+    margin: 0 0 8px;
+}
+
+.senseDiag {
+    font-size: 0.85rem;
+    color: #aaa;
+    font-style: italic;
+    margin: 8px 0 0;
+}
+
+/* ── Nous estils: estat pendent ── */
+.pendentText {
+    font-size: 0.82rem;
+    color: #ea580c;
+    font-style: italic;
+    margin: 4px 0 6px;
+}
+
+.codiValidacio {
+    font-size: 0.82rem;
+    color: #555;
+    margin: 0;
+    font-family: monospace;
+    background: #fff7ed;
+    border: 1px dashed #fdba74;
+    border-radius: 6px;
+    padding: 4px 8px;
+    display: inline-block;
+}
+
+/* Progrés */
+.progresBox {
+    margin-top: 4px;
+}
+
+.progresCapçalera {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.progresText {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.progresNum {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.progresBarBg {
+    height: 6px;
+    background: #e8f0ff;
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.progresBarFill {
+    height: 100%;
+    background: #2563eb;
+    border-radius: 99px;
+    transition: width 0.5s ease;
+}
+
+/* Estat buit */
+.buit {
+    text-align: center;
+    padding: 80px 0;
+    color: #aaa;
+}
+
+.buit p {
+    margin: 0 0 16px;
+    font-size: 0.95rem;
+}
+
+.afegirBtnSecundari {
+    padding: 10px 22px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.afegirBtnSecundari:hover {
+    background: #1d4ed8;
+}
+
+/* Loading */
+.carregant {
+    display: flex;
+    justify-content: center;
+    padding: 80px 0;
+}
+
+.spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid #e8f0ff;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 640px) {
+    .contenidor {
+        padding: 24px 20px;
+    }
+
+    .titol {
+        font-size: 1.5rem;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}

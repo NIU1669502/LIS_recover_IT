@@ -17,6 +17,10 @@ import BibliotecaExercicis from './components/BibliotecaExercicis'
 import ExercicisEnCurs from './components/ExercicisEnCurs'
 import HistorialDiagnostics from './components/HistorialDiagnostics'
 
+// Vistes del fisio
+import PanellFisio from './components/PanellFisio'
+import LlistaPacients from './components/LlistaPacients'
+
 import styles from './page.module.css'
 
 export default function Page() {
@@ -28,7 +32,6 @@ export default function Page() {
   const transitionRef = useRef(null)
   const [musculActual, setMusculActual] = useState(null)
 
-
   const navegarA = (novaVista, onTransition) => {
     if (transitionRef.current) clearTimeout(transitionRef.current)
     setPageVisible(false)
@@ -39,20 +42,21 @@ export default function Page() {
       setPageVisible(true)
     }, 220)
   }
-useEffect(() => {
+  useEffect(() => {
     if (vistaActual === 'perfil' && usuariSessio) {
-        obtenirPerfil(usuariSessio)
+      obtenirPerfil(usuariSessio)
     }
-}, [vistaActual])
+  }, [vistaActual])
   const {
     usuariSessio, perfilUsuari,
     errorAuth,
     carregantAuth,
     registreForm, setRegistreForm,
     loginForm, setLoginForm,
-    registrarUsuari, iniciarSessio, tancarSessio, editarPerfil,obtenirPerfil
+    registrarUsuari, iniciarSessio, tancarSessio, editarPerfil, obtenirPerfil
   } = useAuth(navegarA)
 
+  const esFisio = perfilUsuari?.es_fisioterapeuta === true
   const esPantallaAuth = vistaActual === 'login' || vistaActual === 'registre'
 
   return (
@@ -69,6 +73,7 @@ useEffect(() => {
             vistaActual={vistaActual}
             onNavegar={navegarA}
             onTancarSessio={tancarSessio}
+            esFisio={esFisio}
           />
         )}
 
@@ -83,6 +88,8 @@ useEffect(() => {
         )}
 
         <main key={vistaActual} className={`${esPantallaAuth ? styles.mainFull : styles.main} ${styles.pageEnter}`}>
+
+          {/* ── Vistes comunes ─────────────────────────── */}
 
           {vistaActual === 'login' && (
             <LoginForm
@@ -111,6 +118,23 @@ useEffect(() => {
             />
           )}
 
+          {/* ── Vistes del fisioterapeuta ───────────────── */}
+
+          {vistaActual === 'inici-fisio' && (
+            <PanellFisio
+              perfilUsuari={perfilUsuari}
+              onNavegar={navegarA}
+            />
+          )}
+
+          {vistaActual === 'pacients' && (
+            <LlistaPacients
+              perfilUsuari={perfilUsuari}
+            />
+          )}
+
+          {/* ── Vistes del pacient ──────────────────────── */}
+
           {vistaActual === 'test' && (
             <section className={styles.testSection}>
               <div className={styles.testHeader}>
@@ -119,7 +143,6 @@ useEffect(() => {
                 </div>
                 <h2 className={styles.testTitle}>Test diagnòstic</h2>
               </div>
-
               <TestDiagnostic
                 onGuardar={(resultat) => processarTestDiagnostic(resultat, navegarA)}
                 onCancel={() => navegarA('inici')}
@@ -169,22 +192,18 @@ useEffect(() => {
 
           {vistaActual === 'inici' && (
             <section className={styles.homeSection}>
-
               <h1 className={styles.title}>
                 Recover<span className={styles.titleAccent}>IT</span>
               </h1>
-
               <p className={styles.subtitle}>
                 La teva plataforma de recuperació guiada i intel·ligent.
               </p>
-
               <div className={styles.buttonGroup}>
                 {!usuariSessio ? (
                   <>
                     <button onClick={() => navegarA('login')} className={styles.loginButton}>
                       Iniciar sessió
                     </button>
-
                     <button onClick={() => navegarA('registre')} className={styles.registerButton}>
                       Registrar-me
                     </button>
@@ -194,19 +213,16 @@ useEffect(() => {
                     <button onClick={() => navegarA('test')} className={styles.testButton}>
                       Tornar a fer el test
                     </button>
-
                     <button onClick={() => navegarA('perfil')} className={styles.profileButton}>
                       Anar al meu perfil
                     </button>
                   </>
                 )}
               </div>
-
               <div className={styles.imageSection}>
                 <div className={styles.imageBox}>
                   [Imatge anatòmica]
                 </div>
-
                 <button
                   onClick={() => navegarA('biblioteca')}
                   className={styles.bigButton}
@@ -214,7 +230,6 @@ useEffect(() => {
                   Veure exercicis
                 </button>
               </div>
-
             </section>
           )}
 
