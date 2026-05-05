@@ -1,3 +1,5 @@
+/* ── CSS original conservat íntegrament ── */
+
 .overlay {
     position: fixed;
     inset: 0;
@@ -11,8 +13,13 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .modal {
@@ -26,8 +33,15 @@
 }
 
 @keyframes slideUp {
-    from { transform: translateY(12px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+        transform: translateY(12px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .header {
@@ -68,7 +82,7 @@
 }
 
 .inputGroup {
-    margin-bottom: 28px;
+    margin-bottom: 20px;
 }
 
 .label {
@@ -103,12 +117,14 @@
     color: #dc2626;
     font-size: 0.82rem;
     margin-top: 8px;
+    margin-bottom: 4px;
 }
 
 .actions {
     display: flex;
     gap: 12px;
     justify-content: flex-end;
+    margin-top: 8px;
 }
 
 .cancelBtn {
@@ -152,4 +168,89 @@
 .cancelBtn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+/* ── Nous estils: indicador de passos ── */
+
+.stepIndicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.step {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e8f0ff;
+    color: #94a3b8;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s, color 0.2s;
+}
+
+.stepActive {
+    background: #2563eb;
+    color: #fff;
+}
+
+.stepLine {
+    flex: 1;
+    height: 2px;
+    background: #e0e0e0;
+    border-radius: 2px;
+}
+
+/* ── Nous estils: textarea ── */
+
+.textarea {
+    resize: vertical;
+    min-height: 80px;
+    letter-spacing: 0;
+    line-height: 1.5;
+    font-family: inherit;
+}
+
+/* ── Nous estils: pantalla del codi (pas 3) ── */
+
+.codiContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding-top: 8px;
+    text-align: center;
+}
+
+.codiLabel {
+    font-size: 0.95rem;
+    color: #444;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.codiBadge {
+    font-size: 2.25rem;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    color: #1e3a8a;
+    background: #eff6ff;
+    border: 2px dashed #93c5fd;
+    border-radius: 14px;
+    padding: 18px 32px;
+    font-family: 'Courier New', monospace;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.codiSub {
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.5;
+    margin: 0;
 }

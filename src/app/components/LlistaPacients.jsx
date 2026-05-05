@@ -5,6 +5,7 @@ import { getPacientsDeFisio, getProgresTotal } from '../utils/fisio'
 import AfegirPacientModal from './AfegirPacientModal'
 import styles from './LlistaPacients.module.css'
 
+// ── Targeta individual de pacient ────────────────────────────
 function TarjetaPacient({ pacient }) {
     const [progres, setProgres] = useState(null)
 
@@ -14,20 +15,26 @@ function TarjetaPacient({ pacient }) {
         }
     }, [pacient])
 
+    const esPendent = pacient.confirmat === false
     const fase = pacient.diagnostic?.fase_actual
     const finalitzat = pacient.diagnostic?.finalitzat
 
-    const badgeLabel = finalitzat
-        ? 'Completat'
-        : fase
-            ? `Fase ${fase}`
-            : 'Sense pla'
+    // ── Badge: pendent / fase / completat / sense pla ───────
+    const badgeLabel = esPendent
+        ? 'Pla en confirmació'
+        : finalitzat
+            ? 'Completat'
+            : fase
+                ? `Fase ${fase}`
+                : 'Sense pla'
 
-    const badgeClass = finalitzat
-        ? styles.badgeComplet
-        : fase
-            ? styles.badgeFase
-            : styles.badgeSensePla
+    const badgeClass = esPendent
+        ? styles.badgePendent
+        : finalitzat
+            ? styles.badgeComplet
+            : fase
+                ? styles.badgeFase
+                : styles.badgeSensePla
 
     return (
         <div className={styles.tarjeta}>
@@ -41,7 +48,25 @@ function TarjetaPacient({ pacient }) {
             <h3 className={styles.nom}>{pacient.nom}</h3>
             <p className={styles.dni}>DNI: {pacient.dni}</p>
 
-            {pacient.diagnostic ? (
+            {/* ── Cas pendent: mostra info del diagnòstic assignat + codi ── */}
+            {esPendent ? (
+                <div>
+                    {pacient.diagnosticPendent && (
+                        <p className={styles.lesio}>
+                            {pacient.diagnosticPendent.nom_lesio} · {pacient.diagnosticPendent.nom_muscul}
+                        </p>
+                    )}
+                    <p className={styles.pendentText}>
+                        El pacient encara no ha confirmat l'assignació
+                    </p>
+                    {pacient.codi_validacio && (
+                        <p className={styles.codiValidacio}>
+                            Codi: <strong>{pacient.codi_validacio}</strong>
+                        </p>
+                    )}
+                </div>
+            ) : pacient.diagnostic ? (
+                // ── Cas normal: diagnòstic actiu amb progrés ─────────────
                 <>
                     <p className={styles.lesio}>
                         {pacient.diagnostic.nom_lesio} · {pacient.diagnostic.nom_muscul}
@@ -62,6 +87,7 @@ function TarjetaPacient({ pacient }) {
                     )}
                 </>
             ) : (
+                // ── Cas sense diagnòstic ──────────────────────────────────
                 <p className={styles.senseDiag}>Sense diagnòstic assignat</p>
             )}
         </div>

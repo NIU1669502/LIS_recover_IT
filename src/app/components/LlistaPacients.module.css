@@ -1,3 +1,5 @@
+/* ── CSS original conservat íntegrament ── */
+
 .contenidor {
     padding: 40px 48px;
     max-width: 960px;
@@ -102,7 +104,7 @@
 }
 
 .tarjeta:hover {
-    box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
     transform: translateY(-2px);
 }
 
@@ -148,6 +150,12 @@
     color: #999;
 }
 
+/* ── Nou: badge de pla en confirmació (taronja) ── */
+.badgePendent {
+    background: #fff7ed;
+    color: #ea580c;
+}
+
 .nom {
     font-size: 1rem;
     font-weight: 700;
@@ -165,7 +173,7 @@
 .lesio {
     font-size: 0.85rem;
     color: #666;
-    margin: 0 0 16px;
+    margin: 0 0 8px;
 }
 
 .senseDiag {
@@ -175,6 +183,27 @@
     margin: 8px 0 0;
 }
 
+/* ── Nous estils: estat pendent ── */
+.pendentText {
+    font-size: 0.82rem;
+    color: #ea580c;
+    font-style: italic;
+    margin: 4px 0 6px;
+}
+
+.codiValidacio {
+    font-size: 0.82rem;
+    color: #555;
+    margin: 0;
+    font-family: monospace;
+    background: #fff7ed;
+    border: 1px dashed #fdba74;
+    border-radius: 6px;
+    padding: 4px 8px;
+    display: inline-block;
+}
+
+/* Progrés */
 .progresBox {
     margin-top: 4px;
 }
@@ -254,7 +283,9 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 @media (max-width: 640px) {

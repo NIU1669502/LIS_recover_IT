@@ -1,3 +1,5 @@
+/* ── CSS original conservat íntegrament ── */
+
 .panell {
     padding: 40px 48px;
     max-width: 960px;
@@ -60,6 +62,11 @@
     margin-bottom: 40px;
 }
 
+/* ── Nova variant amb 4 targetes ── */
+.statsGrid4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
 .statCard {
     background: #fff;
     border: 1.5px solid #f0f0f0;
@@ -73,7 +80,7 @@
 }
 
 .statCard:hover {
-    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
 }
 
 .statIconBox {
@@ -292,10 +299,18 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Responsive */
+@media (max-width: 768px) {
+    .statsGrid4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 @media (max-width: 640px) {
     .panell {
         padding: 24px 20px;
@@ -303,6 +318,10 @@
 
     .statsGrid {
         grid-template-columns: 1fr;
+    }
+
+    .statsGrid4 {
+        grid-template-columns: 1fr 1fr;
     }
 
     .progresBox {
