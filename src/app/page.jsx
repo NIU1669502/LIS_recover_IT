@@ -15,6 +15,7 @@ import PerfilUsuari from './components/PerfilUsuari'
 import TestDiagnostic from './components/TestDiagnostic'
 import BibliotecaExercicis from './components/BibliotecaExercicis'
 import ExercicisEnCurs from './components/ExercicisEnCurs'
+import HistorialDiagnostics from './components/HistorialDiagnostics'
 
 import styles from './page.module.css'
 
@@ -144,6 +145,13 @@ useEffect(() => {
 
           {vistaActual === 'historial' && (
             <HistorialSessions perfilUsuari={perfilUsuari} />
+          )}
+
+          {vistaActual === 'progres' && (
+            <HistorialDiagnostics 
+              perfilUsuari={perfilUsuari} 
+              onNavegar={navegarA} 
+            />
           )}
 
           {vistaActual === 'exercicis-en-curs' && (

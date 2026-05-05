@@ -28,6 +28,7 @@ export async function getDiagnosticActiu(userDni) {
         .from('diagnostic')
         .select('*')
         .eq('dni_pacient', userDni)
+        .eq('finalitzat', false)
         .order('id_diagnostic', { ascending: false })
         .limit(1)
         .single()
@@ -131,7 +132,7 @@ export async function completarSessio(userDni, puntsGuanyats) {
         if (diagnostic.fase_actual === 3) {
             completada = true
             novaFase = 3
-            nouNumSessions = numSessionsActualitzat // Conservem el total de sessions per saber que està completat
+            nouNumSessions = numSessionsActualitzat
         } else {
             novaFase = diagnostic.fase_actual + 1
             nouNumSessions = 0
@@ -233,7 +234,6 @@ export async function processarTestDiagnostic(resultat, navegarA) {
         const { error } = await supabase
             .from('diagnostic')
             .insert([{
-                id_lesio: resultat.id_lesio,
                 dni_pacient: userDni,
                 part_cos: idCos,
                 descripcio: resultat.descripcio || 'Sense descripció',
@@ -241,6 +241,7 @@ export async function processarTestDiagnostic(resultat, navegarA) {
                 num_sessions: 0,
                 punts_recuperacio: 0,
                 puntsFinals: puntsTotal,
+                finalitzat: false
             }])
 
         if (error) {
