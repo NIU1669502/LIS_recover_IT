@@ -1,0 +1,2 @@
+-- Placeholder for the existing remote migration baseline.
+-- Marked as applied via `supabase migration repair`.

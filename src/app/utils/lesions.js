@@ -159,7 +159,21 @@ export async function completarSessio(userDni, puntsGuanyats) {
         .update(actualitzacio)
         .eq('id_diagnostic', diagnostic.id_diagnostic)
 
-    // 5. Sumar punts a l'usuari
+    // Registrem la sessió a l'historial (no bloquegem el flux si falla)
+    try {
+        await supabase
+            .from('historial_sessions')
+            .insert([{
+                dni_pacient: userDni,
+                id_diagnostic: diagnostic.id_diagnostic,
+                id_lesio: diagnostic.id_lesio,
+                fase: diagnostic.fase_actual,
+                punts_obtinguts: puntsGuanyats || 0,
+            }])
+    } catch (err) {
+        console.error('No s\'ha pogut registrar la sessió a l\'historial', err)
+    }
+
     return { completada, novaFase: completada ? null : novaFase, faseAvançada, nSessionsRestants: nSessionsRequerides - nouNumSessions }
 }
 
@@ -236,6 +250,7 @@ export async function processarTestDiagnostic(resultat, navegarA) {
             .insert([{
                 dni_pacient: userDni,
                 part_cos: idCos,
+                id_lesio: resultat.id_lesio,
                 descripcio: resultat.descripcio || 'Sense descripció',
                 fase_actual: 1,
                 num_sessions: 0,

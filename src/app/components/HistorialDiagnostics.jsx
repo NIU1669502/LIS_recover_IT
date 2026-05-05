@@ -50,8 +50,6 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar }) {
         return <div className={styles.container}><p>Carregant l'historial de lesions...</p></div>
     }
 
-
-
     return (
         <section className={styles.container}>
             <h1 className={styles.title}>Progrés i Historial</h1>
@@ -70,7 +68,9 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar }) {
                 ) : (
                     <div className={styles.grid}>
                         {actives.map(diag => {
-                            const pct = Math.min(100, ((diag.punts_recuperacio || 0) / (diag.puntsFinals || 1)) * 100);
+                            const puntsActuals = diag.punts_recuperacio ?? 0
+                            const puntsObjectiu = diag.puntsFinals ?? 0
+                            const pct = puntsObjectiu > 0 ? Math.min(100, (puntsActuals / puntsObjectiu) * 100) : 0
                             return (
                                 <div key={diag.id_diagnostic} className={styles.card}>
                                     <div className={styles.cardHeader}>
@@ -92,7 +92,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar }) {
                                     <div className={styles.progressContainer}>
                                         <div className={styles.progressHeader}>
                                             <span>Progrés de recuperació</span>
-                                            <span>{diag.punts_recuperacio || 0} / {diag.puntsFinals || '?'} pts</span>
+                                            <span>{puntsActuals} / {puntsObjectiu} pts</span>
                                         </div>
                                         <div className={styles.progressBar}>
                                             <div className={styles.progressFill} style={{ width: `${pct}%` }}></div>
@@ -145,7 +145,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar }) {
                                     <div className={styles.progressContainer}>
                                         <div className={styles.progressHeader}>
                                             <span>Puntuació final assolida</span>
-                                            <span style={{color: '#166534'}}>{diag.punts_recuperacio || 0} / {diag.puntsFinals || '?'} pts</span>
+                                            <span style={{color: '#166534'}}>{diag.punts_recuperacio ?? 0} / {diag.puntsFinals ?? 0} pts</span>
                                         </div>
                                     </div>
                                 </div>
