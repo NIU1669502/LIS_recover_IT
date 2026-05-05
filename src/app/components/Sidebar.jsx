@@ -5,6 +5,7 @@ import styles from './Sidebar.module.css'
 const seccionsPackient = [
     { id: 'inici', label: 'Inici' },
     { id: 'progres', label: 'Progrés i Historial' },
+    { id: 'historial', label: 'Historial de sessions' },
     { id: 'exercicis-en-curs', label: 'Exercicis en curs' },
     { id: 'perfil', label: 'El meu perfil' },
 ]

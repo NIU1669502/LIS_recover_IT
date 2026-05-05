@@ -16,6 +16,7 @@ import TestDiagnostic from './components/TestDiagnostic'
 import BibliotecaExercicis from './components/BibliotecaExercicis'
 import ExercicisEnCurs from './components/ExercicisEnCurs'
 import HistorialDiagnostics from './components/HistorialDiagnostics'
+import HistorialSessions from './components/HistorialSessions'
 
 // Vistes del fisio
 import PanellFisio from './components/PanellFisio'
@@ -173,6 +174,10 @@ export default function Page() {
               perfilUsuari={perfilUsuari}
               onNavegar={navegarA}
             />
+          )}
+
+          {vistaActual === 'historial' && (
+            <HistorialSessions perfilUsuari={perfilUsuari} />
           )}
 
           {vistaActual === 'exercicis-en-curs' && (

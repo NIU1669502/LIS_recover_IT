@@ -79,6 +79,8 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
     }
 
     const estaCompletat = sessionsTotals > 0 && sessionsFetes >= sessionsTotals;
+    const puntsActuals = diagnostic?.punts_recuperacio ?? 0
+    const puntsObjectiu = diagnostic?.puntsFinals ?? 0
 
     if (estaCompletat) {
         return (
@@ -114,7 +116,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
                 </div>
                 <div className={styles.rutinaTag}>
                     <span className={styles.tagLabel}>Progrés</span>
-                    <span className={styles.tagValue}>{diagnostic.punts_recuperacio || 0} / {diagnostic.puntsFinals || '?'} pts</span>
+                    <span className={styles.tagValue}>{puntsActuals} / {puntsObjectiu} pts</span>
                 </div>
             </div>
 

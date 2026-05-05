@@ -1,0 +1,82 @@
+import { useState, useEffect } from 'react'
+import { supabase } from '../../utils/supabase'
+
+// ============================================================
+// Hook: useHistorial
+// Obté l'historial de SESSIONS (dia + fase + lesió) i, per
+// compatibilitat, també retorna l'historial d'exercicis agrupats
+// per dia per components que encara el facin servir.
+// ============================================================
+export function useHistorial(dni) {
+    const [sessions, setSessions] = useState([])
+    const [historial, setHistorial] = useState({})
+    const [carregant, setCarregant] = useState(true)
+    const [error, setError] = useState(null)
+
+    const agruparPerDia = (dades) => {
+        const grups = {}
+        dades.forEach(item => {
+            const dia = item.data_realitzacio
+            if (!grups[dia]) grups[dia] = []
+            grups[dia].push(item)
+        })
+        return grups
+    }
+
+    useEffect(() => {
+        if (!dni) return
+
+        const carregar = async () => {
+            setCarregant(true)
+            setError(null)
+
+            const [sessionsRes, exercicisRes] = await Promise.all([
+                supabase
+                    .from('historial_sessions')
+                    .select(`
+                        id_sessio,
+                        data_realitzacio,
+                        fase,
+                        punts_obtinguts,
+                        id_diagnostic,
+                        id_lesio,
+                        lesions ( nom )
+                    `)
+                    .eq('dni_pacient', dni)
+                    .order('data_realitzacio', { ascending: false }),
+
+                supabase
+                    .from('historial_exercicis_diaris')
+                    .select(`
+                        id_historial,
+                        temps_realitzat_segons,
+                        data_realitzacio,
+                        completat,
+                        punts_obtinguts,
+                        exercicis ( nom, descripcio, duracio_segons )
+                    `)
+                    .eq('dni_pacient', dni)
+                    .order('data_realitzacio', { ascending: false }),
+            ])
+
+            if (sessionsRes.error) {
+                setError(sessionsRes.error.message)
+                setSessions([])
+            } else {
+                setSessions(sessionsRes.data || [])
+            }
+
+            if (exercicisRes.error) {
+                setHistorial({})
+            } else {
+                setHistorial(agruparPerDia(exercicisRes.data || []))
+            }
+
+            setCarregant(false)
+        }
+
+        carregar()
+    }, [dni])
+
+    return { sessions, historial, carregant, error }
+}
