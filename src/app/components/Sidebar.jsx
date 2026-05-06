@@ -7,6 +7,7 @@ const seccionsPackient = [
     { id: 'progres', label: 'Progrés i Historial' },
     { id: 'exercicis-en-curs', label: 'Exercicis en curs' },
     { id: 'perfil', label: 'El meu perfil' },
+    { id: 'historial', label: 'Historial de sessions' },
 ]
 
 const secciosFisio = [
