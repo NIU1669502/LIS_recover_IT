@@ -188,7 +188,7 @@ export default function AfegirPacientModal({ dniFisio, onTancar, onPacientAfegit
                                 Cancel·lar
                             </button>
                             <button className={styles.confirmBtn} onClick={handleSeguent}>
-                                Següent →
+                                Següent
                             </button>
                         </div>
                     </>

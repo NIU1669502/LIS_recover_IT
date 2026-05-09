@@ -119,3 +119,44 @@ export async function confirmarCodiFisio(dniPacient, codiIntroduit) {
 
     return { ok: true }
 }
+
+// ============================================================
+// Desassignar el fisioterapeuta d'un pacient
+// Elimina la relació fisio-pacient i finalitza el diagnòstic actiu
+// ============================================================
+export async function desassignarFisio(dniPacient) {
+    // ── 1. Obtenir la relació activa ─────────────────────────
+    const { data: relacio, error: errorRelacio } = await supabase
+        .from('relacio_fisio_pacient')
+        .select('dni_fisio')
+        .eq('dni_pacient', dniPacient)
+        .maybeSingle()
+
+    if (errorRelacio) {
+        return { ok: false, missatge: errorRelacio.message }
+    }
+
+    if (!relacio) {
+        return { ok: false, missatge: 'No tens cap fisioterapeuta assignat.' }
+    }
+
+    // ── 2. Eliminar la relació fisio-pacient ─────────────────
+    const { error: errorDelete } = await supabase
+        .from('relacio_fisio_pacient')
+        .delete()
+        .eq('dni_pacient', dniPacient)
+        .eq('dni_fisio', relacio.dni_fisio)
+
+    if (errorDelete) {
+        return { ok: false, missatge: errorDelete.message }
+    }
+
+    // ── 3. Finalitzar el diagnòstic actiu (si n'hi ha) ───────
+    await supabase
+        .from('diagnostic')
+        .update({ finalitzat: true })
+        .eq('dni_pacient', dniPacient)
+        .eq('finalitzat', false)
+
+    return { ok: true }
+}

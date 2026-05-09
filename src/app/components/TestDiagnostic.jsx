@@ -26,7 +26,7 @@ export default function TestDiagnostic({ onGuardar, onCancel }) {
             setPas(pas + 1)
         } else {
             const detall = determinarLesio(novesRespostes)
-            const muscle = TEST_STEPS[0].opcions[novesRespostes[0]]
+            const muscle = novesRespostes[0]
             setResultat({ muscle, ...detall, descripcio: novesRespostes[4] })
         }
     }
@@ -70,7 +70,7 @@ export default function TestDiagnostic({ onGuardar, onCancel }) {
                 </div>
 
                 <button onClick={() => onGuardar(resultat)} className={styles.primaryButton}>
-                    Començar programa →
+                    Començar programa
                 </button>
 
                 <button onClick={reiniciar} className={styles.secondaryButton}>
@@ -122,16 +122,15 @@ export default function TestDiagnostic({ onGuardar, onCancel }) {
 
                         <button
                             onClick={() => seleccionar(textInput)}
-                            disabled={!textInput.trim()}
-                            className={`${styles.nextButton} ${textInput.trim() ? styles.nextButtonEnabled : styles.nextButtonDisabled
+                            className={`${styles.nextButton} ${styles.nextButtonEnabled
                                 }`}
                         >
-                            Següent →
+                            Següent
                         </button>
                     </>
                 ) : (
                     step.opcions.map((opcio, idx) => (
-                        <button key={idx} onClick={() => seleccionar(idx)} className={styles.optionButton}>
+                        <button key={idx} onClick={() => seleccionar(opcio)} className={styles.optionButton}>
                             {opcio}
                         </button>
                     ))

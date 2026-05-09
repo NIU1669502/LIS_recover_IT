@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../utils/supabase'
 import { getDiagnosticActiu, getExercicisDelaFase, getResumSessions } from '../utils/lesions'
 import styles from './exercicisEnCurs.module.css'
 
-export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
+export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsuari }) {
     const [diagnostic, setDiagnostic] = useState(null)
     const [exercicis, setExercicis] = useState([])
     const [nomMuscul, setNomMuscul] = useState('')
@@ -14,51 +14,67 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
     const [sessionsTotals, setSessionsTotals] = useState(0)
     const [carregant, setCarregant] = useState(true)
 
+    const canalRef = useRef(null)
+
     useEffect(() => {
+        let cancelat = false
+
         const carregar = async () => {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) { setCarregant(false); return }
+            if (!perfilUsuari?.dni) { setCarregant(false); return }
 
-            const userDni = session.user.user_metadata?.dni
+            setCarregant(true)
+            const userDni = perfilUsuari.dni
             const diag = await getDiagnosticActiu(userDni)
-            if (!diag) { setCarregant(false); return }
 
-            setDiagnostic(diag)
+            if (cancelat) return
+            if (!diag) { setDiagnostic(null); setCarregant(false); return }
 
-            // Nom del múscul
-            const { data: muscul } = await supabase
-                .from('musculs')
-                .select('nom')
-                .eq('id_cos', diag.part_cos)
-                .single()
+            const [
+                { data: muscul },
+                { data: lesio },
+                exs,
+                { fetes, totals }
+            ] = await Promise.all([
+                supabase.from('musculs').select('nom').eq('id_cos', diag.part_cos).single(),
+                supabase.from('lesions').select('nom').eq('id_lesio', diag.id_lesio).single(),
+                getExercicisDelaFase(diag),
+                getResumSessions(diag)
+            ])
+
+            if (cancelat) return
+
             if (muscul) setNomMuscul(muscul.nom)
-
-            // Nom de la lesió
-            const { data: lesio } = await supabase
-                .from('lesions')
-                .select('nom')
-                .eq('id_lesio', diag.id_lesio)
-                .single()
             if (lesio) setNomLesio(lesio.nom)
-
-            // Exercicis de la fase actual
-            const exs = await getExercicisDelaFase(diag)
             setExercicis(exs)
-
-            // Resum global de sessions
-            const { fetes, totals } = await getResumSessions(diag)
             setSessionsFetes(fetes)
             setSessionsTotals(totals)
-
+            setDiagnostic(diag)
             setCarregant(false)
-        }
-        carregar()
-    }, [])
 
-    if (carregant) {
+            if (canalRef.current) return
+            canalRef.current = supabase
+                .channel('exercicis-en-curs-rt')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'diagnostic', filter: `dni_pacient=eq.${userDni}` }, carregar)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'relacio_fisio_pacient', filter: `dni_pacient=eq.${userDni}` }, carregar)
+                .subscribe()
+        }
+
+        carregar()
+
+        return () => {
+            cancelat = true
+            if (canalRef.current) {
+                supabase.removeChannel(canalRef.current)
+                canalRef.current = null
+            }
+        }
+    }, [perfilUsuari?.dni])
+
+    if (carregant && !diagnostic) {
         return (
-            <div className={styles.emptyContainer}>
-                <p>Carregant...</p>
+            <div className={styles.loadingScreen}>
+                <div className={styles.spinner}></div>
+                <p className={styles.loadingText}>Carregant exercicis...</p>
             </div>
         )
     }
@@ -69,16 +85,16 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
                 <div className={styles.emptyIcon}>🏥</div>
                 <h2 className={styles.emptyTitle}>Encara no tens cap rutina</h2>
                 <p className={styles.emptyText}>
-                    Fes el test diagnòstic per rebre el teu programa de recuperació personalitzat.
+                    Fes el test diagnòstic per rebre el teu programa de recuperació aproximat o consulta amb un fisioterapeuta per un personalitzat.
                 </p>
                 <button className={styles.primaryButton} onClick={() => onNavegar('test')}>
-                    Fer el test diagnòstic →
+                    Fer el test diagnòstic
                 </button>
             </div>
         )
     }
 
-    const estaCompletat = sessionsTotals > 0 && sessionsFetes >= sessionsTotals;
+    const estaCompletat = sessionsTotals > 0 && sessionsFetes >= sessionsTotals
     const puntsActuals = diagnostic?.punts_recuperacio ?? 0
     const puntsObjectiu = diagnostic?.puntsFinals ?? 0
 
@@ -159,7 +175,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio }) {
                 className={styles.primaryButton}
                 onClick={() => onIniciarSessio(exercicis, diagnostic.fase_actual, diagnostic.part_cos)}
             >
-                Iniciar sessió d'exercicis →
+                Iniciar sessió d'exercicis
             </button>
         </div>
     )

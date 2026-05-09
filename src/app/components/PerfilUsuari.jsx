@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../utils/supabase'
-import { confirmarCodiFisio } from '../utils/diagFisio'
+import { confirmarCodiFisio, desassignarFisio } from '../utils/diagFisio'
 import { showToast } from '../utils/toast'
 import styles from './perfilUsuari.module.css'
 
@@ -30,6 +30,11 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
     const [missatgeCodi, setMissatgeCodi] = useState(null)
     const [enviantCodi, setEnviantCodi] = useState(false)
 
+    // Desassignar fisioterapeuta
+    const [confirmantDesassignar, setConfirmantDesassignar] = useState(false)
+    const [desassignant, setDesassignant] = useState(false)
+    const [teFisioAssignat, setTeFisioAssignat] = useState(false)
+
     const esFisio = perfilUsuari?.es_fisioterapeuta === true
 
     useEffect(() => {
@@ -40,6 +45,32 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
         }
         puntsAnteriors.current = nous
     }, [perfilUsuari?.punts_recuperacio])
+
+    // Comprova si el pacient té un fisio assignat + Realtime
+    useEffect(() => {
+        if (!perfilUsuari?.dni || esFisio) return
+
+        const comprovarFisio = async () => {
+            const { data } = await supabase
+                .from('relacio_fisio_pacient')
+                .select('dni_fisio')
+                .eq('dni_pacient', perfilUsuari.dni)
+                .eq('confirmat', true)
+                .limit(1)
+                .maybeSingle()
+            setTeFisioAssignat(!!data)
+        }
+
+        comprovarFisio()
+
+        // ── Realtime: actualitzar quan canvia la relació fisio-pacient ──
+        const canal = supabase
+            .channel(`perfil-relacio-${perfilUsuari.dni}`)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'relacio_fisio_pacient', filter: `dni_pacient=eq.${perfilUsuari.dni}` }, comprovarFisio)
+            .subscribe()
+
+        return () => { supabase.removeChannel(canal) }
+    }, [perfilUsuari?.dni, esFisio])
 
     const iniciarEdicio = () => {
         setNouNom(perfilUsuari?.nom || '')
@@ -117,20 +148,54 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
         }
     }
 
+    // ── Desassignar fisioterapeuta ────────────────────────────
+    const handleDesassignar = async () => {
+        if (!confirmantDesassignar) {
+            setConfirmantDesassignar(true)
+            return
+        }
+        setDesassignant(true)
+        const resultat = await desassignarFisio(perfilUsuari.dni)
+        setDesassignant(false)
+        setConfirmantDesassignar(false)
+        if (!resultat.ok) {
+            showToast(`Error: ${resultat.missatge}`, 'error')
+        } else {
+            setTeFisioAssignat(false)
+            showToast('Fisioterapeuta desassignat correctament.', 'success')
+        }
+    }
+
     return (
-        <section className={styles.container}>
-            <h2 className={styles.title}>El meu perfil</h2>
+    <section className={styles.container}>
 
-            {!perfilUsuari && (
-                <p className={styles.textMuted}>No s'han trobat dades del perfil.</p>
-            )}
+        {!perfilUsuari && (
+            <p className={styles.textMuted}>No s'han trobat dades del perfil.</p>
+        )}
 
-            {perfilUsuari && (
+        {perfilUsuari && (
+            <>
+
                 <div className={styles.card}>
+                    <div className={styles.header}>
+                        <div className={styles.avatar}>
+                        {perfilUsuari.nom?.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()}
+                        </div>
+                        <div className={styles.headerText}>
+                            <p className={styles.headerName}>{perfilUsuari.nom}</p>
+                            <p className={styles.headerRole}>
+                                {esFisio ? 'Fisioterapeuta' : 'Pacient'} · {perfilUsuari.dni}
+                            </p>
+                        </div>
+                    </div>
+                    {/* Informació personal */}
+                    <p className={styles.sectionTitle}>Informació personal</p>
 
-                    {/* Nom */}
-                    <div className={styles.field}>
-                        <span className={styles.label}>Nom</span>
+                    <div className={styles.fieldRow}>
+                        <span className={styles.fieldLabel}>
+                            <i className="ti ti-user" aria-hidden="true" />
+                            Nom
+                        </span>
                         {editant ? (
                             <div className={styles.editRow}>
                                 <input
@@ -148,34 +213,37 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
                                 <button onClick={cancellarEdicio} className={styles.cancelButton}>✕</button>
                             </div>
                         ) : (
-                            <div className={styles.displayRow}>
-                                <p className={styles.value}>{perfilUsuari.nom}</p>
-                                <button onClick={iniciarEdicio} className={styles.editInlineButton}>
-                                    Editar
-                                </button>
+                            <div className={styles.fieldRight}>
+                                <span className={styles.fieldValue}>{perfilUsuari.nom}</span>
+                                <button onClick={iniciarEdicio} className={styles.editInlineButton}>Editar</button>
                             </div>
                         )}
                     </div>
 
-                    <div className={styles.divider} />
-
-                    {/* DNI */}
-                    <div className={styles.field}>
-                        <span className={styles.label}>DNI</span>
-                        <p className={styles.value}>{perfilUsuari.dni}</p>
+                    <div className={styles.fieldRow}>
+                        <span className={styles.fieldLabel}>
+                            <i className="ti ti-id-badge" aria-hidden="true" />
+                            DNI
+                        </span>
+                        <span className={styles.fieldValueMono}>{perfilUsuari.dni}</span>
                     </div>
 
-                    <div className={styles.divider} />
+                    <div className={styles.fieldRow}>
+                        <span className={styles.fieldLabel}>
+                            <i className="ti ti-shield-check" aria-hidden="true" />
+                            Rol
+                        </span>
+                        <span className={styles.badge}>{esFisio ? 'Fisioterapeuta' : 'Pacient'}</span>
+                    </div>
 
-                    {/* Progrés de recuperació — només per a pacients */}
+                    {/* Recuperació — només pacients */}
                     {!esFisio && (
                         <>
-                            <div className={styles.field}>
-                                <span className={styles.label}>Progrés de recuperació</span>
-                                <div className={styles.progressInfo}>
-                                    <span className={styles.progressText}>
-                                        {perfilUsuari.punts_recuperacio ?? 0} / {perfilUsuari.puntsFinals ?? 0} punts
-                                    </span>
+                            <div className={styles.sectionDivider} />
+                            <p className={styles.sectionTitle}>Recuperació</p>
+                            <div className={styles.progressWrap}>
+                                <div className={styles.progressMeta}>
+                                    <span>{perfilUsuari.punts_recuperacio ?? 0} / {perfilUsuari.puntsFinals ?? 0} pts</span>
                                     <span className={`${styles.progressPercent} ${animant ? styles.puntsAnimat : ''}`}>
                                         {perfilUsuari?.puntsFinals > 0
                                             ? Math.round((perfilUsuari.punts_recuperacio / perfilUsuari.puntsFinals) * 100)
@@ -193,140 +261,113 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
                                     />
                                 </div>
                             </div>
-
-                            <div className={styles.divider} />
                         </>
                     )}
 
-                    {/* Rol */}
-                    <div className={styles.field}>
-                        <span className={styles.label}>Rol</span>
-                        <p className={styles.value}>
-                            {esFisio ? 'Fisioterapeuta' : 'Pacient'}
-                        </p>
-                    </div>
-
-                    <div className={styles.divider} />
-
-                    {/* Afegir codi del fisioterapeuta — només per a pacients */}
+                    {/* Fisioterapeuta — només pacients */}
                     {!esFisio && (
                         <>
-                            <div className={styles.field}>
-                                <span className={styles.label}>Codi del fisioterapeuta</span>
+                            <div className={styles.sectionDivider} />
+                            <p className={styles.sectionTitle}>Fisioterapeuta</p>
 
-                                {!mostrarCodi ? (
-                                    <button
-                                        onClick={() => setMostrarCodi(true)}
-                                        className={styles.editInlineButton}
-                                    >
-                                        Afegir codi de confirmació
-                                    </button>
-                                ) : (
-                                    <div className={styles.passwordSection}>
-                                        <input
-                                            type="text"
-                                            placeholder="Introdueix el codi del fisioterapeuta"
-                                            value={codiInput}
-                                            onChange={(e) => setCodiInput(e.target.value.toUpperCase())}
-                                            onKeyDown={(e) => e.key === 'Enter' && confirmarCodi()}
-                                            className={styles.inputEdit}
-                                            style={{ letterSpacing: '0.1em', fontFamily: 'monospace' }}
-                                            autoFocus
-                                        />
-
-                                        {missatgeCodi && (
-                                            <p className={missatgeCodi.tipus === 'ok' ? styles.successText : styles.errorText}>
-                                                {missatgeCodi.text}
-                                            </p>
-                                        )}
-
+                            {!teFisioAssignat && (
+                                <div className={styles.fieldRow}>
+                                    <span className={styles.fieldLabel}>
+                                        <i className="ti ti-stethoscope" aria-hidden="true" />
+                                        Codi de confirmació
+                                    </span>
+                                    {!mostrarCodi ? (
+                                        <button onClick={() => setMostrarCodi(true)} className={styles.codiButton}>
+                                            <i className="ti ti-plus" aria-hidden="true" />
+                                            Afegir codi
+                                        </button>
+                                    ) : (
                                         <div className={styles.editRow}>
-                                            <button
-                                                onClick={confirmarCodi}
-                                                disabled={enviantCodi}
-                                                className={styles.saveButton}
-                                            >
-                                                {enviantCodi ? 'Validant...' : 'Confirmar'}
+                                            <input
+                                                type="text"
+                                                placeholder="Codi del fisioterapeuta"
+                                                value={codiInput}
+                                                onChange={(e) => setCodiInput(e.target.value.toUpperCase())}
+                                                onKeyDown={(e) => e.key === 'Enter' && confirmarCodi()}
+                                                className={styles.inputEdit}
+                                                style={{ letterSpacing: '0.1em', fontFamily: 'monospace' }}
+                                                autoFocus
+                                            />
+                                            <button onClick={confirmarCodi} disabled={enviantCodi} className={styles.saveButton}>
+                                                {enviantCodi ? '...' : 'Confirmar'}
                                             </button>
-                                            <button
-                                                onClick={() => {
-                                                    setMostrarCodi(false)
-                                                    setMissatgeCodi(null)
-                                                    setCodiInput('')
-                                                }}
-                                                className={styles.cancelButton}
-                                            >
-                                                ✕
-                                            </button>
+                                            <button onClick={() => { setMostrarCodi(false); setMissatgeCodi(null); setCodiInput('') }} className={styles.cancelButton}>✕</button>
                                         </div>
-                                    </div>
-                                )}
-                            </div>
+                                    )}
+                                </div>
+                            )}
 
-                            <div className={styles.divider} />
+                            {missatgeCodi && (
+                                <p className={missatgeCodi.tipus === 'ok' ? styles.successText : styles.errorText} style={{ padding: '0 1.25rem 0.75rem' }}>
+                                    {missatgeCodi.text}
+                                </p>
+                            )}
+
+                            {teFisioAssignat && (
+                                <div className={styles.fieldRow}>
+                                    <span className={styles.fieldLabel}>
+                                        <i className="ti ti-stethoscope" aria-hidden="true" />
+                                        Fisioterapeuta assignat
+                                    </span>
+                                    {!confirmantDesassignar ? (
+                                        <button onClick={handleDesassignar} className={styles.dangerButton}>
+                                            Desassignar
+                                        </button>
+                                    ) : (
+                                        <div className={styles.confirmInlineRow}>
+                                            <span className={styles.confirmText}>Segur? Es finalitzarà el diagnòstic actiu.</span>
+                                            <button onClick={handleDesassignar} disabled={desassignant} className={styles.dangerButton}>
+                                                {desassignant ? '...' : 'Sí'}
+                                            </button>
+                                            <button onClick={() => setConfirmantDesassignar(false)} className={styles.cancelInlineButton}>✕</button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </>
                     )}
 
-                    {/* Canviar contrasenya */}
-                    <div className={styles.field}>
-                        <span className={styles.label}>Contrasenya</span>
+                    {/* Seguretat */}
+                    <div className={styles.sectionDivider} />
+                    <p className={styles.sectionTitle}>Seguretat</p>
 
+                    <div className={styles.fieldRow}>
+                        <span className={styles.fieldLabel}>
+                            <i className="ti ti-lock" aria-hidden="true" />
+                            Contrasenya
+                        </span>
                         {!mostrarContrasenya ? (
-                            <button
-                                onClick={() => setMostrarContrasenya(true)}
-                                className={styles.editInlineButton}
-                            >
-                                Canviar contrasenya
+                            <button onClick={() => setMostrarContrasenya(true)} className={styles.editInlineButton}>
+                                Canviar
                             </button>
-                        ) : (
-                            <div className={styles.passwordSection}>
-                                <input
-                                    type="password"
-                                    placeholder="Nova contrasenya"
-                                    value={novaContrasenya}
-                                    onChange={(e) => setNovaContrasenya(e.target.value)}
-                                    className={styles.inputEdit}
-                                />
-                                <input
-                                    type="password"
-                                    placeholder="Confirmar contrasenya"
-                                    value={confirmarContrasenya}
-                                    onChange={(e) => setConfirmarContrasenya(e.target.value)}
-                                    className={styles.inputEdit}
-                                />
-
-                                {missatgeContrasenya && (
-                                    <p className={missatgeContrasenya.tipus === 'ok' ? styles.successText : styles.errorText}>
-                                        {missatgeContrasenya.text}
-                                    </p>
-                                )}
-
-                                <div className={styles.editRow}>
-                                    <button
-                                        onClick={canviarContrasenya}
-                                        disabled={guardantContrasenya}
-                                        className={styles.saveButton}
-                                    >
-                                        {guardantContrasenya ? 'Guardant...' : 'Guardar'}
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setMostrarContrasenya(false)
-                                            setMissatgeContrasenya(null)
-                                            setNovaContrasenya('')
-                                            setConfirmarContrasenya('')
-                                        }}
-                                        className={styles.cancelButton}
-                                    >
-                                        ✕
-                                    </button>
-                                </div>
-                            </div>
-                        )}
+                        ) : null}
                     </div>
 
+                    {mostrarContrasenya && (
+                        <div className={styles.passwordSection}>
+                            <input type="password" placeholder="Nova contrasenya" value={novaContrasenya} onChange={(e) => setNovaContrasenya(e.target.value)} className={styles.inputEdit} />
+                            <input type="password" placeholder="Confirmar contrasenya" value={confirmarContrasenya} onChange={(e) => setConfirmarContrasenya(e.target.value)} className={styles.inputEdit} />
+                            {missatgeContrasenya && (
+                                <p className={missatgeContrasenya.tipus === 'ok' ? styles.successText : styles.errorText}>
+                                    {missatgeContrasenya.text}
+                                </p>
+                            )}
+                            <div className={styles.editRow}>
+                                <button onClick={canviarContrasenya} disabled={guardantContrasenya} className={styles.saveButton}>
+                                    {guardantContrasenya ? 'Guardant...' : 'Guardar'}
+                                </button>
+                                <button onClick={() => { setMostrarContrasenya(false); setMissatgeContrasenya(null); setNovaContrasenya(''); setConfirmarContrasenya('') }} className={styles.cancelButton}>✕</button>
+                            </div>
+                        </div>
+                    )}
+
                 </div>
-            )}
-        </section>
-    )
-}
+            </>
+        )}
+    </section>
+)}

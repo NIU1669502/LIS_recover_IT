@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { supabase } from '../../utils/supabase'
 import { getPacientsDeFisio, getProgresTotal } from '../utils/fisio'
 import AfegirPacientModal from './AfegirPacientModal'
 import styles from './LlistaPacients.module.css'
@@ -100,6 +101,8 @@ export default function LlistaPacients({ perfilUsuari }) {
     const [modalObert, setModalObert] = useState(false)
     const [cerca, setCerca] = useState('')
 
+    const canalRef = useRef(null)
+
     const carregarPacients = async () => {
         if (!perfilUsuari?.dni) return
         setCarregant(true)
@@ -110,7 +113,20 @@ export default function LlistaPacients({ perfilUsuari }) {
 
     useEffect(() => {
         carregarPacients()
-    }, [perfilUsuari])
+
+        // ── Realtime: actualitzar quan canvia la llista de pacients o diagnòstics ──
+        if (perfilUsuari?.dni) {
+            canalRef.current = supabase
+                .channel(`llista-pacients-${perfilUsuari.dni}`)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'relacio_fisio_pacient', filter: `dni_fisio=eq.${perfilUsuari.dni}` }, carregarPacients)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'diagnostic' }, carregarPacients)
+                .subscribe()
+        }
+
+        return () => {
+            if (canalRef.current) supabase.removeChannel(canalRef.current)
+        }
+    }, [perfilUsuari?.dni])
 
     const pacientsFiltrats = pacients.filter(p =>
         p.nom.toLowerCase().includes(cerca.toLowerCase()) ||

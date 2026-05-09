@@ -76,6 +76,18 @@ export function useHistorial(dni) {
         }
 
         carregar()
+
+        // ── Realtime: actualitzar quan s'insereix una nova sessió ──
+        const canal = supabase
+            .channel(`historial-sessions-${dni}`)
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'historial_sessions', filter: `dni_pacient=eq.${dni}` },
+                () => carregar()
+            )
+            .subscribe()
+
+        return () => { supabase.removeChannel(canal) }
     }, [dni])
 
     return { sessions, historial, carregant, error }

@@ -1,249 +1,341 @@
-/* ======================================
-   Premium Theme - Perfil d'Usuari
-   ====================================== */
 .container {
-    max-width: 600px;
+    max-width: 720px;
     margin: 0 auto;
-    padding: 2rem 1rem;
-}
-
-.title {
-    font-size: 2rem;
-    font-weight: 900;
-    color: #0f172a;
-    margin-bottom: 2rem;
-    letter-spacing: -0.02em;
+    padding: 2.5rem 1rem;
 }
 
 .card {
     background: #ffffff;
+    border: 1px solid #ebebeb;
     border-radius: 24px;
-    padding: 2.5rem;
-    box-shadow: 0 15px 35px -5px rgba(37, 99, 235, 0.08);
-    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
 }
 
-.field {
-    margin-bottom: 1.75rem;
-}
-
-.field:last-child {
-    margin-bottom: 0;
-}
-
-.label {
-    display: block;
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 0.5rem;
-}
-
-.value {
-    font-size: 1.15rem;
-    font-weight: 600;
-    color: #0f172a;
-}
-
-.divider {
-    height: 1px;
-    background: #e2e8f0;
-    margin: 1.75rem 0;
-}
-
-.editRow {
+.header {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 1.5rem;
+    padding: 2.5rem 2.5rem 2rem;
+    border-bottom: 1px solid #ebebeb;
+    background: #f7f7f7;
 }
 
-.inputEdit {
-    flex: 1;
-    padding: 0.75rem 1rem;
-    border: 2px solid #cbd5e1;
-    border-radius: 12px;
-    font-family: inherit;
-    font-size: 1rem;
-    color: #0f172a;
-    transition: all 0.2s;
-    background: #f8fafc;
-}
-
-.inputEdit:focus {
-    outline: none;
-    border-color: #3b82f6;
-    background: #ffffff;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-}
-
-.saveButton {
-    padding: 0.75rem 1.25rem;
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-    border: none;
-    border-radius: 12px;
+.avatar {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
     font-weight: 700;
-    font-size: 0.95rem;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    transition: all 0.2s;
+    color: #ffffff;
+    flex-shrink: 0;
+    border: 3px solid #eff6ff;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.25);
 }
 
-.saveButton:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+.headerText {
+    flex: 1;
 }
 
-.cancelButton {
-    padding: 0.75rem 1rem;
-    background: #f1f5f9;
-    color: #64748b;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.2s;
+.headerName {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 6px;
 }
 
-.cancelButton:hover {
-    background: #e2e8f0;
-    color: #334155;
+.headerRole {
+    font-size: 16px;
+    color: #888888;
+    margin: 0;
 }
 
-.displayRow {
+.sectionTitle {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #aaaaaa;
+    padding: 1.5rem 2.5rem 0.75rem;
+    margin: 0;
+}
+
+.fieldRow {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 1.1rem 2.5rem;
+    gap: 1rem;
+    border-top: 1px solid #ebebeb;
+    transition: background 0.15s;
+}
+
+.fieldRow:hover {
+    background: #f7f7f7;
+}
+
+.fieldLabel {
+    font-size: 16px;
+    color: #888888;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.fieldLabel i {
+    font-size: 20px;
+    color: #bbbbbb;
+}
+
+.fieldValue {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.fieldValueMono {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    font-family: monospace;
+    letter-spacing: 0.08em;
+}
+
+.fieldRight {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sectionDivider {
+    height: 1px;
+    background: #ebebeb;
+    margin: 0.25rem 0;
+}
+
+.badge {
+    font-size: 15px;
+    font-weight: 700;
+    color: #2563eb;
 }
 
 .editInlineButton {
-    padding: 0.4rem 0.8rem;
-    background: transparent;
-    color: #3b82f6;
-    border: 1px solid #bfdbfe;
-    border-radius: 8px;
+    font-size: 14px;
     font-weight: 600;
-    font-size: 0.85rem;
+    color: #2563eb;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    padding: 7px 16px;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .editInlineButton:hover {
-    background: #eff6ff;
+    background: #dbeafe;
     color: #1d4ed8;
 }
 
-.textMuted {
-    color: #94a3b8;
-    font-style: italic;
+.codiButton {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border: none;
+    border-radius: 10px;
+    padding: 9px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25);
 }
 
-.progressSection {
-    margin: 20px 0;
-    padding: 16px 20px;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+.codiButton:hover {
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(59, 130, 246, 0.35);
 }
 
-.progressInfo {
+.dangerButton {
+    font-size: 14px;
+    font-weight: 600;
+    color: #cc3333;
+    background: transparent;
+    border: 1px solid #f0c0c0;
+    border-radius: 10px;
+    padding: 7px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.dangerButton:hover {
+    background: #fff5f5;
+}
+
+.saveButton {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    background: #2563eb;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.saveButton:hover {
+    background: #1d4ed8;
+}
+
+.cancelButton {
+    font-size: 14px;
+    font-weight: 600;
+    color: #888888;
+    background: transparent;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancelButton:hover {
+    background: #f7f7f7;
+    color: #1a1a1a;
+}
+
+.cancelInlineButton {
+    font-size: 14px;
+    font-weight: 600;
+    color: #888888;
+    background: transparent;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 7px 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancelInlineButton:hover {
+    background: #f7f7f7;
+}
+
+.editRow {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.inputEdit {
+    flex: 1;
+    padding: 0.65rem 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 15px;
+    color: #1a1a1a;
+    background: #fafafa;
+    transition: all 0.2s;
+    min-width: 0;
+}
+
+.inputEdit:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.progressWrap {
+    padding: 1rem 2.5rem 1.5rem;
+    border-top: 1px solid #ebebeb;
+}
+
+.progressMeta {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    font-size: 14px;
+    color: #888888;
     margin-bottom: 10px;
 }
 
-.progressText {
-    font-size: 0.85rem;
-    color: #6b7280;
-    font-weight: 500;
-}
-
 .progressPercent {
-    font-size: 0.95rem;
     font-weight: 700;
-    color: #3b82f6;
+    color: #2563eb;
 }
 
 .progressBar {
-    width: 100%;
-    height: 10px;
-    background-color: #e5e7eb;
+    height: 7px;
+    background: #e2e8f0;
     border-radius: 999px;
     overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
 }
 
 .progressFill {
     height: 100%;
-    background: linear-gradient(90deg, #3b82f6, #6366f1);
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
     border-radius: 999px;
     transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
+    animation: fillBar 1.2s cubic-bezier(0.175, 0.885, 0.32, 1) forwards;
 }
 
-.progressFill::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 60%;
-    height: 100%;
-    background: linear-gradient(90deg,
-            transparent,
-            rgba(255, 255, 255, 0.4),
-            transparent);
-    animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-    0% {
-        left: -60%;
-    }
-
-    100% {
-        left: 160%;
-    }
-}
-
-/* ✅ Animació de pujada de punts */
-.puntsAnimat {
-    animation: pujada 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-@keyframes pujada {
-    0% {
-        transform: scale(1);
-        color: #3b82f6;
-    }
-
-    50% {
-        transform: scale(1.4);
-        color: #22c55e;
-    }
-
-    100% {
-        transform: scale(1);
-        color: #3b82f6;
-    }
+@keyframes fillBar {
+    from { width: 0; }
 }
 
 .passwordSection {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
+    gap: 0.6rem;
+    padding: 1rem 2.5rem 1.5rem;
+    border-top: 1px solid #ebebeb;
 }
 
 .successText {
-    color: #16a34a;
-    font-size: 0.85rem;
+    color: #2d7a4f;
+    font-size: 14px;
 }
 
 .errorText {
-    color: #dc2626;
-    font-size: 0.85rem;
+    color: #cc3333;
+    font-size: 14px;
+}
+
+.confirmInlineRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.confirmText {
+    font-size: 14px;
+    color: #cc3333;
+    font-weight: 500;
+    flex: 1;
+    min-width: 0;
+}
+
+.puntsAnimat {
+    animation: pujada 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes pujada {
+    0% { transform: scale(1); color: #2563eb; }
+    50% { transform: scale(1.4); color: #60a5fa; }
+    100% { transform: scale(1); color: #2563eb; }
+}
+
+.textMuted {
+    color: #aaaaaa;
+    font-style: italic;
 }

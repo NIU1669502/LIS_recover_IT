@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { supabase } from '../../utils/supabase'
 import { getEstadistiquesFisio, getProgresTotal } from '../utils/fisio'
 import AfegirPacientModal from './AfegirPacientModal'
 import styles from './PanellFisio.module.css'
@@ -75,6 +76,8 @@ export default function PanellFisio({ perfilUsuari, onNavegar }) {
     const [carregant, setCarregant] = useState(true)
     const [modalObert, setModalObert] = useState(false)
 
+    const canalRef = useRef(null)
+
     const carregarDades = async () => {
         if (!perfilUsuari?.dni) return
         setCarregant(true)
@@ -85,6 +88,19 @@ export default function PanellFisio({ perfilUsuari, onNavegar }) {
 
     useEffect(() => {
         carregarDades()
+
+        // ── Realtime: actualitzar quan hi ha canvis en pacients o diagnòstics ──
+        if (perfilUsuari?.dni) {
+            canalRef.current = supabase
+                .channel(`panell-fisio-${perfilUsuari.dni}`)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'relacio_fisio_pacient', filter: `dni_fisio=eq.${perfilUsuari.dni}` }, carregarDades)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'diagnostic' }, carregarDades)
+                .subscribe()
+        }
+
+        return () => {
+            if (canalRef.current) supabase.removeChannel(canalRef.current)
+        }
     }, [perfilUsuari])
 
     const pacientsMostrats = estadistiques?.pacients?.slice(0, 5) || []

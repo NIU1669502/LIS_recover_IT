@@ -31,7 +31,7 @@ export async function getDiagnosticActiu(userDni) {
         .eq('finalitzat', false)
         .order('id_diagnostic', { ascending: false })
         .limit(1)
-        .single()
+        .maybeSingle()
 
     if (error || !diagnostic) return null
     return diagnostic
@@ -180,7 +180,7 @@ export async function completarSessio(userDni, puntsGuanyats) {
 // ============================================================
 // RF-PAC-01 — Guarda o actualitza el diagnòstic a Supabase
 // ============================================================
-export async function processarTestDiagnostic(resultat, navegarA) {
+export async function processarTestDiagnostic(resultat, navegarA,) {
     try {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 

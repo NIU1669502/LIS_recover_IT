@@ -91,7 +91,7 @@ export default function LoginForm({ loginForm, setLoginForm, onSubmit, errorAuth
                             onClick={() => { setMostrarRecuperar(false); setMissatgeRecuperar(null) }}
                             className={styles.forgotLink}
                         >
-                            ← Tornar al login
+                            Tornar al login
                         </button>
                     </div>
                 </div>

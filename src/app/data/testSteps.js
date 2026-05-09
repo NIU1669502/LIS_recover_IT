@@ -32,7 +32,7 @@ export const TEST_STEPS = [
         ],
     },
     {
-        pregunta: 'Explica una breu descripció de com va succeir el dolor:',
+        pregunta: 'Si ho vols, dóna una breu descripció del que va passar:',
         tipus: 'text',
     },
 ]

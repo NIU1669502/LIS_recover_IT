@@ -190,6 +190,7 @@ export default function Page() {
                 setMusculActual(muscul)
                 navegarA('exercici')
               }}
+              perfilUsuari={perfilUsuari}
             />
           )}
 
@@ -214,7 +215,7 @@ export default function Page() {
                 ) : (
                   <>
                     <button onClick={() => navegarA('test')} className={styles.testButton}>
-                      Tornar a fer el test
+                      Realitzar test aproximat
                     </button>
                     <button onClick={() => navegarA('perfil')} className={styles.profileButton}>
                       Anar al meu perfil

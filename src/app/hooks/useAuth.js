@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../utils/supabase'
 import { showToast } from '../utils/toast'
 
@@ -102,7 +102,23 @@ export function useAuth(navegarA) {
         }
         comprovarSessio()
 
-        return () => window.removeEventListener('popstate', manejarPopState)
+        // ── Realtime: refrescar el perfil quan canvia el diagnòstic de l'usuari ──
+        let canalDiag = null
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            const dni = session?.user?.user_metadata?.dni
+            if (!dni) return
+            canalDiag = supabase
+                .channel(`perfil-diagnostic-${dni}`)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'diagnostic', filter: `dni_pacient=eq.${dni}` },
+                    () => obtenirPerfil(session.user)
+                )
+                .subscribe()
+        })
+
+        return () => {
+            window.removeEventListener('popstate', manejarPopState)
+            if (canalDiag) supabase.removeChannel(canalDiag)
+        }
     }, [])
 
     // ── RF-AUTH-01 — Registre ────────────────────────────────

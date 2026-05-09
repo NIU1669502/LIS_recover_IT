@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../utils/supabase'
+import { getDiagnosticActiu } from '../utils/lesions'
+
 import styles from './historialDiagnostics.module.css'
 
 export default function HistorialDiagnostics({ perfilUsuari, onNavegar }) {
@@ -10,40 +12,43 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar }) {
     const [carregant, setCarregant] = useState(true)
     const [nomsLesions, setNomsLesions] = useState({})
 
+    const canalRef = useRef(null)
+
     useEffect(() => {
         const carregarDades = async () => {
             if (!perfilUsuari?.dni) return;
 
-            // 1. Carregar diccionari de lesions per resoldre l'ID al nom real
             const { data: catLesions } = await supabase.from('lesions').select('id_lesio, nom')
             const mapaNoms = {}
-            if (catLesions) {
-                catLesions.forEach(l => mapaNoms[l.id_lesio] = l.nom)
-            }
+            if (catLesions) catLesions.forEach(l => mapaNoms[l.id_lesio] = l.nom)
             setNomsLesions(mapaNoms)
 
-            // 2. Carregar l'historial infinit de diagnòstics del pacient
-            const { data: diagnostics, error } = await supabase
+            const diagActiu = await getDiagnosticActiu(perfilUsuari.dni)
+            setActives(diagActiu ? [diagActiu] : [])
+            const { data: finalitzats, error } = await supabase
                 .from('diagnostic')
                 .select('*')
                 .eq('dni_pacient', perfilUsuari.dni)
+                .eq('finalitzat', true)
                 .order('id_diagnostic', { ascending: false })
-            
-            if (error) {
-                console.error("Error carregant diagnòstics:", error)
-                setCarregant(false)
-                return
-            }
-
-            // 3. Separar en actives (finalitzat=false) i historial (finalitzat=true)
-            if (diagnostics) {
-                setActives(diagnostics.filter(d => d.finalitzat === false))
-                setFinalitzades(diagnostics.filter(d => d.finalitzat === true))
-            }
+            if (error) { console.error('Error:', error); setCarregant(false); return }
+            setFinalitzades(finalitzats ?? [])
             setCarregant(false)
         }
 
         carregarDades()
+
+        // ── Realtime: actualitzar quan canvia el diagnòstic del pacient ──
+        if (perfilUsuari?.dni) {
+            canalRef.current = supabase
+                .channel(`historial-diag-${perfilUsuari.dni}`)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'diagnostic', filter: `dni_pacient=eq.${perfilUsuari.dni}` }, carregarDades)
+                .subscribe()
+        }
+
+        return () => {
+            if (canalRef.current) supabase.removeChannel(canalRef.current)
+        }
     }, [perfilUsuari])
 
     if (carregant) {

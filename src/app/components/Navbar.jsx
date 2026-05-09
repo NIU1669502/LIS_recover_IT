@@ -24,7 +24,7 @@ export default function Navbar({ vistaActual, usuariSessio, onTornar, onTancarSe
                         onClick={onTornar}
                         className={styles.backButton}
                     >
-                        <span className={styles.backIcon}>←</span>
+                        <span className={styles.backIcon}></span>
                         Tornar
                     </button>
                 )}
