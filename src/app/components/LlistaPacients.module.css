@@ -266,6 +266,83 @@
     background: #1d4ed8;
 }
 
+.desvincularBtn {
+    margin-top: 16px;
+    padding: 8px 16px;
+    width: 100%;
+    background: transparent;
+    color: #ef4444;
+    border: 1px solid #fee2e2;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.desvincularBtn:hover {
+    background: #fef2f2;
+    border-color: #fca5a5;
+}
+
+.confirmInlineRow {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    background: #fff5f5;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #fee2e2;
+}
+
+.confirmText {
+    font-size: 0.8rem;
+    color: #cc3333;
+    font-weight: 500;
+    flex: 1;
+    min-width: 0;
+}
+
+.desvincularBtnActiu {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #ffffff;
+    background: #ef4444;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.desvincularBtnActiu:hover {
+    background: #dc2626;
+}
+
+.desvincularBtnActiu:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cancelInlineButton {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #888888;
+    background: transparent;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancelInlineButton:hover {
+    background: #f7f7f7;
+    color: #111;
+}
+
 /* Loading */
 .carregant {
     display: flex;

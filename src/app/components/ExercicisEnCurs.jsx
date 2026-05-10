@@ -8,7 +8,7 @@ import styles from './exercicisEnCurs.module.css'
 export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsuari }) {
     const [diagnostic, setDiagnostic] = useState(null)
     const [exercicis, setExercicis] = useState([])
-    const [nomMuscul, setNomMuscul] = useState('')
+    const [infoMuscul, setInfoMuscul] = useState({ id_cos: 0, nom: '' })
     const [nomLesio, setNomLesio] = useState('')
     const [sessionsFetes, setSessionsFetes] = useState(0)
     const [sessionsTotals, setSessionsTotals] = useState(0)
@@ -35,7 +35,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
                 exs,
                 { fetes, totals }
             ] = await Promise.all([
-                supabase.from('musculs').select('nom').eq('id_cos', diag.part_cos).single(),
+                supabase.from('musculs').select('id_cos,nom').eq('id_cos', diag.part_cos).single(),
                 supabase.from('lesions').select('nom').eq('id_lesio', diag.id_lesio).single(),
                 getExercicisDelaFase(diag),
                 getResumSessions(diag)
@@ -43,7 +43,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
 
             if (cancelat) return
 
-            if (muscul) setNomMuscul(muscul.nom)
+            if (muscul) setInfoMuscul(muscul)
             if (lesio) setNomLesio(lesio.nom)
             setExercicis(exs)
             setSessionsFetes(fetes)
@@ -107,7 +107,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
                     Has completat totes les sessions de la teva recuperació. Enhorabona!
                 </p>
                 <button className={styles.primaryButton} onClick={() => onNavegar('test')}>
-                    Fer un nou test →
+                    Fer un nou test 
                 </button>
             </div>
         )
@@ -120,7 +120,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
             <div className={styles.rutinaInfo}>
                 <div className={styles.rutinaTag}>
                     <span className={styles.tagLabel}>Múscul</span>
-                    <span className={styles.tagValue}>{nomMuscul}</span>
+                    <span className={styles.tagValue}>{infoMuscul.nom}</span>
                 </div>
                 <div className={styles.rutinaTag}>
                     <span className={styles.tagLabel}>Lesió</span>
@@ -173,7 +173,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
 
             <button
                 className={styles.primaryButton}
-                onClick={() => onIniciarSessio(exercicis, diagnostic.fase_actual, diagnostic.part_cos)}
+                onClick={() => onIniciarSessio(exercicis, diagnostic.fase_actual, infoMuscul)}
             >
                 Iniciar sessió d'exercicis
             </button>

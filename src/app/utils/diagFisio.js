@@ -105,7 +105,7 @@ export async function confirmarCodiFisio(dniPacient, codiIntroduit) {
             dni_pacient: relacio.dni_pacient,
             id_lesio: relacio.id_lesio,
             part_cos: relacio.part_cos,
-            descripcio: relacio.descripcio || null,
+            descripcio: relacio.descripcio || 'Sense descripció',
             fase_actual: 1,
             finalitzat: false,
             num_sessions: 0,

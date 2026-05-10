@@ -96,7 +96,7 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
                 .from('exercici_muscul')
                 .select('id_exercici, url_video')
                 .in('id_exercici', ids)
-                .eq('id_cos', musculActual)
+                .eq('id_cos', musculActual.id_cos)
 
             if (data) {
                 const mapa = {}
@@ -145,7 +145,7 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
 
     const textBoto = () => {
 
-        if (!esUltimExercici) return `Següent exercici: ${exercicis[index + 1]?.nom}`
+        if (!esUltimExercici) return `Següent exercici: ${exercicis[index + 1]?.nom + " del " + musculActual.nom.toLowerCase()}`
         return 'Completar sessió'
     }
     const convertirYoutubeURL = (url) => {
@@ -157,8 +157,8 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
         if (longMatch) videoId = longMatch[1]
 
         if (!videoId) return url
-        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0`
-    }
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&showinfo=0&loop=1&playlist=${videoId}&enablejsapi=0`
+        }
     return (
         <div className={styles.container}>
             {mostrarPuntsFlash && (
@@ -178,7 +178,7 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
                 </div>
             </div>
 
-            <h2 className={styles.exerciciNom}>{exercici.nom}</h2>
+            <h2 className={styles.exerciciNom}>{exercici.nom + " del " + musculActual.nom.toLowerCase()}</h2>
 
             {/* Tracker de repeticions */}
             <div className={styles.repsTracker}>

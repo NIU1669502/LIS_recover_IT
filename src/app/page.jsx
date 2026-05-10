@@ -31,7 +31,7 @@ export default function Page() {
   const [faseActual, setFaseActual] = useState(1)
   const [pageVisible, setPageVisible] = useState(true)
   const transitionRef = useRef(null)
-  const [musculActual, setMusculActual] = useState(null)
+  const [musculActual, setMusculActual] = useState({ id_cos: 0, nom: '' })
 
   const navegarA = (novaVista, onTransition) => {
     if (transitionRef.current) clearTimeout(transitionRef.current)
@@ -183,11 +183,11 @@ export default function Page() {
           {vistaActual === 'exercicis-en-curs' && (
             <ExercicisEnCurs
               onNavegar={navegarA}
-              onIniciarSessio={(exercicis, fase, muscul) => {
+              onIniciarSessio={(exercicis, fase, infoMuscul) => {
                 setExercicisRutina(exercicis)
                 setFaseActual(fase)
                 setIndexExercici(0)
-                setMusculActual(muscul)
+                setMusculActual(infoMuscul)
                 navegarA('exercici')
               }}
               perfilUsuari={perfilUsuari}

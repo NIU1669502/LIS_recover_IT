@@ -138,43 +138,15 @@ export async function getPacientsDeFisio(dniFisio) {
 export async function getProgresTotal(diagnostic) {
     if (!diagnostic) return 0
 
-    const { data: rutina } = await supabase
-        .from('rutines_lesio')
-        .select('id_fase_1, id_fase_2, id_fase_3')
-        .eq('id_muscul', diagnostic.part_cos)
-        .eq('id_lesio', diagnostic.id_lesio)
-        .single()
-
-    if (!rutina) return 0
-
-    const ids = [rutina.id_fase_1, rutina.id_fase_2, rutina.id_fase_3].filter(Boolean)
-
-    const { data: fases } = await supabase
-        .from('fases')
-        .select('id_fase, n_sessions')
-        .in('id_fase', ids)
-
-    if (!fases) return 0
-
-    const mapFases = {}
-    fases.forEach(f => { mapFases[f.id_fase] = f.n_sessions || 0 })
-
-    const req1 = mapFases[rutina.id_fase_1] || 0
-    const req2 = mapFases[rutina.id_fase_2] || 0
-    const req3 = mapFases[rutina.id_fase_3] || 0
-    const totals = req1 + req2 + req3
-
-    if (totals === 0) return 0
-
-    let fetes = 0
-
-    if (diagnostic.fase_actual === 1) fetes = diagnostic.num_sessions || 0
-    else if (diagnostic.fase_actual === 2) fetes = req1 + (diagnostic.num_sessions || 0)
-    else if (diagnostic.fase_actual === 3) fetes = req1 + req2 + (diagnostic.num_sessions || 0)
+    const {data : punts} = await supabase
+    .from('diagnostic')
+    .select('punts_recuperacio, puntsFinals')
+    .eq('id_diagnostic', diagnostic.id_diagnostic)
+    .single() 
 
     if (diagnostic.finalitzat) return 100
 
-    return Math.round((fetes / totals) * 100)
+    return Math.round((punts.punts_recuperacio / punts.puntsFinals) * 100)
 }
 
 // ============================================================

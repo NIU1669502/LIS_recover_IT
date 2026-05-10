@@ -3,12 +3,33 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../utils/supabase'
 import { getPacientsDeFisio, getProgresTotal } from '../utils/fisio'
+import { desassignarFisio } from '../utils/diagFisio'
 import AfegirPacientModal from './AfegirPacientModal'
 import styles from './LlistaPacients.module.css'
 
 // ── Targeta individual de pacient ────────────────────────────
-function TarjetaPacient({ pacient }) {
+function TarjetaPacient({ pacient, onCanvi }) {
     const [progres, setProgres] = useState(null)
+    const [confirmantDesassignar, setConfirmantDesassignar] = useState(false)
+    const [desassignant, setDesassignant] = useState(false)
+    console.log('pacient:', pacient)
+    const handleDesassignar = async () => {
+        if (!confirmantDesassignar) {
+            setConfirmantDesassignar(true)
+            return
+        }
+
+        setDesassignant(true)
+        const res = await desassignarFisio(pacient.dni)
+        setDesassignant(false)
+        setConfirmantDesassignar(false)
+
+        if (res.ok) {
+            if (onCanvi) onCanvi()
+        } else {
+            alert(res.missatge || 'Error en desassignar el pacient')
+        }
+    }
 
     useEffect(() => {
         if (pacient.diagnostic) {
@@ -86,11 +107,26 @@ function TarjetaPacient({ pacient }) {
                             </div>
                         </div>
                     )}
+                    {!confirmantDesassignar ? (
+                <button onClick={handleDesassignar} className={styles.desvincularBtn}>
+                    Desvincular
+                </button>
+            ) : (
+                <div className={styles.confirmInlineRow}>
+                    <span className={styles.confirmText}>Segur? Es finalitzarà el diagnòstic actiu del pacient.</span>
+                    <button onClick={handleDesassignar} disabled={desassignant} className={styles.desvincularBtnActiu}>
+                        {desassignant ? '...' : 'Sí'}
+                    </button>
+                    <button onClick={() => setConfirmantDesassignar(false)} className={styles.cancelInlineButton}>✕</button>
+                </div>
+            )}
                 </>
             ) : (
                 // ── Cas sense diagnòstic ──────────────────────────────────
                 <p className={styles.senseDiag}>Sense diagnòstic assignat</p>
             )}
+
+            
         </div>
     )
 }
@@ -100,6 +136,8 @@ export default function LlistaPacients({ perfilUsuari }) {
     const [carregant, setCarregant] = useState(true)
     const [modalObert, setModalObert] = useState(false)
     const [cerca, setCerca] = useState('')
+    const [confirmantDesassignar, setConfirmantDesassignar] = useState(false)
+    
 
     const canalRef = useRef(null)
 
@@ -178,7 +216,7 @@ export default function LlistaPacients({ perfilUsuari }) {
             ) : (
                 <div className={styles.grid}>
                     {pacientsFiltrats.map(p => (
-                        <TarjetaPacient key={p.dni} pacient={p} />
+                        <TarjetaPacient key={p.dni} pacient={p} onCanvi={carregarPacients} />
                     ))}
                 </div>
             )}

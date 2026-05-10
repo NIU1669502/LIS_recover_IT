@@ -12,6 +12,15 @@ import styles from './AfegirPacientModal.module.css'
 //   2. DNI del pacient + generar codi
 //   3. Mostrar el codi generat
 // ============================================================
+const lesions_per_muscul = {
+                1: [1, 2, 3],
+                2: [1, 2, 3],
+                3: [1, 2, 3],
+                4: [2, 3],
+                5: [2, 3],
+                6: [2, 3],
+                7: [2, 3],
+            }
 export default function AfegirPacientModal({ dniFisio, onTancar, onPacientAfegit }) {
     // ── Pas actual del flux (1, 2 o 3) ──────────────────────
     const [pas, setPas] = useState(1)
@@ -35,24 +44,20 @@ export default function AfegirPacientModal({ dniFisio, onTancar, onPacientAfegit
     // ── Carregar músculs i lesions en muntar ─────────────────
     useEffect(() => {
         const carregarOpcions = async () => {
-            const { data: musData } = await supabase
-                .from('musculs')
-                .select('id_cos, nom')
-                .order('nom')
-
-            // Només les 3 primeres lesions (Esquinç, Distensió, Contractura)
-            const { data: lesData } = await supabase
-                .from('lesions')
-                .select('id_lesio, nom')
-                .order('id_lesio')
-                .limit(3)
-
-            if (musData) setMusculs(musData)
-            if (lesData) setLesions(lesData)
+            const [{ data: musculsDB }, { data: lesionsDB }] = await Promise.all([
+                supabase.from('musculs').select('*'),
+                supabase.from('lesions').select('*')
+            ])
+            setMusculs(musculsDB ?? [])
+            setLesions(lesionsDB ?? [])
+            
         }
         carregarOpcions()
     }, [])
 
+    const lesionsFiltrades = partCosSelec
+        ? lesions.filter(l => (lesions_per_muscul[partCosSelec] ?? []).includes(l.id_lesio))
+        : []
     // ── Validació i avanç del pas 1 al pas 2 ────────────────
     const handleSeguent = () => {
         if (!partCosSelec || !idLesioSelec) {
@@ -145,7 +150,7 @@ export default function AfegirPacientModal({ dniFisio, onTancar, onPacientAfegit
                             <select
                                 className={styles.input}
                                 value={partCosSelec}
-                                onChange={e => setPartCosSelec(e.target.value)}
+                                onChange={e => (setPartCosSelec(e.target.value),setIdLesioSelec(''))}
                             >
                                 <option value="">Selecciona un múscul...</option>
                                 {musculs.map(m => (
@@ -163,7 +168,7 @@ export default function AfegirPacientModal({ dniFisio, onTancar, onPacientAfegit
                                 onChange={e => setIdLesioSelec(e.target.value)}
                             >
                                 <option value="">Selecciona el tipus de lesió...</option>
-                                {lesions.map(l => (
+                                {lesionsFiltrades.map(l => (
                                     <option key={l.id_lesio} value={l.id_lesio}>{l.nom}</option>
                                 ))}
                             </select>
@@ -223,7 +228,7 @@ export default function AfegirPacientModal({ dniFisio, onTancar, onPacientAfegit
                                 onClick={() => { setPas(1); setError('') }}
                                 disabled={carregant}
                             >
-                                ← Tornar
+                                Tornar
                             </button>
                             <button
                                 className={styles.confirmBtn}

@@ -10,10 +10,11 @@
     background: #0f172a; /* Blau fosc profund */
     display: flex;
     flex-direction: column;
-    padding: 2rem 0;
+    padding: 2rem 0 1.25rem 0; /* Padding ajustat perquè el botó quedi una mica més avall */
     z-index: 100;
     box-shadow: 10px 0 30px rgba(15, 23, 42, 0.15);
     overflow-y: auto;
+    box-sizing: border-box; /* IMPORTANT: Evita que el padding faci créixer el 100vh */
 }
 
 /* Logo */
@@ -102,11 +103,11 @@
     gap: 0.85rem;
     width: 100%;
     padding: 0.85rem 1.25rem;
-    background: transparent;
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.2);
     border-radius: 12px;
     cursor: pointer;
-    color: #cbd5e1;
+    color: #fca5a5;
     font-size: 0.95rem;
     font-weight: 600;
     text-align: left;
@@ -114,7 +115,9 @@
 }
 
 .logoutButton:hover {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: rgba(239, 68, 68, 0.3);
-    color: #fca5a5;
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #f87171;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
 }
