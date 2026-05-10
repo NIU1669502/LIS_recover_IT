@@ -266,6 +266,29 @@
     background: #1d4ed8;
 }
 
+.veureDetallsBtn {
+    margin-top: 16px;
+    padding: 8px 16px;
+    width: 100%;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    margin-bottom: 8px;
+}
+
+.veureDetallsBtn:hover {
+    background: #1d4ed8;
+}
+
+.veureDetallsBtn:active {
+    transform: scale(0.98);
+}
+
 .desvincularBtn {
     margin-top: 16px;
     padding: 8px 16px;

@@ -5,6 +5,7 @@ import { supabase } from '../../utils/supabase'
 import { getPacientsDeFisio, getProgresTotal } from '../utils/fisio'
 import { desassignarFisio } from '../utils/diagFisio'
 import AfegirPacientModal from './AfegirPacientModal'
+import DetallsPacientModal from './DetallsPacientModal'
 import styles from './LlistaPacients.module.css'
 
 // ── Targeta individual de pacient ────────────────────────────
@@ -12,7 +13,7 @@ function TarjetaPacient({ pacient, onCanvi }) {
     const [progres, setProgres] = useState(null)
     const [confirmantDesassignar, setConfirmantDesassignar] = useState(false)
     const [desassignant, setDesassignant] = useState(false)
-    console.log('pacient:', pacient)
+    const [mostrarDetalls, setMostrarDetalls] = useState(false)
     const handleDesassignar = async () => {
         if (!confirmantDesassignar) {
             setConfirmantDesassignar(true)
@@ -86,6 +87,10 @@ function TarjetaPacient({ pacient, onCanvi }) {
                             Codi: <strong>{pacient.codi_validacio}</strong>
                         </p>
                     )}
+                    {/* ── Botó detalls (pendent) ── */}
+                    <button onClick={() => setMostrarDetalls(true)} className={styles.veureDetallsBtn}>
+                        Veure detalls pacient
+                    </button>
                 </div>
             ) : pacient.diagnostic ? (
                 // ── Cas normal: diagnòstic actiu amb progrés ─────────────
@@ -107,26 +112,42 @@ function TarjetaPacient({ pacient, onCanvi }) {
                             </div>
                         </div>
                     )}
-                    {!confirmantDesassignar ? (
-                <button onClick={handleDesassignar} className={styles.desvincularBtn}>
-                    Desvincular
-                </button>
-            ) : (
-                <div className={styles.confirmInlineRow}>
-                    <span className={styles.confirmText}>Segur? Es finalitzarà el diagnòstic actiu del pacient.</span>
-                    <button onClick={handleDesassignar} disabled={desassignant} className={styles.desvincularBtnActiu}>
-                        {desassignant ? '...' : 'Sí'}
+                    {/* ── Botó detalls (dalt del desvincular) ── */}
+                    <button onClick={() => setMostrarDetalls(true)} className={styles.veureDetallsBtn}>
+                        Veure detalls pacient
                     </button>
-                    <button onClick={() => setConfirmantDesassignar(false)} className={styles.cancelInlineButton}>✕</button>
-                </div>
-            )}
+                    {!confirmantDesassignar ? (
+                        <button onClick={handleDesassignar} className={styles.desvincularBtn}>
+                            Desvincular
+                        </button>
+                    ) : (
+                        <div className={styles.confirmInlineRow}>
+                            <span className={styles.confirmText}>Segur? Es finalitzarà el diagnòstic actiu del pacient.</span>
+                            <button onClick={handleDesassignar} disabled={desassignant} className={styles.desvincularBtnActiu}>
+                                {desassignant ? '...' : 'Sí'}
+                            </button>
+                            <button onClick={() => setConfirmantDesassignar(false)} className={styles.cancelInlineButton}>✕</button>
+                        </div>
+                    )}
                 </>
             ) : (
                 // ── Cas sense diagnòstic ──────────────────────────────────
-                <p className={styles.senseDiag}>Sense diagnòstic assignat</p>
+                <>
+                    <p className={styles.senseDiag}>Sense diagnòstic assignat</p>
+                    <button onClick={() => setMostrarDetalls(true)} className={styles.veureDetallsBtn}>
+                        Veure detalls pacient
+                    </button>
+                </>
             )}
 
-            
+            {/* ── Modal de detalls ── */}
+            {mostrarDetalls && (
+                <DetallsPacientModal
+                    dniPacient={pacient.dni}
+                    nomPacient={pacient.nom}
+                    onTancar={() => setMostrarDetalls(false)}
+                />
+            )}
         </div>
     )
 }
