@@ -1,9 +1,37 @@
 .container {
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 2rem;
   animation: fadeIn 0.4s ease-out;
 }
+
+/* ── Layout dues columnes ── */
+.layoutDuoColumnes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.columnaEsquerra {
+  min-width: 0;
+}
+
+.columnaDreta {
+  min-width: 0;
+  position: sticky;
+  top: 24px;
+}
+
+@media (max-width: 900px) {
+  .layoutDuoColumnes {
+    grid-template-columns: 1fr;
+  }
+  .columnaDreta {
+    position: static;
+  }
+}
+
 
 .title {
   font-size: 2rem;

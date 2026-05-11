@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { supabase } from '../../utils/supabase'
+import GraficaRecuperacio from './GraficaRecuperacio'
 import styles from './detallsPacientModal.module.css'
 
 // ============================================================
@@ -64,7 +65,7 @@ async function getDetallsPacient(dniPacient) {
     // Diagnòstic actiu = el primer no finalitzat, o el més recent si tots estan finalitzats
     const diagnostic = diagnosticsEnriquits.find(d => !d.finalitzat) || diagnosticsEnriquits[0] || null
 
-    // ── 3. Historial de sessions ─────────────────────────────
+    // ── 3. Historial de sessions (totes, per a la llista) ────────
     const { data: sessions } = await supabase
         .from('historial_sessions')
         .select(`
@@ -78,11 +79,25 @@ async function getDetallsPacient(dniPacient) {
         .order('data_realitzacio', { ascending: false })
         .limit(20)
 
+    // ── 4. Sessions NOMÉS del diagnòstic actiu (per a la gràfica, ASC) ──
+    let sessionsGraficaAsc = []
+    const diagActiu = diagnosticsEnriquits.find(d => !d.finalitzat) || null
+    if (diagActiu?.id_diagnostic) {
+        const { data: sessGrafica } = await supabase
+            .from('historial_sessions')
+            .select('data_realitzacio, punts_obtinguts')
+            .eq('dni_pacient', dniPacient)
+            .eq('id_diagnostic', diagActiu.id_diagnostic)
+            .order('data_realitzacio', { ascending: true })
+        sessionsGraficaAsc = sessGrafica || []
+    }
+
     return {
         usuari,
         diagnostic,
         historialLesions: diagnosticsEnriquits,
         sessions: sessions || [],
+        sessionsGraficaAsc,
     }
 }
 
@@ -288,6 +303,20 @@ export default function DetallsPacientModal({ dniPacient, nomPacient, onTancar }
                             ) : (
                                 <p className={styles.senseDades}>Encara no hi ha lesions registrades.</p>
                             )}
+                        </section>
+
+                        <div className={styles.divider} />
+
+                        {/* ── Gràfica de recuperació ── */}
+                        <section className={styles.seccio}>
+                            <p className={styles.seccioTitol}>
+                                <span className={styles.seccioIcon}>📈</span>
+                                Gràfica de recuperació
+                            </p>
+                            <GraficaRecuperacio
+                                sessions={dades?.sessionsGraficaAsc || []}
+                                puntsFinals={dades?.diagnostic?.puntsFinals ?? 0}
+                            />
                         </section>
 
                     </div>
