@@ -37,6 +37,19 @@ export async function getDiagnosticActiu(userDni) {
     return diagnostic
 }
 
+/** Tots els diagnòstics no finalitzats del pacient (més recents primer). */
+export async function getDiagnosticsActius(userDni) {
+    const { data, error } = await supabase
+        .from('diagnostic')
+        .select('*')
+        .eq('dni_pacient', userDni)
+        .eq('finalitzat', false)
+        .order('id_diagnostic', { ascending: false })
+
+    if (error || !data?.length) return []
+    return data
+}
+
 export async function getExercicisDelaFase(diagnostic) {
     const { part_cos, id_lesio, fase_actual } = diagnostic
 
@@ -90,9 +103,22 @@ export async function getExercicisDelaFase(diagnostic) {
 // ============================================================
 // Avança la fase del diagnòstic i suma punts a l'usuari
 // ============================================================
-export async function completarSessio(userDni, puntsGuanyats) {
-    // 1. Agafar diagnòstic actual
-    const diagnostic = await getDiagnosticActiu(userDni)
+export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = null) {
+    // 1. Agafar diagnòstic (el de la sessió en curs, o el més recent si no s'especifica)
+    let diagnostic
+    if (idDiagnostic != null) {
+        const { data, error } = await supabase
+            .from('diagnostic')
+            .select('*')
+            .eq('id_diagnostic', idDiagnostic)
+            .eq('dni_pacient', userDni)
+            .eq('finalitzat', false)
+            .maybeSingle()
+        if (error || !data) return { completada: false }
+        diagnostic = data
+    } else {
+        diagnostic = await getDiagnosticActiu(userDni)
+    }
     if (!diagnostic) return { completada: false }
 
     // 2. Determinar n_sessions requerides per a la fase actual

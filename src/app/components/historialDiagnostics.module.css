@@ -145,6 +145,25 @@
   background-color: #2563eb;
 }
 
+.secondaryButton {
+  margin-top: 0.65rem;
+  width: 100%;
+  padding: 0.7rem 0.75rem;
+  background-color: #ffffff;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.secondaryButton:hover {
+  background-color: #eff6ff;
+  border-color: #3b82f6;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }

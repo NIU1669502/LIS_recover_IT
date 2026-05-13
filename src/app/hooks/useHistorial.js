@@ -7,7 +7,7 @@ import { supabase } from '../../utils/supabase'
 // compatibilitat, també retorna l'historial d'exercicis agrupats
 // per dia per components que encara el facin servir.
 // ============================================================
-export function useHistorial(dni) {
+export function useHistorial(dni, idDiagnosticFiltre = null) {
     const [sessions, setSessions] = useState([])
     const [historial, setHistorial] = useState({})
     const [carregant, setCarregant] = useState(true)
@@ -30,10 +30,9 @@ export function useHistorial(dni) {
             setCarregant(true)
             setError(null)
 
-            const [sessionsRes, exercicisRes] = await Promise.all([
-                supabase
-                    .from('historial_sessions')
-                    .select(`
+            let sessionsQuery = supabase
+                .from('historial_sessions')
+                .select(`
                         id_sessio,
                         data_realitzacio,
                         fase,
@@ -42,8 +41,14 @@ export function useHistorial(dni) {
                         id_lesio,
                         lesions ( nom )
                     `)
-                    .eq('dni_pacient', dni)
-                    .order('data_realitzacio', { ascending: false }),
+                .eq('dni_pacient', dni)
+
+            if (idDiagnosticFiltre != null && idDiagnosticFiltre !== '') {
+                sessionsQuery = sessionsQuery.eq('id_diagnostic', idDiagnosticFiltre)
+            }
+
+            const [sessionsRes, exercicisRes] = await Promise.all([
+                sessionsQuery.order('data_realitzacio', { ascending: false }),
 
                 supabase
                     .from('historial_exercicis_diaris')
@@ -88,7 +93,7 @@ export function useHistorial(dni) {
             .subscribe()
 
         return () => { supabase.removeChannel(canal) }
-    }, [dni])
+    }, [dni, idDiagnosticFiltre])
 
     return { sessions, historial, carregant, error }
 }

@@ -345,6 +345,18 @@
     margin: 0;
 }
 
+.completadaSubtext {
+    color: #64748b;
+    line-height: 1.55;
+    font-size: 1rem;
+    margin: 0;
+    max-width: 28rem;
+}
+
+.completadaSubtext strong {
+    color: #1e40af;
+}
+
 .puntsBadge {
     background: linear-gradient(135deg, #fef3c7, #fde68a);
     color: #b45309;

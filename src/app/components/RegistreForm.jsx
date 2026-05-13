@@ -65,9 +65,13 @@ export default function RegistreForm({
                         </div>
 
                         <div className={`${styles.field} ${styles.anim} ${styles.anim3}`}>
-                            <label>DNI</label>
+                            <label>DNI (8 xifres i lletra)</label>
                             <input
                                 type="text"
+                                inputMode="text"
+                                autoComplete="off"
+                                maxLength={9}
+                                placeholder="12345678Z"
                                 value={registreForm.dni}
                                 onChange={(e) =>
                                     setRegistreForm(prev => ({ ...prev, dni: e.target.value }))
@@ -79,9 +83,11 @@ export default function RegistreForm({
                         </div>
 
                         <div className={`${styles.field} ${styles.anim} ${styles.anim4}`}>
-                            <label>Email</label>
+                            <label>Correu electrònic</label>
                             <input
                                 type="email"
+                                autoComplete="email"
+                                placeholder="nom@exemple.cat"
                                 value={registreForm.email}
                                 onChange={(e) =>
                                     setRegistreForm(prev => ({ ...prev, email: e.target.value }))

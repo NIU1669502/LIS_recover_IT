@@ -2,37 +2,65 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../utils/supabase'
-import { getDiagnosticActiu } from '../utils/lesions'
+import { getDiagnosticsActius } from '../utils/lesions'
 
 import styles from './historialDiagnostics.module.css'
 
-export default function HistorialDiagnostics({ perfilUsuari, onNavegar }) {
+export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureHistorialSessions }) {
     const [actives, setActives] = useState([])
     const [finalitzades, setFinalitzades] = useState([])
     const [carregant, setCarregant] = useState(true)
     const [nomsLesions, setNomsLesions] = useState({})
+    const [nomsMusculs, setNomsMusculs] = useState({})
 
     const canalRef = useRef(null)
 
     useEffect(() => {
         const carregarDades = async () => {
-            if (!perfilUsuari?.dni) return;
+            if (!perfilUsuari?.dni) {
+                setCarregant(false)
+                return
+            }
 
             const { data: catLesions } = await supabase.from('lesions').select('id_lesio, nom')
             const mapaNoms = {}
             if (catLesions) catLesions.forEach(l => mapaNoms[l.id_lesio] = l.nom)
             setNomsLesions(mapaNoms)
 
-            const diagActiu = await getDiagnosticActiu(perfilUsuari.dni)
-            setActives(diagActiu ? [diagActiu] : [])
-            const { data: finalitzats, error } = await supabase
-                .from('diagnostic')
-                .select('*')
-                .eq('dni_pacient', perfilUsuari.dni)
-                .eq('finalitzat', true)
-                .order('id_diagnostic', { ascending: false })
-            if (error) { console.error('Error:', error); setCarregant(false); return }
+            const [diagnosticsActius, { data: finalitzats, error }] = await Promise.all([
+                getDiagnosticsActius(perfilUsuari.dni),
+                supabase
+                    .from('diagnostic')
+                    .select('*')
+                    .eq('dni_pacient', perfilUsuari.dni)
+                    .eq('finalitzat', true)
+                    .order('data_fi', { ascending: false })
+                    .order('id_diagnostic', { ascending: false }),
+            ])
+
+            if (error) {
+                console.error('Error:', error)
+                setCarregant(false)
+                return
+            }
+
+            setActives(diagnosticsActius ?? [])
             setFinalitzades(finalitzats ?? [])
+
+            const tots = [...(diagnosticsActius ?? []), ...(finalitzats ?? [])]
+            const partIds = [...new Set(tots.map((d) => d.part_cos).filter(Boolean))]
+            if (partIds.length > 0) {
+                const { data: musculsRows } = await supabase
+                    .from('musculs')
+                    .select('id_cos, nom')
+                    .in('id_cos', partIds)
+                const mapaMusculs = {}
+                if (musculsRows) musculsRows.forEach((m) => { mapaMusculs[m.id_cos] = m.nom })
+                setNomsMusculs(mapaMusculs)
+            } else {
+                setNomsMusculs({})
+            }
+
             setCarregant(false)
         }
 
@@ -49,7 +77,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar }) {
         return () => {
             if (canalRef.current) supabase.removeChannel(canalRef.current)
         }
-    }, [perfilUsuari])
+    }, [perfilUsuari?.dni])
 
     if (carregant) {
         return <div className={styles.container}><p>Carregant l'historial de lesions...</p></div>
@@ -84,6 +112,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar }) {
                                                 {nomsLesions[diag.id_lesio] || 'Lesió Desconeguda'}
                                             </h3>
                                             <p className={styles.lesioDate}>
+                                                {nomsMusculs[diag.part_cos] ? `${nomsMusculs[diag.part_cos]} · ` : ''}
                                                 Fase actual: {diag.fase_actual} / 3
                                             </p>
                                         </div>
@@ -106,6 +135,13 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar }) {
 
                                     <button className={styles.actionButton} onClick={() => onNavegar('exercicis-en-curs')}>
                                         Continuar exercicis
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={styles.secondaryButton}
+                                        onClick={() => onVeureHistorialSessions?.(diag.id_diagnostic)}
+                                    >
+                                        Veure historial de la sessió
                                     </button>
                                 </div>
                             )
@@ -137,6 +173,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar }) {
                                                 {nomsLesions[diag.id_lesio] || 'Lesió Desconeguda'}
                                             </h3>
                                             <p className={styles.lesioDate}>
+                                                {nomsMusculs[diag.part_cos] ? `${nomsMusculs[diag.part_cos]} · ` : ''}
                                                 Curada el: {dataFormatada}
                                             </p>
                                         </div>

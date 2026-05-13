@@ -32,6 +32,9 @@ export default function Page() {
   const [pageVisible, setPageVisible] = useState(true)
   const transitionRef = useRef(null)
   const [musculActual, setMusculActual] = useState(null)
+  const [idDiagnosticSessio, setIdDiagnosticSessio] = useState(null)
+
+  const [idDiagnosticFiltreHistorial, setIdDiagnosticFiltreHistorial] = useState(null)
 
   const navegarA = (novaVista, onTransition) => {
     if (transitionRef.current) clearTimeout(transitionRef.current)
@@ -72,7 +75,10 @@ export default function Page() {
         {usuariSessio && (
           <Sidebar
             vistaActual={vistaActual}
-            onNavegar={navegarA}
+            onNavegar={(vista) => {
+              if (vista === 'historial') setIdDiagnosticFiltreHistorial(null)
+              navegarA(vista)
+            }}
             onTancarSessio={tancarSessio}
             esFisio={esFisio}
           />
@@ -158,6 +164,7 @@ export default function Page() {
                 indexInicial={indexExercici}
                 fase={faseActual}
                 musculActual={musculActual}
+                idDiagnostic={idDiagnosticSessio}
                 onCompletarSessio={() => navegarA('exercicis-en-curs')}
               />
             </div>
@@ -173,21 +180,30 @@ export default function Page() {
             <HistorialDiagnostics
               perfilUsuari={perfilUsuari}
               onNavegar={navegarA}
+              onVeureHistorialSessions={(idDiagnostic) => {
+                setIdDiagnosticFiltreHistorial(idDiagnostic)
+                navegarA('historial')
+              }}
             />
           )}
 
           {vistaActual === 'historial' && (
-            <HistorialSessions perfilUsuari={perfilUsuari} />
+            <HistorialSessions
+              perfilUsuari={perfilUsuari}
+              idDiagnosticFiltre={idDiagnosticFiltreHistorial}
+              onClearFiltreHistorial={() => setIdDiagnosticFiltreHistorial(null)}
+            />
           )}
 
           {vistaActual === 'exercicis-en-curs' && (
             <ExercicisEnCurs
               onNavegar={navegarA}
-              onIniciarSessio={(exercicis, fase, muscul) => {
+              onIniciarSessio={(exercicis, fase, muscul, idDiagnostic) => {
                 setExercicisRutina(exercicis)
                 setFaseActual(fase)
                 setIndexExercici(0)
                 setMusculActual(muscul)
+                setIdDiagnosticSessio(idDiagnostic ?? null)
                 navegarA('exercici')
               }}
               perfilUsuari={perfilUsuari}
