@@ -5,6 +5,76 @@ import { supabase } from '../../utils/supabase'
 import { completarSessio } from '../utils/lesions'
 import styles from './sessioExercici.module.css'
 
+// ============================================================
+// Modal de valoració del dolor (1-10)
+// ============================================================
+function ModalDolor({ titol, subtitol, onConfirmar, variant = 'blanc' }) {
+    const [valor, setValor] = useState(null)
+
+    const colors = [
+        '#22c55e', '#4ade80', '#86efac',
+        '#fbbf24', '#f59e0b',
+        '#fb923c', '#f97316',
+        '#ef4444', '#dc2626', '#b91c1c',
+    ]
+
+    const esBlauu = variant === 'blau'
+
+    return (
+        <div className={styles.modalOverlay}>
+            <div className={`${styles.modalCard} ${esBlauu ? styles.modalCardBlau : ''}`}>
+                <h3 className={`${styles.modalTitol} ${esBlauu ? styles.modalTitolBlau : ''}`}>{titol}</h3>
+                <p className={`${styles.modalSubtitol} ${esBlauu ? styles.modalSubtitolBlau : ''}`}>{subtitol}</p>
+
+                <div className={styles.dolorGrid}>
+                    {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
+                        <button
+                            key={n}
+                            className={`${styles.dolorBtn} ${valor === n ? styles.dolorBtnSelected : ''}`}
+                            style={valor === n ? { background: colors[n - 1], borderColor: colors[n - 1] } : {}}
+                            onClick={() => setValor(n)}
+                        >
+                            {n}
+                        </button>
+                    ))}
+                </div>
+
+                <div className={styles.dolorLegenda}>
+                    <span>Sense dolor</span>
+                    <span>Dolor màxim</span>
+                </div>
+
+                {valor && (
+                    <div
+                        className={styles.dolorIndicador}
+                        style={{ color: colors[valor - 1] }}
+                    >
+                        {valor <= 3 ? 'Molt bé!' : valor <= 5 ? 'Moderat' : valor <= 7 ? 'Significatiu' : 'Molt intens'}
+                    </div>
+                )}
+
+                <button
+                    className={`${styles.modalConfirmar} ${!valor ? styles.modalConfirmarDisabled : ''} ${esBlauu ? styles.modalConfirmarBlau : ''}`}
+                    onClick={() => valor && onConfirmar(valor)}
+                    disabled={!valor}
+                >
+                    Continuar
+                </button>
+
+                <button
+                    className={`${styles.modalSaltar} ${esBlauu ? styles.modalSaltarBlau : ''}`}
+                    onClick={() => onConfirmar(null)}
+                >
+                    Saltar valoració
+                </button>
+            </div>
+        </div>
+    )
+}
+
+// ============================================================
+// Component principal: SessioExercici
+// ============================================================
 export default function SessioExercici({ exercicis = [], indexInicial = 0, fase = 1, onCompletarSessio, musculActual, idDiagnostic = null }) {
     const [index, setIndex] = useState(indexInicial)
     const [repActual, setRepActual] = useState(1)
@@ -13,15 +83,21 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
     const [cronometreFinalitzat, setCronometreFinalitzat] = useState(false)
     const [mostrarCompletada, setMostrarCompletada] = useState(false)
     const [resultCompletada, setResultCompletada] = useState(null)
-    const intervalRef = useRef(null)
     const [urlsVideo, setUrlsVideo] = useState({})
     const [mostrarPuntsFlash, setMostrarPuntsFlash] = useState(false)
     const [puntsFlash, setPuntsFlash] = useState(0)
 
+    // Dolor
+    const [mostrarModalDolor, setMostrarModalDolor] = useState(false)
+    const [mostrarModalDolorFinal, setMostrarModalDolorFinal] = useState(false)
+    const [valoracionsExercici, setValoracionsExercici] = useState([]) // [{index, dolor}]
+    const [pendentCompletarSessio, setPendentCompletarSessio] = useState(null)
+
+    const intervalRef = useRef(null)
+
     const exercici = exercicis[index]
-    const totalReps = exercici.Repeticions
-    const esUltimaRep = true
     const esUltimExercici = index === exercicis.length - 1
+    const totalReps = exercici?.Repeticions
 
     // Reset quan canvia d'exercici
     useEffect(() => {
@@ -55,6 +131,24 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
         return () => clearInterval(intervalRef.current)
     }, [cronometreActiu])
 
+    // Carregar vídeos
+    useEffect(() => {
+        const carregarUrls = async () => {
+            const ids = exercicis.map(e => e.id_exercici)
+            const { data } = await supabase
+                .from('exercici_muscul')
+                .select('id_exercici, url_video')
+                .in('id_exercici', ids)
+                .eq('id_cos', musculActual)
+            if (data) {
+                const mapa = {}
+                data.forEach(row => { mapa[row.id_exercici] = row.url_video })
+                setUrlsVideo(mapa)
+            }
+        }
+        if (musculActual && exercicis.length > 0) carregarUrls()
+    }, [musculActual, exercicis])
+
     const iniciarCronòmetre = () => { setCronometreActiu(true); setCronometreFinalitzat(false) }
     const pausarCronòmetre = () => setCronometreActiu(false)
 
@@ -75,38 +169,40 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
         setTempsRestant(exercici.duracio_segons)
     }
 
-    const handleCompletar = async () => {
-    if (!esUltimExercici) {
-        setIndex(i => i + 1)
-        return
+    // Quan clica "Completar" → primer mostrem modal de dolor per exercici
+    const handleCompletar = () => {
+        setMostrarModalDolor(true)
     }
-    const puntsGuanyats = exercicis.reduce((acc, ex) => acc + ((ex.punts || 0) * fase), 0)
-    const { data: { session } } = await supabase.auth.getSession()
-    const userDni = session?.user?.user_metadata?.dni
-    const resultat = await completarSessio(userDni, puntsGuanyats, idDiagnostic)
-    setResultCompletada({ ...resultat, puntsGuanyats })
-    setMostrarCompletada(true)
-}
 
-    useEffect(() => {
-        const carregarUrls = async () => {
-            const ids = exercicis.map(e => e.id_exercici)
+    // Després de valorar el dolor de l'exercici
+    const handleDolorExercici = (valor) => {
+        setMostrarModalDolor(false)
+        const nouValor = { index, nom: exercici.nom, dolor: valor }
+        const novaLlista = [...valoracionsExercici, nouValor]
+        setValoracionsExercici(novaLlista)
 
-            const { data } = await supabase
-                .from('exercici_muscul')
-                .select('id_exercici, url_video')
-                .in('id_exercici', ids)
-                .eq('id_cos', musculActual)
-
-            if (data) {
-                const mapa = {}
-                data.forEach(row => { mapa[row.id_exercici] = row.url_video })
-                setUrlsVideo(mapa)
-            }
+        if (!esUltimExercici) {
+            setIndex(i => i + 1)
+        } else {
+            // Últim exercici → modal de dolor final de sessió
+            setMostrarModalDolorFinal(true)
         }
+    }
 
-        if (musculActual && exercicis.length > 0) carregarUrls()
-    }, [musculActual, exercicis])
+    // Després de valorar el dolor final de la sessió → completar
+    const handleDolorFinal = async (valor) => {
+        setMostrarModalDolorFinal(false)
+        // TODO: quan la BD estigui llesta, guardar valoracionsExercici i valor a la BD
+        console.log('Valoracions exercicis:', valoracionsExercici)
+        console.log('Valoració final sessió:', valor)
+
+        const puntsGuanyats = exercicis.reduce((acc, ex) => acc + ((ex.punts || 0) * fase), 0)
+        const { data: { session } } = await supabase.auth.getSession()
+        const userDni = session?.user?.user_metadata?.dni
+        const resultat = await completarSessio(userDni, puntsGuanyats, idDiagnostic)
+        setResultCompletada({ ...resultat, puntsGuanyats })
+        setMostrarCompletada(true)
+    }
 
     const formatTemps = (s) => {
         const m = Math.floor(s / 60)
@@ -118,7 +214,18 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
     const circumferencia = 2 * Math.PI * 54
     const strokeDashoffset = circumferencia * (1 - pct / 100)
 
-    // ── Pantalla completada (tots els exercicis de la sessió)
+    const convertirYoutubeURL = (url) => {
+        if (!url) return ''
+        let videoId = ''
+        const shortMatch = url.match(/youtu\.be\/([^?]+)/)
+        if (shortMatch) videoId = shortMatch[1]
+        const longMatch = url.match(/[?&]v=([^&]+)/)
+        if (longMatch) videoId = longMatch[1]
+        if (!videoId) return url
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0`
+    }
+
+    // ── Pantalla completada ─────────────────────────────────
     if (mostrarCompletada && resultCompletada) {
         const programaAcabat = resultCompletada.completada === true
         const faseAvançada = resultCompletada.faseAvançada === true
@@ -129,37 +236,33 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
                 <div className={styles.completadaIcon} aria-hidden="true">
                     {programaAcabat ? '🏆' : '✅'}
                 </div>
-
                 <h2 className={styles.completadaTitle}>
                     {programaAcabat ? 'Programa completat!' : 'Sessió recuperada!'}
                 </h2>
-
                 {programaAcabat ? (
                     <p className={styles.completadaText}>
-                        Has completat totes les fases del programa de recuperació d&apos;aquesta lesió. Enhorabona!
+                        Has completat totes les fases del programa. Enhorabona!
                     </p>
                 ) : (
                     <>
                         <p className={styles.completadaText}>
-                            Has completat tots els exercicis d&apos;aquesta sessió i s&apos;ha registrat la teva recuperació al teu programa.
+                            Has completat tots els exercicis d&apos;aquesta sessió.
                         </p>
                         {faseAvançada && novaFase != null && (
                             <p className={styles.completadaSubtext}>
-                                Has completat les sessions d&apos;aquesta fase i passes a la <strong>fase {novaFase} de 3</strong>.
+                                Passes a la <strong>fase {novaFase} de 3</strong>.
                             </p>
                         )}
                         {!faseAvançada && (
                             <p className={styles.completadaSubtext}>
-                                Continua amb les sessions que et quedin en aquesta fase per avançar al següent nivell.
+                                Continua amb les sessions que et quedin en aquesta fase.
                             </p>
                         )}
                     </>
                 )}
-
                 <div className={styles.puntsBadge}>
                     +{resultCompletada.puntsGuanyats ?? 0} punts guanyats
                 </div>
-
                 <button type="button" className={styles.primaryButton} onClick={onCompletarSessio}>
                     Tornar a exercicis en curs
                 </button>
@@ -170,28 +273,37 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
     if (!exercici) return null
 
     const textBoto = () => {
-
         if (!esUltimExercici) return `Següent exercici: ${exercicis[index + 1]?.nom}`
         return 'Completar sessió'
     }
-    const convertirYoutubeURL = (url) => {
-        if (!url) return ''
-        let videoId = ''
-        const shortMatch = url.match(/youtu\.be\/([^?]+)/)
-        if (shortMatch) videoId = shortMatch[1]
-        const longMatch = url.match(/[?&]v=([^&]+)/)
-        if (longMatch) videoId = longMatch[1]
 
-        if (!videoId) return url
-        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0`
-    }
     return (
         <div className={styles.container}>
+            {/* Modal dolor per exercici */}
+            {mostrarModalDolor && (
+                <ModalDolor
+                    titol={`Com t'has sentit fent "${exercici.nom}"?`}
+                    subtitol="Valora el dolor que has sentit durant aquest exercici"
+                    onConfirmar={handleDolorExercici}
+                />
+            )}
+
+            {/* Modal dolor final de sessió */}
+            {mostrarModalDolorFinal && (
+                <ModalDolor
+                    titol="Com valores la sessió d'avui?"
+                    subtitol="Valora el dolor general que has sentit durant tota la sessió"
+                    onConfirmar={handleDolorFinal}
+                    variant="blau"
+                />
+            )}
+
             {mostrarPuntsFlash && (
-            <div className={styles.puntsFlash}>
-                +{puntsFlash} pts ⭐
-            </div>
-        )}
+                <div className={styles.puntsFlash}>
+                    +{puntsFlash} pts ⭐
+                </div>
+            )}
+
             <div className={styles.progressHeader}>
                 <span className={styles.progressText}>
                     Exercici {index + 1} de {exercicis.length}
@@ -206,7 +318,6 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
 
             <h2 className={styles.exerciciNom}>{exercici.nom}</h2>
 
-            {/* Tracker de repeticions */}
             <div className={styles.repsTracker}>
                 <span className={styles.repsLabel}>Repeticions necessàries: {totalReps}</span>
             </div>
@@ -235,30 +346,21 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
                     <circle cx="60" cy="60" r="54" className={styles.trackCircle} />
                     <circle
                         cx="60" cy="60" r="54"
-                        className={`
-                            ${styles.progressCircle}
-                            ${cronometreFinalitzat ? styles.progressCircleDone : ''}
-                            ${tempsRestant <= 10 && tempsRestant > 0 ? styles.progressCircleUrgent : ''}
-                            ${tempsRestant <= 20 && tempsRestant > 10 ? styles.progressCircleWarning : ''}
-                        `}
+                        className={`${styles.progressCircle} ${cronometreFinalitzat ? styles.progressCircleDone : ''} ${tempsRestant <= 10 && tempsRestant > 0 ? styles.progressCircleUrgent : ''} ${tempsRestant <= 20 && tempsRestant > 10 ? styles.progressCircleWarning : ''}`}
                         strokeDasharray={circumferencia}
                         strokeDashoffset={strokeDashoffset}
                         style={{ transition: cronometreActiu ? 'stroke-dashoffset 1s linear' : 'none' }}
                     />
                 </svg>
                 <div className={styles.cronometreCenter}>
-                    <span className={`
-                        ${styles.cronometreTemps}
-                        ${tempsRestant <= 10 && tempsRestant > 0 ? styles.cronometreTempsUrgent : ''}
-                        ${tempsRestant <= 20 && tempsRestant > 10 ? styles.cronometreTempsWarning : ''}
-                    `}>
+                    <span className={`${styles.cronometreTemps} ${tempsRestant <= 10 && tempsRestant > 0 ? styles.cronometreTempsUrgent : ''} ${tempsRestant <= 20 && tempsRestant > 10 ? styles.cronometreTempsWarning : ''}`}>
                         {formatTemps(tempsRestant)}
-                </span>
-                <span className={styles.cronometreLabel}>
-                    {cronometreFinalitzat ? '✓ fet' : cronometreActiu ? 'en curs' : 'preparat'}
-                </span>
+                    </span>
+                    <span className={styles.cronometreLabel}>
+                        {cronometreFinalitzat ? '✓ fet' : cronometreActiu ? 'en curs' : 'preparat'}
+                    </span>
+                </div>
             </div>
-        </div>
 
             <div className={styles.cronometreControls}>
                 {!cronometreActiu && !cronometreFinalitzat && (
@@ -271,7 +373,7 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
                         Pausar
                     </button>
                 )}
-                {(!cronometreFinalitzat && tempsRestant < exercici.duracio_segons) && (
+                {!cronometreFinalitzat && tempsRestant < exercici.duracio_segons && (
                     <button className={styles.doneButton} onClick={finalitzarCronometre}>
                         Fet
                     </button>
@@ -294,7 +396,6 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
             >
                 {textBoto()}
             </button>
-
         </div>
     )
 }
