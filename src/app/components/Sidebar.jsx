@@ -1,6 +1,7 @@
 'use client'
 
 import styles from './Sidebar.module.css'
+import { useHistorial } from '../hooks/useHistorial'
 
 const seccionsPackient = [
     { id: 'inici', label: 'Inici' },
@@ -16,15 +17,27 @@ const secciosFisio = [
     { id: 'perfil', label: 'Perfil' },
 ]
 
-export default function Sidebar({ vistaActual, onNavegar, onTancarSessio, esFisio }) {
+export default function Sidebar({ vistaActual, onNavegar, onTancarSessio, esFisio, perfilUsuari }) {
     const seccions = esFisio ? secciosFisio : seccionsPackient
+    
+    // Obtenir racha només si és pacient
+    const dni = !esFisio ? perfilUsuari?.dni : null;
+    const { racha } = useHistorial(dni);
 
     return (
         <aside className={styles.sidebar}>
-            <div className={styles.logo}>
-                <span className={styles.logoText}>
-                    Recover<span className={styles.logoAccent}>IT</span>
-                </span>
+            <div className={styles.headerContainer}>
+                <div className={styles.logo}>
+                    <span className={styles.logoText}>
+                        Recover<span className={styles.logoAccent}>IT</span>
+                    </span>
+                </div>
+                {!esFisio && racha > 1 && (
+                    <div className={styles.rachaBadge} title={`${racha} dies seguits completant sessions`}>
+                        <span className={styles.rachaIcon}>🔥</span>
+                        <span className={styles.rachaNum}>{racha}</span>
+                    </div>
+                )}
             </div>
 
             <nav className={styles.nav}>

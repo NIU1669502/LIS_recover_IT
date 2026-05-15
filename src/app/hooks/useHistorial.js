@@ -13,6 +13,8 @@ export function useHistorial(dni) {
     const [carregant, setCarregant] = useState(true)
     const [error, setError] = useState(null)
 
+    const [racha, setRacha] = useState(0)
+
     const agruparPerDia = (dades) => {
         const grups = {}
         dades.forEach(item => {
@@ -21,6 +23,50 @@ export function useHistorial(dni) {
             grups[dia].push(item)
         })
         return grups
+    }
+
+    const calcularRacha = (sessionsArr) => {
+        if (!sessionsArr || sessionsArr.length === 0) return 0;
+        
+        // Obtenir dates úniques (només la part de la data YYYY-MM-DD en hora local)
+        const datesUniques = [...new Set(sessionsArr.map(s => {
+            const d = new Date(s.data_realitzacio);
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }))];
+        
+        // Ordenar dates descendentment
+        datesUniques.sort((a, b) => b.localeCompare(a));
+
+        const avui = new Date();
+        const strAvui = `${avui.getFullYear()}-${String(avui.getMonth() + 1).padStart(2, '0')}-${String(avui.getDate()).padStart(2, '0')}`;
+        
+        const ahir = new Date(avui);
+        ahir.setDate(ahir.getDate() - 1);
+        const strAhir = `${ahir.getFullYear()}-${String(ahir.getMonth() + 1).padStart(2, '0')}-${String(ahir.getDate()).padStart(2, '0')}`;
+
+        // Si l'última sessió no és ni d'avui ni d'ahir, s'ha trencat la racha
+        if (datesUniques[0] !== strAvui && datesUniques[0] !== strAhir) {
+            return 0;
+        }
+
+        let rachaActual = 1;
+        let dataActualStr = datesUniques[0];
+
+        // Comprovar dies consecutius cap enrere
+        for (let i = 1; i < datesUniques.length; i++) {
+            const prevDateObj = new Date(dataActualStr);
+            prevDateObj.setDate(prevDateObj.getDate() - 1);
+            const prevExpectedStr = `${prevDateObj.getFullYear()}-${String(prevDateObj.getMonth() + 1).padStart(2, '0')}-${String(prevDateObj.getDate()).padStart(2, '0')}`;
+            
+            if (datesUniques[i] === prevExpectedStr) {
+                rachaActual++;
+                dataActualStr = datesUniques[i];
+            } else {
+                break;
+            }
+        }
+        
+        return rachaActual;
     }
 
     useEffect(() => {
@@ -62,8 +108,11 @@ export function useHistorial(dni) {
             if (sessionsRes.error) {
                 setError(sessionsRes.error.message)
                 setSessions([])
+                setRacha(0)
             } else {
-                setSessions(sessionsRes.data || [])
+                const fetchedSessions = sessionsRes.data || [];
+                setSessions(fetchedSessions)
+                setRacha(calcularRacha(fetchedSessions))
             }
 
             if (exercicisRes.error) {
@@ -78,8 +127,9 @@ export function useHistorial(dni) {
         carregar()
 
         // ── Realtime: actualitzar quan s'insereix una nova sessió ──
+        const channelName = `historial-sessions-${dni}-${Math.random().toString(36).substring(2, 9)}`
         const canal = supabase
-            .channel(`historial-sessions-${dni}`)
+            .channel(channelName)
             .on(
                 'postgres_changes',
                 { event: '*', schema: 'public', table: 'historial_sessions', filter: `dni_pacient=eq.${dni}` },
@@ -90,5 +140,5 @@ export function useHistorial(dni) {
         return () => { supabase.removeChannel(canal) }
     }, [dni])
 
-    return { sessions, historial, carregant, error }
+    return { sessions, historial, carregant, error, racha }
 }

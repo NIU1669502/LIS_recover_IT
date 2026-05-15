@@ -75,6 +75,7 @@ export default function Page() {
             onNavegar={navegarA}
             onTancarSessio={tancarSessio}
             esFisio={esFisio}
+            perfilUsuari={perfilUsuari}
           />
         )}
 

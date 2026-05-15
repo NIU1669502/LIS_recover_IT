@@ -17,11 +17,19 @@
     box-sizing: border-box; /* IMPORTANT: Evita que el padding faci créixer el 100vh */
 }
 
-/* Logo */
-.logo {
+.headerContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 0 1.5rem 2rem 1.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     margin-bottom: 1.5rem;
+}
+
+/* Logo */
+.logo {
+    display: flex;
+    align-items: center;
 }
 
 .logoText {
@@ -36,6 +44,36 @@
     background: linear-gradient(135deg, #60a5fa, #3b82f6);
     -webkit-background-clip: text;
     background-clip: text;
+}
+
+/* Racha Badge (Fueguito) */
+.rachaBadge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, #fb923c, #ef4444);
+    padding: 4px 10px;
+    border-radius: 99px;
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+    animation: pulseFlame 2s infinite ease-in-out;
+}
+
+.rachaIcon {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.rachaNum {
+    color: white;
+    font-weight: 800;
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
+@keyframes pulseFlame {
+    0% { transform: scale(1); box-shadow: 0 0 12px rgba(239, 68, 68, 0.4); }
+    50% { transform: scale(1.05); box-shadow: 0 0 18px rgba(239, 68, 68, 0.6); }
+    100% { transform: scale(1); box-shadow: 0 0 12px rgba(239, 68, 68, 0.4); }
 }
 
 /* Nav */

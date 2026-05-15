@@ -57,8 +57,9 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar }) {
 
         // ── Realtime: actualitzar quan canvia el diagnòstic del pacient ──
         if (perfilUsuari?.dni) {
+            const channelName = `historial-diag-${perfilUsuari.dni}-${Math.random().toString(36).substring(2, 9)}`
             canalRef.current = supabase
-                .channel(`historial-diag-${perfilUsuari.dni}`)
+                .channel(channelName)
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'diagnostic', filter: `dni_pacient=eq.${perfilUsuari.dni}` }, carregarDades)
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'historial_sessions', filter: `dni_pacient=eq.${perfilUsuari.dni}` }, carregarDades)
                 .subscribe()
