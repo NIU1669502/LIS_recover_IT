@@ -143,7 +143,7 @@ export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0 }) {
                             strokeDasharray="6 4" opacity="0.6"
                         />
                         <text
-                            x={W - PAD.right + 4} y={PAD.top + 4}
+                            x={W - PAD.right + 2.25} y={PAD.top + 4}
                             fontSize="10" fill="#22c55e" fontFamily="Inter, sans-serif"
                         >
                             Meta

@@ -320,7 +320,7 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
                                         </button>
                                     ) : (
                                         <div className={styles.confirmInlineRow}>
-                                            <span className={styles.confirmText}>Segur? Es finalitzarà el diagnòstic actiu.</span>
+                                            <span className={styles.confirmText}>Segur? El teu fisio deixarà de fer-te seguiment.</span>
                                             <button onClick={handleDesassignar} disabled={desassignant} className={styles.dangerButton}>
                                                 {desassignant ? '...' : 'Sí'}
                                             </button>

@@ -8,9 +8,10 @@ import { useHistorial } from '../hooks/useHistorial'
 // Mostra una entrada per cada sessió d'exercicis completada
 // indicant: data, fase i lesió associada.
 // ============================================================
-export default function HistorialSessions({ perfilUsuari }) {
+export default function HistorialSessions({ perfilUsuari, idDiagnosticFiltre = null, onClearFiltreHistorial }) {
     const dni = perfilUsuari?.dni
-    const { sessions, carregant, error } = useHistorial(dni)
+    const teFiltre = idDiagnosticFiltre != null && idDiagnosticFiltre !== ''
+    const { sessions, carregant, error } = useHistorial(dni, teFiltre ? idDiagnosticFiltre : null)
 
     const formatDia = (iso) => {
         if (!iso) return '—'
@@ -48,11 +49,28 @@ export default function HistorialSessions({ perfilUsuari }) {
         <section className={styles.container}>
             <h2 className={styles.title}>Historial de sessions</h2>
 
+            {teFiltre && (
+                <div className={styles.filtreBanner}>
+                    <p className={styles.filtreBannerText}>
+                        Mostrant només les sessions d&apos;aquesta lesió en curs.
+                    </p>
+                    {onClearFiltreHistorial && (
+                        <button type="button" className={styles.filtreBannerButton} onClick={onClearFiltreHistorial}>
+                            Veure totes les sessions
+                        </button>
+                    )}
+                </div>
+            )}
+
             {carregant && <p className={styles.muted}>Carregant historial...</p>}
             {error && <p className={styles.error}>Error: {error}</p>}
 
             {!carregant && sessions.length === 0 && (
-                <p className={styles.muted}>Encara no hi ha sessions registrades.</p>
+                <p className={styles.muted}>
+                    {teFiltre
+                        ? 'Encara no hi ha sessions registrades per aquesta lesió.'
+                        : 'Encara no hi ha sessions registrades.'}
+                </p>
             )}
 
             {!carregant && sessions.length > 0 && (

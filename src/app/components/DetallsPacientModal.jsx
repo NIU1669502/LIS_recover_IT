@@ -37,35 +37,75 @@ async function getDetallsPacient(dniPacient) {
         .eq('dni_pacient', dniPacient)
         .order('id_diagnostic', { ascending: false })
 
+    // ── 3. Relacions fisio-pacient per saber quins estan confirmats ──
+    const { data: relacions } = await supabase
+        .from('relacio_fisio_pacient')
+        .select('id_lesio, part_cos, confirmat, descripcio, codi_validacio')
+        .eq('dni_pacient', dniPacient)
+
     // Enriquir cada diagnòstic amb noms de lesió i múscul
     let diagnosticsEnriquits = []
+    let diagnosticsPendents = []
+
+    const allLesions = [
+        ...(diagnostics || []).map(d => d.id_lesio),
+        ...(relacions || []).map(r => r.id_lesio)
+    ]
+    const allMusculs = [
+        ...(diagnostics || []).map(d => d.part_cos),
+        ...(relacions || []).map(r => r.part_cos)
+    ]
+
+    const idsLesions = [...new Set(allLesions.filter(Boolean))]
+    const idsMusculs = [...new Set(allMusculs.filter(Boolean))]
+
+    const [{ data: lesions }, { data: musculs }] = await Promise.all([
+        idsLesions.length > 0
+            ? supabase.from('lesions').select('id_lesio, nom').in('id_lesio', idsLesions)
+            : Promise.resolve({ data: [] }),
+        idsMusculs.length > 0
+            ? supabase.from('musculs').select('id_cos, nom').in('id_cos', idsMusculs)
+            : Promise.resolve({ data: [] }),
+    ])
+
+    const nomLesions = Object.fromEntries((lesions || []).map(l => [l.id_lesio, l.nom]))
+    const nomMusculs = Object.fromEntries((musculs || []).map(m => [m.id_cos, m.nom]))
+
     if (diagnostics && diagnostics.length > 0) {
-        const idsLesions = [...new Set(diagnostics.map(d => d.id_lesio).filter(Boolean))]
-        const idsMusculs = [...new Set(diagnostics.map(d => d.part_cos).filter(Boolean))]
-
-        const [{ data: lesions }, { data: musculs }] = await Promise.all([
-            idsLesions.length > 0
-                ? supabase.from('lesions').select('id_lesio, nom').in('id_lesio', idsLesions)
-                : Promise.resolve({ data: [] }),
-            idsMusculs.length > 0
-                ? supabase.from('musculs').select('id_cos, nom').in('id_cos', idsMusculs)
-                : Promise.resolve({ data: [] }),
-        ])
-
-        const nomLesions = Object.fromEntries((lesions || []).map(l => [l.id_lesio, l.nom]))
-        const nomMusculs = Object.fromEntries((musculs || []).map(m => [m.id_cos, m.nom]))
-
-        diagnosticsEnriquits = diagnostics.map(d => ({
-            ...d,
-            nomLesio: nomLesions[d.id_lesio] || 'Desconeguda',
-            nomMuscul: nomMusculs[d.part_cos] || 'Desconegut',
-        }))
+        // Buscar si la relació corresponent està confirmada
+        // Fem match per id_lesio + part_cos
+        diagnosticsEnriquits = diagnostics.map(d => {
+            const relacio = (relacions || []).find(
+                r => r.id_lesio === d.id_lesio && r.part_cos === d.part_cos
+            )
+            return {
+                ...d,
+                nomLesio: nomLesions[d.id_lesio] || 'Desconeguda',
+                nomMuscul: nomMusculs[d.part_cos] || 'Desconegut',
+                confirmat: relacio ? relacio.confirmat : true, // si no hi ha relació, assumim confirmat
+            }
+        })
     }
 
-    // Diagnòstic actiu = el primer no finalitzat, o el més recent si tots estan finalitzats
-    const diagnostic = diagnosticsEnriquits.find(d => !d.finalitzat) || diagnosticsEnriquits[0] || null
+    if (relacions && relacions.length > 0) {
+        diagnosticsPendents = relacions
+            .filter(r => r.confirmat === false)
+            .map((r, index) => ({
+                id_diagnostic_pendent: `pendent-${index}`, // fake ID for key
+                nomLesio: nomLesions[r.id_lesio] || 'Desconeguda',
+                nomMuscul: nomMusculs[r.part_cos] || 'Desconegut',
+                descripcio: r.descripcio || 'Sense descripció',
+                codi_validacio: r.codi_validacio,
+                confirmat: false,
+            }))
+    }
 
-    // ── 3. Historial de sessions (totes, per a la llista) ────────
+    // Diagnòstics actius = tots els no finalitzats
+    const diagnosticsActius = diagnosticsEnriquits.filter(d => !d.finalitzat)
+    // Per compatibilitat, mantenim "diagnostic" com el primer actiu
+    const diagnostic = diagnosticsActius[0] || diagnosticsEnriquits[0] || null
+
+    // ── 4. Historial de sessions ─────────────────────────────
     const { data: sessions } = await supabase
         .from('historial_sessions')
         .select(`
@@ -73,28 +113,37 @@ async function getDetallsPacient(dniPacient) {
             data_realitzacio,
             fase,
             punts_obtinguts,
-            lesions ( nom )
+            diagnostic!inner (
+                musculs:part_cos ( nom )
+            ),
+            lesions (nom)
         `)
         .eq('dni_pacient', dniPacient)
+        .in('id_diagnostic', diagnosticsActius.map(d => d.id_diagnostic))
         .order('data_realitzacio', { ascending: false })
         .limit(20)
 
-    // ── 4. Sessions NOMÉS del diagnòstic actiu (per a la gràfica, ASC) ──
+    // ── 5. Sessions de TOTS els diagnòstics actius per a la gràfica ──
     let sessionsGraficaAsc = []
-    const diagActiu = diagnosticsEnriquits.find(d => !d.finalitzat) || null
-    if (diagActiu?.id_diagnostic) {
+    if (diagnosticsActius.length > 0) {
+        const ids = diagnosticsActius.map(d => d.id_diagnostic)
         const { data: sessGrafica } = await supabase
             .from('historial_sessions')
             .select('data_realitzacio, punts_obtinguts')
             .eq('dni_pacient', dniPacient)
-            .eq('id_diagnostic', diagActiu.id_diagnostic)
+            .in('id_diagnostic', ids)
             .order('data_realitzacio', { ascending: true })
         sessionsGraficaAsc = sessGrafica || []
     }
 
+    const puntsFinalsTotals = diagnosticsActius.reduce((acc, d) => acc + (d.puntsFinals ?? 0), 0)
+
     return {
         usuari,
         diagnostic,
+        diagnosticsActius,
+        diagnosticsPendents,
+        puntsFinalsTotals,
         historialLesions: diagnosticsEnriquits,
         sessions: sessions || [],
         sessionsGraficaAsc,
@@ -184,63 +233,96 @@ export default function DetallsPacientModal({ dniPacient, nomPacient, onTancar }
 
                         <div className={styles.divider} />
 
-                        {/* ── Diagnòstic actiu ── */}
+                        {/* ── Diagnòstics pendents ── */}
+                        {dades?.diagnosticsPendents?.length > 0 && (
+                            <>
+                                <section className={styles.seccio}>
+                                    <p className={styles.seccioTitol}>
+                                        <span className={styles.seccioIcon}>⏳</span>
+                                        Pendents de confirmació
+                                        <span className={styles.comptador}>{dades.diagnosticsPendents.length}</span>
+                                    </p>
+                                    {dades.diagnosticsPendents.map((diag) => (
+                                        <div key={diag.id_diagnostic_pendent} className={styles.diagCard}>
+                                            <div className={styles.diagCardHeader}>
+                                                <div>
+                                                    <span className={styles.diagNom}>{diag.nomLesio + " "}</span>
+                                                    <span className={styles.diagMuscul}>{diag.nomMuscul}</span>
+                                                </div>
+                                            </div>
+
+                                            {diag.descripcio && diag.descripcio !== 'Sense descripció' && (
+                                                <div className={styles.descripcioBox}>
+                                                    <p className={styles.descripcioText}>
+                                                        {diag.descripcio}
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            {diag.codi_validacio && (
+                                                <div className={styles.progresBox} style={{ marginTop: '0.75rem' }}>
+                                                    <p className={styles.progresDetall}>
+                                                        Codi de validació: <strong>{diag.codi_validacio}</strong>
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </section>
+                                <div className={styles.divider} />
+                            </>
+                        )}
+
+                        {/* ── Diagnòstics actius ── */}
                         <section className={styles.seccio}>
                             <p className={styles.seccioTitol}>
                                 <span className={styles.seccioIcon}>🩺</span>
-                                Diagnòstic actiu
+                                Diagnòstics actius
+                                <span className={styles.comptador}>{dades?.diagnosticsActius?.length ?? 0}</span>
                             </p>
 
-                            {diag ? (
-                                <>
-                                    <div className={styles.infoGrid}>
-                                        <div className={styles.infoItem}>
-                                            <span className={styles.infoLabel}>Lesió</span>
-                                            <span className={styles.infoValue}>{diag.nomLesio}</span>
-                                        </div>
-                                        <div className={styles.infoItem}>
-                                            <span className={styles.infoLabel}>Múscul / Zona</span>
-                                            <span className={styles.infoValue}>{diag.nomMuscul}</span>
-                                        </div>
-                                        <div className={styles.infoItem}>
-                                            <span className={styles.infoLabel}>Fase actual</span>
-                                            <span className={styles.infoValue}>
-                                                {diag.finalitzat
-                                                    ? <span className={styles.badgeComplet}>Completat</span>
-                                                    : <span className={styles.badgeFase}>Fase {diag.fase_actual}</span>
-                                                }
-                                            </span>
-                                        </div>
-                                        <div className={styles.infoItem}>
-                                            <span className={styles.infoLabel}>Sessions completades</span>
-                                            <span className={styles.infoValue}>{diag.num_sessions ?? 0}</span>
-                                        </div>
-                                    </div>
+                            {dades?.diagnosticsActius?.length > 0 ? (
+                                dades.diagnosticsActius.map((diag) => {
+                                    const progres = diag.puntsFinals > 0
+                                        ? Math.min(Math.round((diag.punts_recuperacio / diag.puntsFinals) * 100), 100)
+                                        : 0
 
-                                    {diag.descripcio && (
-                                        <div className={styles.descripcioBox}>
-                                            <span className={styles.infoLabel}>Descripció clínica</span>
-                                            <p className={styles.descripcioText}>{diag.descripcio}</p>
-                                        </div>
-                                    )}
+                                    return (
+                                        <div key={diag.id_diagnostic} className={styles.diagCard}>
+                                            <div className={styles.diagCardHeader}>
+                                                <div>
+                                                    <span className={styles.diagNom}>{diag.nomLesio + " "}</span>
+                                                    <span className={styles.diagMuscul}>{diag.nomMuscul}</span>
+                                                </div>
+                                                <div className={styles.diagBadges}>
+                                                    <span className={styles.badgeFase}>Fase {diag.fase_actual}</span>
+                                                    {diag.confirmat === false && (
+                                                        <span className={styles.badgeNoConfirmat}>No confirmat</span>
+                                                    )}
+                                                </div>
+                                            </div>
 
-                                    {/* Barra de progrés */}
-                                    <div className={styles.progresBox}>
-                                        <div className={styles.progresCapcalera}>
-                                            <span className={styles.progresLabel}>Progrés de recuperació</span>
-                                            <span className={styles.progresNum}>{progres}%</span>
+                                            {diag.descripcio && diag.descripcio !== 'Sense descripció' && (
+                                                <div className={styles.descripcioBox}>
+                                                    <p className={styles.descripcioText}>{diag.descripcio}</p>
+                                                </div>
+                                            )}
+
+                                            <div className={styles.progresBox}>
+                                                <div className={styles.progresCapcalera}>
+                                                    <span className={styles.progresLabel}>Progrés de recuperació</span>
+                                                    <span className={styles.progresNum}>{progres}%</span>
+                                                </div>
+                                                <div className={styles.progresBarBg}>
+                                                    <div className={styles.progresBarFill} style={{ width: `${progres}%` }} />
+                                                </div>
+                                                <p className={styles.progresDetall}>
+                                                    {diag.punts_recuperacio ?? 0} / {diag.puntsFinals ?? 0} punts · {diag.num_sessions ?? 0} sessions
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className={styles.progresBarBg}>
-                                            <div
-                                                className={styles.progresBarFill}
-                                                style={{ width: `${progres}%` }}
-                                            />
-                                        </div>
-                                        <p className={styles.progresDetall}>
-                                            {diag.punts_recuperacio ?? 0} / {diag.puntsFinals ?? 0} punts
-                                        </p>
-                                    </div>
-                                </>
+                                    )
+                                })
                             ) : (
                                 <p className={styles.senseDades}>Aquest pacient no té cap diagnòstic actiu.</p>
                             )}
@@ -252,7 +334,7 @@ export default function DetallsPacientModal({ dniPacient, nomPacient, onTancar }
                         <section className={styles.seccio}>
                             <p className={styles.seccioTitol}>
                                 <span className={styles.seccioIcon}>📋</span>
-                                Historial de sessions
+                                Historial de sessions dels diagnòstics actius
                                 <span className={styles.comptador}>{dades?.sessions?.length ?? 0}</span>
                             </p>
 
@@ -263,6 +345,9 @@ export default function DetallsPacientModal({ dniPacient, nomPacient, onTancar }
                                             <div className={styles.sessioData}>{formatDia(s.data_realitzacio)}</div>
                                             <div className={styles.sessioBadge}>Fase {s.fase}</div>
                                             <div className={styles.sessioLesio}>{s.lesions?.nom || '—'}</div>
+                                            <div className={styles.sessioLesio}>
+                                                {s.diagnostic?.musculs?.nom || '—'}
+                                            </div>
                                             <div className={styles.sessioPunts}>+{s.punts_obtinguts ?? 0} pts</div>
                                         </div>
                                     ))}
@@ -315,7 +400,7 @@ export default function DetallsPacientModal({ dniPacient, nomPacient, onTancar }
                             </p>
                             <GraficaRecuperacio
                                 sessions={dades?.sessionsGraficaAsc || []}
-                                puntsFinals={dades?.diagnostic?.puntsFinals ?? 0}
+                                puntsFinals={dades?.puntsFinalsTotals ?? 0}
                             />
                         </section>
 

@@ -12,6 +12,49 @@
     letter-spacing: -0.03em;
 }
 
+.filtreBanner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(to right, #eff6ff, #ffffff);
+    border: 1px solid #bfdbfe;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.06);
+}
+
+.filtreBannerText {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1e40af;
+    line-height: 1.45;
+    flex: 1;
+    min-width: 200px;
+}
+
+.filtreBannerButton {
+    padding: 0.55rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+    color: #1e40af;
+    background: #ffffff;
+    border: 1px solid #93c5fd;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    white-space: nowrap;
+}
+
+.filtreBannerButton:hover {
+    background: #dbeafe;
+    border-color: #3b82f6;
+}
+
 .muted {
     color: #64748b;
     font-size: 1.05rem;

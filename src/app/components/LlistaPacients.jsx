@@ -91,6 +91,9 @@ function TarjetaPacient({ pacient, onCanvi }) {
                     <button onClick={() => setMostrarDetalls(true)} className={styles.veureDetallsBtn}>
                         Veure detalls pacient
                     </button>
+                    <button onClick={() => desassignarFisio(pacient.dni)} className={styles.cancelarPendentBtn}>
+                        Cancel·lar assignació
+                    </button>
                 </div>
             ) : pacient.diagnostic ? (
                 // ── Cas normal: diagnòstic actiu amb progrés ─────────────
@@ -122,7 +125,7 @@ function TarjetaPacient({ pacient, onCanvi }) {
                         </button>
                     ) : (
                         <div className={styles.confirmInlineRow}>
-                            <span className={styles.confirmText}>Segur? Es finalitzarà el diagnòstic actiu del pacient.</span>
+                            <span className={styles.confirmText}>Segur? Deixarà de fer-lo seguiment.</span>
                             <button onClick={handleDesassignar} disabled={desassignant} className={styles.desvincularBtnActiu}>
                                 {desassignant ? '...' : 'Sí'}
                             </button>

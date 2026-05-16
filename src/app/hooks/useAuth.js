@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../utils/supabase'
 import { showToast } from '../utils/toast'
+import { validarDniNouUsuari, validarEmailNouUsuari } from '../utils/validacioRegistre'
 
 export function useAuth(navegarA) {
     const [usuariSessio, setUsuariSessio] = useState(null)
@@ -51,22 +52,28 @@ export function useAuth(navegarA) {
             return null
         }
 
-        // ✅ Afegim punts del diagnòstic actiu al perfil
-        const { data: diagnosticData } = await supabase
+        // Punts de recuperació: suma de tots els diagnòstics actius (no només un)
+        const { data: diagnosticsActius } = await supabase
             .from('diagnostic')
             .select('punts_recuperacio, puntsFinals')
             .eq('dni_pacient', dni)
             .eq('finalitzat', false)
-            .order('id_diagnostic', { ascending: false })
-            .limit(1)
-            .maybeSingle()
+
+        const puntsRecuperacioTotal = (diagnosticsActius ?? []).reduce(
+            (acc, row) => acc + Number(row.punts_recuperacio ?? 0),
+            0
+        )
+        const puntsFinalsTotal = (diagnosticsActius ?? []).reduce(
+            (acc, row) => acc + Number(row.puntsFinals ?? 0),
+            0
+        )
 
         // ✅ Spread per evitar mutar l'objecte original
         // ✅ ?? en lloc de || per no sobreescriure el valor 0
         const perfil = data ? {
             ...data,
-            punts_recuperacio: diagnosticData?.punts_recuperacio ?? 0,
-            puntsFinals: diagnosticData?.puntsFinals ?? 0
+            punts_recuperacio: puntsRecuperacioTotal,
+            puntsFinals: puntsFinalsTotal,
         } : null
 
         setPerfilUsuari(perfil)
@@ -133,20 +140,35 @@ export function useAuth(navegarA) {
             return
         }
 
+        const validacioDni = validarDniNouUsuari(dni)
+        if (!validacioDni.valid) {
+            setErrorAuth(validacioDni.error)
+            return
+        }
+
+        const validacioEmail = validarEmailNouUsuari(email)
+        if (!validacioEmail.valid) {
+            setErrorAuth(validacioEmail.error)
+            return
+        }
+
+        const dniNormalitzat = validacioDni.dniNormalitzat
+        const emailNormalitzat = validacioEmail.email
+
         setErrorAuth('')
         setCarregantAuth(true)
         try {
             const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-                email,
+                email: emailNormalitzat,
                 password,
-                options: { data: { dni, nom, es_fisioterapeuta: false } },
+                options: { data: { dni: dniNormalitzat, nom, es_fisioterapeuta: false } },
             })
 
             if (signUpError) { setErrorAuth(signUpError.message); return }
 
             const { error: upsertError } = await supabase
                 .from('usuaris')
-                .upsert({ dni, nom, es_fisioterapeuta: false }, { onConflict: 'dni' })
+                .upsert({ dni: dniNormalitzat, nom, es_fisioterapeuta: false }, { onConflict: 'dni' })
 
             if (upsertError) {
                 setErrorAuth(`Usuari creat a Auth però no guardat a usuaris: ${upsertError.message}`)
@@ -161,8 +183,8 @@ export function useAuth(navegarA) {
                     .eq('dni', user.user_metadata.dni)
                     .maybeSingle()
 
-                // ✅ Nou usuari, punts_recuperacio serà 0
-                const perfil = perfilData ? { ...perfilData, punts_recuperacio: 0 } : null
+                // Nou usuari sense diagnòstics actius encara
+                const perfil = perfilData ? { ...perfilData, punts_recuperacio: 0, puntsFinals: 0 } : null
 
                 navegarA('test', () => {
                     setUsuariSessio(user)

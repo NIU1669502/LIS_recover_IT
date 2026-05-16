@@ -5,7 +5,7 @@ import { supabase } from '../../utils/supabase'
 import { completarSessio } from '../utils/lesions'
 import styles from './sessioExercici.module.css'
 
-export default function SessioExercici({ exercicis = [], indexInicial = 0, fase = 1, onCompletarSessio, musculActual }) {
+export default function SessioExercici({ exercicis = [], indexInicial = 0, fase = 1, onCompletarSessio, musculActual, idDiagnostic = null }) {
     const [index, setIndex] = useState(indexInicial)
     const [repActual, setRepActual] = useState(1)
     const [tempsRestant, setTempsRestant] = useState(null)
@@ -83,7 +83,7 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
     const puntsGuanyats = exercicis.reduce((acc, ex) => acc + ((ex.punts || 0) * fase), 0)
     const { data: { session } } = await supabase.auth.getSession()
     const userDni = session?.user?.user_metadata?.dni
-    const resultat = await completarSessio(userDni, puntsGuanyats)
+    const resultat = await completarSessio(userDni, puntsGuanyats, idDiagnostic)
     setResultCompletada({ ...resultat, puntsGuanyats })
     setMostrarCompletada(true)
 }
@@ -118,24 +118,50 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
     const circumferencia = 2 * Math.PI * 54
     const strokeDashoffset = circumferencia * (1 - pct / 100)
 
-    // ── Pantalla completada ────────a
+    // ── Pantalla completada (tots els exercicis de la sessió)
     if (mostrarCompletada && resultCompletada) {
+        const programaAcabat = resultCompletada.completada === true
+        const faseAvançada = resultCompletada.faseAvançada === true
+        const novaFase = resultCompletada.novaFase
+
         return (
             <div className={styles.completadaContainer}>
+                <div className={styles.completadaIcon} aria-hidden="true">
+                    {programaAcabat ? '🏆' : '✅'}
+                </div>
 
                 <h2 className={styles.completadaTitle}>
-                    {resultCompletada.completada ? 'Programa completat!' : 'Sessió completada!'}
+                    {programaAcabat ? 'Programa completat!' : 'Sessió recuperada!'}
                 </h2>
-                <p className={styles.completadaText}>
-                    {resultCompletada.completada
-                        ? 'Has completat totes les fases del programa. Enhorabona!'
-                        : `Molt bé! Ara estàs a la Fase ${resultCompletada.novaFase}.`}
-                </p>
+
+                {programaAcabat ? (
+                    <p className={styles.completadaText}>
+                        Has completat totes les fases del programa de recuperació d&apos;aquesta lesió. Enhorabona!
+                    </p>
+                ) : (
+                    <>
+                        <p className={styles.completadaText}>
+                            Has completat tots els exercicis d&apos;aquesta sessió i s&apos;ha registrat la teva recuperació al teu programa.
+                        </p>
+                        {faseAvançada && novaFase != null && (
+                            <p className={styles.completadaSubtext}>
+                                Has completat les sessions d&apos;aquesta fase i passes a la <strong>fase {novaFase} de 3</strong>.
+                            </p>
+                        )}
+                        {!faseAvançada && (
+                            <p className={styles.completadaSubtext}>
+                                Continua amb les sessions que et quedin en aquesta fase per avançar al següent nivell.
+                            </p>
+                        )}
+                    </>
+                )}
+
                 <div className={styles.puntsBadge}>
-                    +{resultCompletada.puntsGuanyats} punts guanyats
+                    +{resultCompletada.puntsGuanyats ?? 0} punts guanyats
                 </div>
-                <button className={styles.primaryButton} onClick={onCompletarSessio}>
-                    Tornar als exercicis
+
+                <button type="button" className={styles.primaryButton} onClick={onCompletarSessio}>
+                    Tornar a exercicis en curs
                 </button>
             </div>
         )

@@ -150,13 +150,5 @@ export async function desassignarFisio(dniPacient) {
     if (errorDelete) {
         return { ok: false, missatge: errorDelete.message }
     }
-
-    // ── 3. Finalitzar el diagnòstic actiu (si n'hi ha) ───────
-    await supabase
-        .from('diagnostic')
-        .update({ finalitzat: true })
-        .eq('dni_pacient', dniPacient)
-        .eq('finalitzat', false)
-
     return { ok: true }
 }

@@ -289,6 +289,28 @@
     transform: scale(0.98);
 }
 
+.cancelarPendentBtn {
+    margin-top: 16px;
+    padding: 8px 16px;
+    width: 100%;
+    background: #eb2c25;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    margin-bottom: 8px;
+}
+
+.cancelarPendentBtn:hover {
+    background: #d88d1d;
+}
+
+.cancelarPendentBtn:active {
+    transform: scale(0.98);
+}
 .desvincularBtn {
     margin-top: 16px;
     padding: 8px 16px;

@@ -6,7 +6,6 @@ import { processarTestDiagnostic } from './utils/lesions'
 import SessioExercici from './components/SessioExercici'
 import ToastContainer from './components/ToastContainer'
 
-
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
 import LoginForm from './components/LoginForm'
@@ -32,6 +31,9 @@ export default function Page() {
   const [pageVisible, setPageVisible] = useState(true)
   const transitionRef = useRef(null)
   const [musculActual, setMusculActual] = useState({ id_cos: 0, nom: '' })
+  const [idDiagnosticSessio, setIdDiagnosticSessio] = useState(null)
+  const [idDiagnosticFiltreHistorial, setIdDiagnosticFiltreHistorial] = useState(null)
+  const [idDiagnosticPreseleccionat, setIdDiagnosticPreseleccionat] = useState(null)
 
   const navegarA = (novaVista, onTransition) => {
     if (transitionRef.current) clearTimeout(transitionRef.current)
@@ -43,11 +45,7 @@ export default function Page() {
       setPageVisible(true)
     }, 220)
   }
-  useEffect(() => {
-    if (vistaActual === 'perfil' && usuariSessio) {
-      obtenirPerfil(usuariSessio)
-    }
-  }, [vistaActual])
+
   const {
     usuariSessio, perfilUsuari,
     errorAuth,
@@ -57,9 +55,18 @@ export default function Page() {
     registrarUsuari, iniciarSessio, tancarSessio, editarPerfil, obtenirPerfil
   } = useAuth(navegarA)
 
+  useEffect(() => {
+    if (vistaActual === 'perfil' && usuariSessio) {
+      obtenirPerfil(usuariSessio)
+    }
+  }, [vistaActual])
+
   const esFisio = perfilUsuari?.es_fisioterapeuta === true
   const esPantallaAuth = vistaActual === 'login' || vistaActual === 'registre'
 
+
+
+  
   return (
     <div className={`${styles.container} ${usuariSessio ? styles.withSidebar : ''}`}>
       <div
@@ -72,7 +79,11 @@ export default function Page() {
         {usuariSessio && (
           <Sidebar
             vistaActual={vistaActual}
-            onNavegar={navegarA}
+            onNavegar={(vista) => {
+              if (vista === 'historial') setIdDiagnosticFiltreHistorial(null)
+              if (vista === 'exercicis-en-curs') setIdDiagnosticPreseleccionat(null)
+              navegarA(vista)
+            }}
             onTancarSessio={tancarSessio}
             esFisio={esFisio}
             perfilUsuari={perfilUsuari}
@@ -159,6 +170,7 @@ export default function Page() {
                 indexInicial={indexExercici}
                 fase={faseActual}
                 musculActual={musculActual}
+                idDiagnostic={idDiagnosticSessio}
                 onCompletarSessio={() => navegarA('exercicis-en-curs')}
               />
             </div>
@@ -168,30 +180,39 @@ export default function Page() {
             <BibliotecaExercicis onTornar={() => navegarA('inici')} />
           )}
 
-
-
           {vistaActual === 'progres' && (
             <HistorialDiagnostics
               perfilUsuari={perfilUsuari}
               onNavegar={navegarA}
+              onPreseleccionarDiagnostic={(id) => setIdDiagnosticPreseleccionat(id)}
+              onVeureHistorialSessions={(idDiagnostic) => {
+                setIdDiagnosticFiltreHistorial(idDiagnostic)
+                navegarA('historial')
+              }}
             />
           )}
 
           {vistaActual === 'historial' && (
-            <HistorialSessions perfilUsuari={perfilUsuari} />
+            <HistorialSessions
+              perfilUsuari={perfilUsuari}
+              idDiagnosticFiltre={idDiagnosticFiltreHistorial}
+              onClearFiltreHistorial={() => setIdDiagnosticFiltreHistorial(null)}
+            />
           )}
 
           {vistaActual === 'exercicis-en-curs' && (
             <ExercicisEnCurs
               onNavegar={navegarA}
-              onIniciarSessio={(exercicis, fase, infoMuscul) => {
+              onIniciarSessio={(exercicis, fase, muscul, idDiagnostic) => {
                 setExercicisRutina(exercicis)
                 setFaseActual(fase)
                 setIndexExercici(0)
-                setMusculActual(infoMuscul)
+                setMusculActual(muscul)
+                setIdDiagnosticSessio(idDiagnostic ?? null)
                 navegarA('exercici')
               }}
               perfilUsuari={perfilUsuari}
+              idDiagnosticInicial={idDiagnosticPreseleccionat}
             />
           )}
 
