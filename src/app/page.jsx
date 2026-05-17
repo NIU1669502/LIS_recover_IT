@@ -22,6 +22,9 @@ import imatgeAnatomica from './data/Imatge_anatomica.png'
 import PanellFisio from './components/PanellFisio'
 import LlistaPacients from './components/LlistaPacients'
 
+// Overlay de diagnòstics sobre la imatge anatòmica
+import OverlayAnatomic from './components/OverlayAnatomic'
+
 import styles from './page.module.css'
 
 export default function Page() {
@@ -118,9 +121,6 @@ export default function Page() {
 
   const esFisio = perfilUsuari?.es_fisioterapeuta === true
   const esPantallaAuth = vistaActual === 'login' || vistaActual === 'registre'
-
-
-
 
   return (
     <div className={`${styles.container} ${usuariSessio ? styles.withSidebar : ''}`}>
@@ -286,7 +286,7 @@ export default function Page() {
                       Recover<span className={styles.titleAccent}>IT</span>
                     </h1>
                     <p className={styles.subtitle}>
-                      La teva plataforma de recuperació guiada i intel·ligent. Torna a moure't amb confiança gràcies a rutines dissenyades exclusivament per a tu.
+                      La teva plataforma de recuperació guiada i intel·ligent. Torna a moure&apos;t amb confiança gràcies a rutines dissenyades exclusivament per a tu.
                     </p>
                     <div className={styles.heroActions}>
                       <div className={styles.primaryActions}>
@@ -305,7 +305,7 @@ export default function Page() {
                           className={styles.textLinkButton}
                           style={{ marginTop: 0, fontSize: '1.1rem' }}
                         >
-                          Explorar la biblioteca d'exercicis &rarr;
+                          Explorar la biblioteca d&apos;exercicis &rarr;
                         </button>
                       </div>
                     </div>
@@ -313,7 +313,11 @@ export default function Page() {
 
                   <div className={styles.homeVisual}>
                     <div className={styles.imageBox}>
-                      <img src={imatgeAnatomica.src} alt="Imatge anatòmica d'una persona" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                      <img
+                        src={imatgeAnatomica.src}
+                        alt="Imatge anatòmica d'una persona"
+                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                      />
                     </div>
                   </div>
                 </section>
@@ -332,8 +336,16 @@ export default function Page() {
                   </div>
 
                   <div className={styles.dashboardGrid}>
+                    {/* ── Imatge anatòmica amb overlay de diagnòstics ── */}
                     <div className={styles.anatomyCard}>
-                      <img src={imatgeAnatomica.src} alt="Imatge anatomica" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', zIndex: 1 }} />
+                      <img
+                        src={imatgeAnatomica.src}
+                        alt="Imatge anatomica"
+                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', zIndex: 1 }}
+                      />
+                      {!esFisio && (
+                        <OverlayAnatomic perfilUsuari={perfilUsuari} />
+                      )}
                     </div>
 
                     <div className={styles.widgetsColumn}>
@@ -345,7 +357,7 @@ export default function Page() {
                         ) : rutinaAvui ? (
                           <>
                             <div className={styles.actionCardContent}>
-                              <h3>Iniciar Sessió d'avui</h3>
+                              <h3>Iniciar Sessió d&apos;avui</h3>
                               <p>Rutina: {rutinaAvui.nomLesio}</p>
                               <span className={styles.actionCardMeta}>{rutinaAvui.minuts} min | {rutinaAvui.numExercicis} exercicis</span>
                             </div>

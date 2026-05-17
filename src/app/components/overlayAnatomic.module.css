@@ -1,0 +1,158 @@
+/* ============================================================
+   OverlayAnatomic — punts de pulsació sobre la imatge anatòmica
+   ============================================================ */
+
+/* Contenidor absolut que cobreix tota la imatge pare */
+.overlayContainer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* ── Botó invisible que centra el punt ── */
+.dotWrapper {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── Anell exterior pulsant ── */
+.dotRing {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(220, 38, 38, 0.22);
+    animation: pulseRing 2s ease-out infinite;
+}
+
+/* ── Cercle interior sòlid ── */
+.dotCore {
+    position: absolute;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.35);
+    transition: transform 0.15s ease;
+}
+
+.dotWrapper:hover .dotCore,
+.dotWrapper:focus-visible .dotCore {
+    transform: scale(1.25);
+}
+
+/* ── Tooltip ── */
+.tooltip {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 160px;
+    background: rgba(15, 23, 42, 0.94);
+    backdrop-filter: blur(8px);
+    border-radius: 10px;
+    padding: 10px 13px;
+    pointer-events: none;
+    animation: fadeInTooltip 0.18s ease;
+    z-index: 10;
+}
+
+/* Fletxa del tooltip */
+.tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(15, 23, 42, 0.94);
+}
+
+.tooltipMuscul {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin: 0 0 2px;
+    letter-spacing: 0.01em;
+}
+
+.tooltipLesio {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    margin: 0 0 8px;
+}
+
+.tooltipMeta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.tooltipFase {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #60a5fa;
+}
+
+.tooltipProgres {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #34d399;
+}
+
+/* Barra de progrés dins el tooltip */
+.tooltipBarBg {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.tooltipBarFill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #34d399);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+}
+
+/* ── Animacions ── */
+@keyframes pulseRing {
+    0% {
+        transform: scale(0.85);
+        opacity: 0.8;
+    }
+
+    60% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(0.85);
+        opacity: 0;
+    }
+}
+
+@keyframes fadeInTooltip {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
