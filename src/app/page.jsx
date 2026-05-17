@@ -38,6 +38,7 @@ export default function Page() {
   const [idDiagnosticPreseleccionat, setIdDiagnosticPreseleccionat] = useState(null)
   const [rutinaAvui, setRutinaAvui] = useState(null)
   const [carregantRutina, setCarregantRutina] = useState(false)
+  const [refreshProgres, setRefreshProgres] = useState(0)
 
   const navegarA = (novaVista, onTransition) => {
     if (transitionRef.current) clearTimeout(transitionRef.current)
@@ -93,13 +94,13 @@ export default function Page() {
             ])
 
             if (isSubscribed) {
-              const nomComplet = muscul && muscul.nom 
-                ? `${lesio?.nom || 'Lesió'} de ${muscul.nom.toLowerCase()}` 
+              const nomComplet = muscul && muscul.nom
+                ? `${lesio?.nom || 'Lesió'} de ${muscul.nom.toLowerCase()}`
                 : (lesio?.nom || 'Lesió')
 
               const tempsTotalSegons = exs.reduce((acc, curr) => acc + ((curr.duracio_segons || 0) * (curr.Repeticions || 1)), 0)
               const mins = Math.ceil(tempsTotalSegons / 60)
-              
+
               setRutinaAvui({
                 nomLesio: nomComplet,
                 numExercicis: exs.length,
@@ -243,6 +244,12 @@ export default function Page() {
                 setIdDiagnosticFiltreHistorial(idDiagnostic)
                 navegarA('historial')
               }}
+              onEsborrarDiagnostic={async (idDiagnostic) => {
+                const { eliminarDiagnostic } = await import('./utils/lesions')
+                await eliminarDiagnostic(idDiagnostic)
+                setRefreshProgres((r) => r + 1)
+              }}
+              refreshNonce={refreshProgres}
             />
           )}
 
@@ -290,7 +297,7 @@ export default function Page() {
                           Iniciar Sessió
                         </button>
                       </div>
-                      
+
                       <div className={styles.secondaryActionBox}>
                         <p className={styles.actionHint}>Vols veure com funciona abans?</p>
                         <button
@@ -323,12 +330,12 @@ export default function Page() {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className={styles.dashboardGrid}>
                     <div className={styles.anatomyCard}>
                       <img src={imatgeAnatomica.src} alt="Imatge anatomica" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', zIndex: 1 }} />
                     </div>
-                    
+
                     <div className={styles.widgetsColumn}>
                       <div className={styles.actionCardPrimary}>
                         {carregantRutina ? (
@@ -356,7 +363,7 @@ export default function Page() {
                               <p>Fes un test diagnòstic per obtenir una rutina.</p>
                             </div>
                             <button className={styles.actionButtonPrimary} onClick={() => navegarA('test')}>
-                              Anar al Test &rarr;
+                              Realitzar Test
                             </button>
                           </>
                         )}
