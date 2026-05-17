@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from './hooks/useAuth'
-import { processarTestDiagnostic } from './utils/lesions'
+import { processarTestDiagnostic, eliminarDiagnostic } from './utils/lesions'
 import SessioExercici from './components/SessioExercici'
 import ToastContainer from './components/ToastContainer'
 
@@ -34,6 +34,7 @@ export default function Page() {
   const [idDiagnosticSessio, setIdDiagnosticSessio] = useState(null)
   const [idDiagnosticFiltreHistorial, setIdDiagnosticFiltreHistorial] = useState(null)
   const [idDiagnosticPreseleccionat, setIdDiagnosticPreseleccionat] = useState(null)
+  const [refreshProgres, setRefreshProgres] = useState(0)
 
   const navegarA = (novaVista, onTransition) => {
     if (transitionRef.current) clearTimeout(transitionRef.current)
@@ -66,7 +67,7 @@ export default function Page() {
 
 
 
-  
+
   return (
     <div className={`${styles.container} ${usuariSessio ? styles.withSidebar : ''}`}>
       <div
@@ -189,6 +190,11 @@ export default function Page() {
                 setIdDiagnosticFiltreHistorial(idDiagnostic)
                 navegarA('historial')
               }}
+              onEsborrarDiagnostic={(idDiagnostic) => {
+                eliminarDiagnostic(idDiagnostic)
+                setRefreshProgres((r) => r + 1)
+              }}
+              refreshNonce={refreshProgres}
             />
           )}
 

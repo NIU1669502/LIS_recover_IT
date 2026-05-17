@@ -192,6 +192,25 @@
   border-color: #3b82f6;
 }
 
+.esborrarButton {
+  margin-top: 0.65rem;
+  width: 100%;
+  padding: 0.7rem 0.75rem;
+  background-color: #fd0000;
+  color: #ffffff;
+  border: 1px solid #fdcf93;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.esborrarButton:hover {
+  background-color: #f75206;
+  border-color: #f6413b;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }

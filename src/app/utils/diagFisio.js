@@ -126,6 +126,7 @@ export async function confirmarCodiFisio(dniPacient, codiIntroduit) {
 // ============================================================
 export async function desassignarFisio(dniPacient) {
     // ── 1. Obtenir la relació activa ─────────────────────────
+    console.log('Desassignar fisio:', dniPacient)
     const { data: relacio, error: errorRelacio } = await supabase
         .from('relacio_fisio_pacient')
         .select('dni_fisio')

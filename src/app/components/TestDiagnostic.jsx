@@ -70,7 +70,7 @@ export default function TestDiagnostic({ onGuardar, onCancel }) {
                 </div>
 
                 <button onClick={() => onGuardar(resultat)} className={styles.primaryButton}>
-                    Començar programa
+                    Confirmar programa aproximat
                 </button>
 
                 <button onClick={reiniciar} className={styles.secondaryButton}>

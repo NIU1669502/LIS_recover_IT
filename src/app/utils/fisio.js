@@ -249,3 +249,72 @@ export async function getEstadistiquesFisio(dniFisio) {
         pacients
     }
 }
+
+
+
+export async function afegirDiagnosticAPacient(dniFisio, dniPacient, partCos, idLesio, descripcio = '') {
+    const { data: idFases } = await supabase
+        .from('rutines_lesio')
+        .select('id_fase_1, id_fase_2, id_fase_3')
+        .eq('id_muscul', partCos)
+        .eq('id_lesio', idLesio)
+        .single()
+
+    let puntsTotal = 0
+
+    if (idFases) {
+        const [
+            { data: multifase1 }, { data: multifase2 }, { data: multifase3 },
+            { data: infoFase1 }, { data: infoFase2 }, { data: infoFase3 },
+        ] = await Promise.all([
+            supabase.from('fases').select('multiplicador').eq('id_fase', idFases.id_fase_1).single(),
+            supabase.from('fases').select('multiplicador').eq('id_fase', idFases.id_fase_2).single(),
+            supabase.from('fases').select('multiplicador').eq('id_fase', idFases.id_fase_3).single(),
+            supabase.from('fases').select('exercici_1, exercici_2, exercici_3, n_sessions').eq('id_fase', idFases.id_fase_1).single(),
+            supabase.from('fases').select('exercici_1, exercici_2, exercici_3, n_sessions').eq('id_fase', idFases.id_fase_2).single(),
+            supabase.from('fases').select('exercici_1, exercici_2, exercici_3, n_sessions').eq('id_fase', idFases.id_fase_3).single(),
+        ])
+
+        if (infoFase1 && infoFase2 && infoFase3) {
+            const idsExercicis = [...new Set([
+                infoFase1.exercici_1, infoFase1.exercici_2, infoFase1.exercici_3,
+                infoFase2.exercici_1, infoFase2.exercici_2, infoFase2.exercici_3,
+                infoFase3.exercici_1, infoFase3.exercici_2, infoFase3.exercici_3,
+            ].filter(Boolean))]
+
+            const { data: exercicisInfo } = await supabase
+                .from('exercicis')
+                .select('id_exercici, punts')
+                .in('id_exercici', idsExercicis)
+
+            const puntsPer = Object.fromEntries((exercicisInfo || []).map(e => [e.id_exercici, e.punts]))
+
+            const calcularPuntsFase = (infoFase, multiplicador) =>
+                [infoFase.exercici_1, infoFase.exercici_2, infoFase.exercici_3]
+                    .filter(Boolean)
+                    .reduce((acc, id) => acc + (puntsPer[id] ?? 0), 0) * (multiplicador ?? 1) * (infoFase.n_sessions ?? 1)
+
+            puntsTotal = calcularPuntsFase(infoFase1, multifase1?.multiplicador)
+                       + calcularPuntsFase(infoFase2, multifase2?.multiplicador)
+                       + calcularPuntsFase(infoFase3, multifase3?.multiplicador)
+        }
+    }
+
+    // 2. Insertar diagnòstic directament
+    const { error } = await supabase
+        .from('diagnostic')
+        .insert([{
+            dni_pacient: dniPacient,
+            id_lesio: idLesio,
+            part_cos: partCos,
+            descripcio: descripcio || 'Sense descripció',
+            fase_actual: 1,
+            finalitzat: false,
+            num_sessions: 0,
+            punts_recuperacio: 0,
+            puntsFinals: puntsTotal,
+        }])
+
+    if (error) return { ok: false, missatge: error.message }
+    return { ok: true }
+}

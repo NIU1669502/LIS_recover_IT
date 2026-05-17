@@ -16,7 +16,8 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
     const [nouNom, setNouNom] = useState('')
     const [animant, setAnimant] = useState(false)
     const puntsAnteriors = useRef(perfilUsuari?.punts_recuperacio ?? 0)
-
+    const [nomFisio, setNomFisio] = useState('')
+    
     // Canvi de contrasenya
     const [mostrarContrasenya, setMostrarContrasenya] = useState(false)
     const [novaContrasenya, setNovaContrasenya] = useState('')
@@ -53,12 +54,13 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
         const comprovarFisio = async () => {
             const { data } = await supabase
                 .from('relacio_fisio_pacient')
-                .select('dni_fisio')
+                .select('dni_fisio, usuaris : dni_fisio (nom))')
                 .eq('dni_pacient', perfilUsuari.dni)
                 .eq('confirmat', true)
                 .limit(1)
                 .maybeSingle()
             setTeFisioAssignat(!!data)
+            setNomFisio(data?.usuaris?.nom || '')
         }
 
         comprovarFisio()
@@ -312,7 +314,7 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
                                 <div className={styles.fieldRow}>
                                     <span className={styles.fieldLabel}>
                                         <i className="ti ti-stethoscope" aria-hidden="true" />
-                                        Fisioterapeuta assignat
+                                        Fisioterapeuta assignat : <span className={styles.fieldValue}>{nomFisio}</span>
                                     </span>
                                     {!confirmantDesassignar ? (
                                         <button onClick={handleDesassignar} className={styles.dangerButton}>

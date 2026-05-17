@@ -342,3 +342,23 @@ export async function getResumSessions(diagnostic) {
 
     return { fetes, totals }
 }
+
+
+// ============================================================
+// Elimina un diagnòstic i totes les seves sessions ( CASCADE implicit)
+// ============================================================
+export async function eliminarDiagnostic(idDiagnostic) {
+    const { error } = await supabase
+        .from('diagnostic')
+        .delete()
+        .eq('id_diagnostic', idDiagnostic)
+
+    if (error) {
+        console.error('Error esborrant diagnòstic:', error)
+        showToast('No s\'ha pogut esborrar el diagnòstic', 'error')
+        return false
+    }
+showToast('Diagnòstic esborrat correctament', 'success')
+    // Les sessions s'esborren automàticament per la restricció CASCADE en la BD
+    return true
+}

@@ -6,7 +6,7 @@ import { getDiagnosticsActius } from '../utils/lesions'
 import GraficaRecuperacio from './GraficaRecuperacio'
 import styles from './historialDiagnostics.module.css'
 
-export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureHistorialSessions,onPreseleccionarDiagnostic }) {
+export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureHistorialSessions,onPreseleccionarDiagnostic, onEsborrarDiagnostic, refreshNonce }) {
     const [actives, setActives] = useState([])
     const [finalitzades, setFinalitzades] = useState([])
     const [carregant, setCarregant] = useState(true)
@@ -90,7 +90,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
         return () => {
             if (canalRef.current) supabase.removeChannel(canalRef.current)
         }
-    }, [perfilUsuari?.dni])
+    }, [perfilUsuari?.dni, refreshNonce])
 
     if (carregant) {
         return <div className={styles.container}><p>Carregant l&apos;historial de lesions...</p></div>
@@ -175,6 +175,13 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
                                             >
                                                 Veure historial de la sessió
                                             </button>
+                                            <button
+                                                type="button"
+                                                className={styles.esborrarButton}
+                                                onClick={() => onEsborrarDiagnostic?.(diag.id_diagnostic)}
+                                            >
+                                                Esborrar diagnòstic
+                                            </button>
                                         </div>
                                     )
                                 })}
@@ -206,7 +213,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
                                                     </h3>
                                                     <p className={styles.lesioDate}>
                                                         {nomsMusculs[diag.part_cos] ? `${nomsMusculs[diag.part_cos]} · ` : ''}
-                                                        Curada el: {dataFormatada}
+                                                        Curada el {dataFormatada}
                                                     </p>
                                                 </div>
                                                 <span className={`${styles.badge} ${styles.badgeDone}`}>Recuperat</span>

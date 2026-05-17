@@ -85,6 +85,9 @@ export function useHistorial(dni, idDiagnosticFiltre = null) {
                         punts_obtinguts,
                         id_diagnostic,
                         id_lesio,
+                        diagnostic!inner (
+                            musculs:part_cos ( nom )
+                        ),
                         lesions ( nom )
                     `)
                 .eq('dni_pacient', dni)

@@ -315,8 +315,8 @@
     margin-top: 16px;
     padding: 8px 16px;
     width: 100%;
-    background: transparent;
-    color: #ef4444;
+    background: #ef4444;
+    color: #ffffff;
     border: 1px solid #fee2e2;
     border-radius: 8px;
     font-size: 0.85rem;
@@ -326,8 +326,9 @@
 }
 
 .desvincularBtn:hover {
-    background: #fef2f2;
+    background: #ffffff;
     border-color: #fca5a5;
+    color: #ef4444;
 }
 
 .confirmInlineRow {
@@ -422,4 +423,27 @@
     .grid {
         grid-template-columns: 1fr;
     }
+}
+
+
+.afegirPlaBtn {
+    margin-top: 16px;
+    padding: 8px 16px;
+    width: 100%;
+    background: #2dad33;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    margin-bottom: 8px;
+}
+.afegirPlaBtn:hover {
+    background: #52d81d;
+}
+
+.afegirPlaBtn:active {
+    transform: scale(0.98);
 }
