@@ -345,7 +345,7 @@ export default function Page() {
                         ) : rutinaAvui ? (
                           <>
                             <div className={styles.actionCardContent}>
-                              <h3>Iniciar Sesión de Hoy</h3>
+                              <h3>Iniciar Sessió d'avui</h3>
                               <p>Rutina: {rutinaAvui.nomLesio}</p>
                               <span className={styles.actionCardMeta}>{rutinaAvui.minuts} min | {rutinaAvui.numExercicis} exercicis</span>
                             </div>
