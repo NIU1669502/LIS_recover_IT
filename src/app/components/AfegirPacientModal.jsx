@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '../../utils/supabase'
-import { vincularPacient } from '../utils/fisio'
+import { vincularPacient, afegirDiagnosticAPacient } from '../utils/fisio'
 import { showToast } from '../utils/toast'
 import styles from './AfegirPacientModal.module.css'
 
@@ -12,7 +12,16 @@ import styles from './AfegirPacientModal.module.css'
 //   2. DNI del pacient + generar codi
 //   3. Mostrar el codi generat
 // ============================================================
-export default function AfegirPacientModal({ dniFisio, onTancar, onPacientAfegit }) {
+const lesions_per_muscul = {
+                1: [1, 2, 3],
+                2: [1, 2, 3],
+                3: [1, 2, 3],
+                4: [2, 3],
+                5: [2, 3],
+                6: [2, 3],
+                7: [2, 3],
+            }
+export default function AfegirPacientModal({ dniFisio, infoPacientInicial, onTancar, onPacientAfegit }) {
     // ── Pas actual del flux (1, 2 o 3) ──────────────────────
     const [pas, setPas] = useState(1)
 
@@ -22,9 +31,10 @@ export default function AfegirPacientModal({ dniFisio, onTancar, onPacientAfegit
     const [partCosSelec, setPartCosSelec] = useState('')
     const [idLesioSelec, setIdLesioSelec] = useState('')
     const [descripcio, setDescripcio] = useState('')
+    const [dni, setDni] = useState('')  
 
     // ── Pas 2: DNI del pacient ───────────────────────────────
-    const [dni, setDni] = useState('')
+
     const [carregant, setCarregant] = useState(false)
     const [error, setError] = useState('')
 
@@ -35,24 +45,20 @@ export default function AfegirPacientModal({ dniFisio, onTancar, onPacientAfegit
     // ── Carregar músculs i lesions en muntar ─────────────────
     useEffect(() => {
         const carregarOpcions = async () => {
-            const { data: musData } = await supabase
-                .from('musculs')
-                .select('id_cos, nom')
-                .order('nom')
-
-            // Només les 3 primeres lesions (Esquinç, Distensió, Contractura)
-            const { data: lesData } = await supabase
-                .from('lesions')
-                .select('id_lesio, nom')
-                .order('id_lesio')
-                .limit(3)
-
-            if (musData) setMusculs(musData)
-            if (lesData) setLesions(lesData)
+            const [{ data: musculsDB }, { data: lesionsDB }] = await Promise.all([
+                supabase.from('musculs').select('*'),
+                supabase.from('lesions').select('*')
+            ])
+            setMusculs(musculsDB ?? [])
+            setLesions(lesionsDB ?? [])
+            
         }
         carregarOpcions()
     }, [])
 
+    const lesionsFiltrades = partCosSelec
+        ? lesions.filter(l => (lesions_per_muscul[partCosSelec] ?? []).includes(l.id_lesio))
+        : []
     // ── Validació i avanç del pas 1 al pas 2 ────────────────
     const handleSeguent = () => {
         if (!partCosSelec || !idLesioSelec) {
@@ -60,21 +66,58 @@ export default function AfegirPacientModal({ dniFisio, onTancar, onPacientAfegit
             return
         }
         setError('')
-        setPas(2)
+        if (infoPacientInicial?.dniPacient) {
+            handleGenerar()
+        } else {
+            setPas(2)
+        }
     }
 
     // ── Generar codi: vincular pacient a la BD ───────────────
-    const handleGenerar = async () => {
-        if (!dni.trim()) {
-            setError('Introdueix el DNI del pacient.')
-            return
-        }
-        setError('')
-        setCarregant(true)
-        try {
-            const resultat = await vincularPacient(
+   const handleGenerar = async () => {
+    const dniAUtilitzar = infoPacientInicial?.dniPacient || dni
+    if (!dniAUtilitzar.trim()) {
+        setError('Introdueix el DNI del pacient.')
+        return
+    }
+    setError('')
+    setCarregant(true)
+    try {
+        let resultat
+
+        if (infoPacientInicial?.dniPacient) {
+            // Pacient ja vinculat → crear diagnòstic directament
+            resultat = await afegirDiagnosticAPacient(
                 dniFisio,
-                dni,
+                infoPacientInicial.dniPacient,
+                parseInt(partCosSelec),
+                parseInt(idLesioSelec),
+                descripcio.trim()
+            )
+            if (resultat.ok) {
+                showToast(`Nou diagnòstic afegit correctament`, 'success')
+                onPacientAfegit()
+                onTancar()
+            } else {
+                setError(resultat.missatge)
+            }
+        } else {
+            // Pacient nou → vincular i generar codi
+            const { data: relacio } = await supabase
+                .from('relacio_fisio_pacient')
+                .select('dni_fisio')
+                .eq('dni_pacient', dniAUtilitzar.trim())
+                .maybeSingle()
+
+            if (relacio) {
+                showToast(`Aquest pacient ja té un fisioterapeuta assignat.`, 'warning')
+                setCarregant(false)
+                return
+            }
+
+            resultat = await vincularPacient(
+                dniFisio,
+                dniAUtilitzar,
                 parseInt(partCosSelec),
                 parseInt(idLesioSelec),
                 descripcio.trim()
@@ -85,24 +128,18 @@ export default function AfegirPacientModal({ dniFisio, onTancar, onPacientAfegit
             } else {
                 setCodiGenerat(resultat.codi)
                 setNomPacient(resultat.nomPacient)
-
-                showToast(
-                    `Pacient ${resultat.nomPacient} vinculat correctament`,
-                    'success'
-                )
-
+                showToast(`Pacient vinculat correctament en espera de confirmació`, 'success')
                 onPacientAfegit()
                 setPas(3)
             }
-        } catch {
-            showToast(
-                'S’ha produït un error inesperat.',
-                'error'
-            )
-        } finally {
-            setCarregant(false)
         }
+    } catch(e) {
+        console.error(e)
+        showToast(`S'ha produït un error inesperat.`, 'error')
+    } finally {
+        setCarregant(false)
     }
+}
 
     // ── Renderitzat ──────────────────────────────────────────
     return (
@@ -122,7 +159,7 @@ export default function AfegirPacientModal({ dniFisio, onTancar, onPacientAfegit
                 </div>
 
                 {/* ── Indicador de pas ──────────────────────── */}
-                {pas !== 3 && (
+                {pas !== 3 && !infoPacientInicial?.dniPacient && (
                     <div className={styles.stepIndicator}>
                         <span className={`${styles.step} ${pas >= 1 ? styles.stepActive : ''}`}>1</span>
                         <span className={styles.stepLine} />
@@ -136,7 +173,10 @@ export default function AfegirPacientModal({ dniFisio, onTancar, onPacientAfegit
                 {pas === 1 && (
                     <>
                         <p className={styles.desc}>
-                            Defineix el diagnòstic que vols assignar al pacient.
+                            {infoPacientInicial?.dniPacient
+                                ?<> Defineix el diagnòstic que vols afegir al pacient<br/><strong>{infoPacientInicial.nomPacient}.</strong></>
+                                : 'Defineix el diagnòstic que vols assignar al pacient.'
+                            }
                         </p>
 
                         {/* Múscul */}
@@ -145,7 +185,7 @@ export default function AfegirPacientModal({ dniFisio, onTancar, onPacientAfegit
                             <select
                                 className={styles.input}
                                 value={partCosSelec}
-                                onChange={e => setPartCosSelec(e.target.value)}
+                                onChange={e => (setPartCosSelec(e.target.value),setIdLesioSelec(''))}
                             >
                                 <option value="">Selecciona un múscul...</option>
                                 {musculs.map(m => (
@@ -163,7 +203,7 @@ export default function AfegirPacientModal({ dniFisio, onTancar, onPacientAfegit
                                 onChange={e => setIdLesioSelec(e.target.value)}
                             >
                                 <option value="">Selecciona el tipus de lesió...</option>
-                                {lesions.map(l => (
+                                {lesionsFiltrades.map(l => (
                                     <option key={l.id_lesio} value={l.id_lesio}>{l.nom}</option>
                                 ))}
                             </select>
@@ -188,7 +228,7 @@ export default function AfegirPacientModal({ dniFisio, onTancar, onPacientAfegit
                                 Cancel·lar
                             </button>
                             <button className={styles.confirmBtn} onClick={handleSeguent}>
-                                Següent
+                               {infoPacientInicial?.dniPacient ? "Afegir nou diagnòstic" : "Següent"}
                             </button>
                         </div>
                     </>
@@ -203,27 +243,29 @@ export default function AfegirPacientModal({ dniFisio, onTancar, onPacientAfegit
                             Introdueix el DNI del pacient al qual vols assignar el diagnòstic.
                         </p>
 
-                        <div className={styles.inputGroup}>
-                            <label className={styles.label}>DNI del pacient</label>
-                            <input
-                                className={styles.input}
-                                type="text"
-                                placeholder="Ex: 12345678A"
-                                value={dni}
-                                onChange={e => setDni(e.target.value.toUpperCase())}
-                                onKeyDown={e => e.key === 'Enter' && handleGenerar()}
-                                autoFocus
-                            />
-                            {error && <p className={styles.error}>{error}</p>}
-                        </div>
-
+                       
+                            <div className={styles.inputGroup}>
+                                <label className={styles.label}>DNI del pacient</label>
+                                <input
+                                    className={styles.input}
+                                    type="text"
+                                    placeholder="Ex: 12345678A"
+                                    value={dni}
+                                    onChange={e => setDni(e.target.value.toUpperCase())}
+                                    onKeyDown={e => e.key === 'Enter' && handleGenerar()}
+                                    autoFocus
+                                />
+                                
+                                {error && <p className={styles.error}>{error}</p>}
+                            </div>
+                        
                         <div className={styles.actions}>
                             <button
                                 className={styles.cancelBtn}
                                 onClick={() => { setPas(1); setError('') }}
                                 disabled={carregant}
                             >
-                                ← Tornar
+                                Tornar
                             </button>
                             <button
                                 className={styles.confirmBtn}
@@ -235,7 +277,6 @@ export default function AfegirPacientModal({ dniFisio, onTancar, onPacientAfegit
                         </div>
                     </>
                 )}
-
                 {/* ══════════════════════════════════════════
                     PAS 3 — Codi generat
                 ══════════════════════════════════════════ */}

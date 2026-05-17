@@ -138,43 +138,15 @@ export async function getPacientsDeFisio(dniFisio) {
 export async function getProgresTotal(diagnostic) {
     if (!diagnostic) return 0
 
-    const { data: rutina } = await supabase
-        .from('rutines_lesio')
-        .select('id_fase_1, id_fase_2, id_fase_3')
-        .eq('id_muscul', diagnostic.part_cos)
-        .eq('id_lesio', diagnostic.id_lesio)
-        .single()
-
-    if (!rutina) return 0
-
-    const ids = [rutina.id_fase_1, rutina.id_fase_2, rutina.id_fase_3].filter(Boolean)
-
-    const { data: fases } = await supabase
-        .from('fases')
-        .select('id_fase, n_sessions')
-        .in('id_fase', ids)
-
-    if (!fases) return 0
-
-    const mapFases = {}
-    fases.forEach(f => { mapFases[f.id_fase] = f.n_sessions || 0 })
-
-    const req1 = mapFases[rutina.id_fase_1] || 0
-    const req2 = mapFases[rutina.id_fase_2] || 0
-    const req3 = mapFases[rutina.id_fase_3] || 0
-    const totals = req1 + req2 + req3
-
-    if (totals === 0) return 0
-
-    let fetes = 0
-
-    if (diagnostic.fase_actual === 1) fetes = diagnostic.num_sessions || 0
-    else if (diagnostic.fase_actual === 2) fetes = req1 + (diagnostic.num_sessions || 0)
-    else if (diagnostic.fase_actual === 3) fetes = req1 + req2 + (diagnostic.num_sessions || 0)
+    const {data : punts} = await supabase
+    .from('diagnostic')
+    .select('punts_recuperacio, puntsFinals')
+    .eq('id_diagnostic', diagnostic.id_diagnostic)
+    .single() 
 
     if (diagnostic.finalitzat) return 100
 
-    return Math.round((fetes / totals) * 100)
+    return Math.round((punts.punts_recuperacio / punts.puntsFinals) * 100)
 }
 
 // ============================================================
@@ -276,4 +248,73 @@ export async function getEstadistiquesFisio(dniFisio) {
         pendents,
         pacients
     }
+}
+
+
+
+export async function afegirDiagnosticAPacient(dniFisio, dniPacient, partCos, idLesio, descripcio = '') {
+    const { data: idFases } = await supabase
+        .from('rutines_lesio')
+        .select('id_fase_1, id_fase_2, id_fase_3')
+        .eq('id_muscul', partCos)
+        .eq('id_lesio', idLesio)
+        .single()
+
+    let puntsTotal = 0
+
+    if (idFases) {
+        const [
+            { data: multifase1 }, { data: multifase2 }, { data: multifase3 },
+            { data: infoFase1 }, { data: infoFase2 }, { data: infoFase3 },
+        ] = await Promise.all([
+            supabase.from('fases').select('multiplicador').eq('id_fase', idFases.id_fase_1).single(),
+            supabase.from('fases').select('multiplicador').eq('id_fase', idFases.id_fase_2).single(),
+            supabase.from('fases').select('multiplicador').eq('id_fase', idFases.id_fase_3).single(),
+            supabase.from('fases').select('exercici_1, exercici_2, exercici_3, n_sessions').eq('id_fase', idFases.id_fase_1).single(),
+            supabase.from('fases').select('exercici_1, exercici_2, exercici_3, n_sessions').eq('id_fase', idFases.id_fase_2).single(),
+            supabase.from('fases').select('exercici_1, exercici_2, exercici_3, n_sessions').eq('id_fase', idFases.id_fase_3).single(),
+        ])
+
+        if (infoFase1 && infoFase2 && infoFase3) {
+            const idsExercicis = [...new Set([
+                infoFase1.exercici_1, infoFase1.exercici_2, infoFase1.exercici_3,
+                infoFase2.exercici_1, infoFase2.exercici_2, infoFase2.exercici_3,
+                infoFase3.exercici_1, infoFase3.exercici_2, infoFase3.exercici_3,
+            ].filter(Boolean))]
+
+            const { data: exercicisInfo } = await supabase
+                .from('exercicis')
+                .select('id_exercici, punts')
+                .in('id_exercici', idsExercicis)
+
+            const puntsPer = Object.fromEntries((exercicisInfo || []).map(e => [e.id_exercici, e.punts]))
+
+            const calcularPuntsFase = (infoFase, multiplicador) =>
+                [infoFase.exercici_1, infoFase.exercici_2, infoFase.exercici_3]
+                    .filter(Boolean)
+                    .reduce((acc, id) => acc + (puntsPer[id] ?? 0), 0) * (multiplicador ?? 1) * (infoFase.n_sessions ?? 1)
+
+            puntsTotal = calcularPuntsFase(infoFase1, multifase1?.multiplicador)
+                       + calcularPuntsFase(infoFase2, multifase2?.multiplicador)
+                       + calcularPuntsFase(infoFase3, multifase3?.multiplicador)
+        }
+    }
+
+    // 2. Insertar diagnòstic directament
+    const { error } = await supabase
+        .from('diagnostic')
+        .insert([{
+            dni_pacient: dniPacient,
+            id_lesio: idLesio,
+            part_cos: partCos,
+            descripcio: descripcio || 'Sense descripció',
+            fase_actual: 1,
+            finalitzat: false,
+            num_sessions: 0,
+            punts_recuperacio: 0,
+            puntsFinals: puntsTotal,
+        }])
+
+    if (error) return { ok: false, missatge: error.message }
+    return { ok: true }
 }

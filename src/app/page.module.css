@@ -1,21 +1,137 @@
-/* ======================================
-   Layout general - Premium Theme
-   ====================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+/* =========================================================
+   RECOVERIT - PROFESSIONAL REDESIGN
+========================================================= */
+
 .container {
     min-height: 100vh;
-    background: #f4f7fc;
-    /* Blau molt clar/gel */
-    color: #0f172a;
-    /* Blau fosc intens */
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    position: relative;
+    color: #102333;
+    overflow-x: hidden;
+    font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+    background:
+        radial-gradient(circle at 12% 18%, rgba(47,128,237,.18), transparent 24%),
+        radial-gradient(circle at 88% 14%, rgba(22,163,108,.15), transparent 24%),
+        radial-gradient(circle at 76% 86%, rgba(239,111,108,.14), transparent 26%),
+        linear-gradient(135deg, #f8fbfd 0%, #edf6f7 42%, #f6f9fc 100%);
+    background-size:
+        120% 120%,
+        120% 120%,
+        120% 120%,
+        100% 100%;
+    animation: backgroundShift 18s ease-in-out infinite alternate;
+    isolation: isolate;
 }
 
-/* Animació de transició entre vistes */
-@keyframes pageEnter {
+.container *,
+.container button,
+.container input,
+.container textarea,
+.container select {
+    font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+.container::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 20% 30%, rgba(47,128,237,.18), transparent 18%),
+        radial-gradient(circle at 70% 20%, rgba(15,110,122,.14), transparent 16%),
+        radial-gradient(circle at 78% 72%, rgba(22,163,108,.14), transparent 18%),
+        radial-gradient(circle at 30% 78%, rgba(239,111,108,.13), transparent 16%);
+    background-size: 130% 130%;
+    opacity: .9;
+    transform: translateZ(0);
+    will-change: transform;
+    animation: lightFloat 20s ease-in-out infinite alternate;
+}
+
+.container::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        linear-gradient(115deg, transparent 0%, rgba(255,255,255,.34) 38%, transparent 66%);
+    opacity: .55;
+    transform: translateX(-35%);
+    will-change: transform;
+    animation: lightSweep 14s ease-in-out infinite;
+}
+
+.withSidebar {
+    padding-left: 260px;
+}
+
+.main {
+    max-width: 1420px;
+    margin: auto;
+    padding: 3rem;
+    position: relative;
+    z-index: 1;
+}
+
+.mainFull {
+    width: 100%;
+    padding: 0;
+}
+
+/* =========================================================
+   ANIMATION
+========================================================= */
+
+@keyframes backgroundShift {
+    0% {
+        background-position:
+            0% 0%,
+            100% 0%,
+            80% 100%,
+            0 0;
+    }
+
+    100% {
+        background-position:
+            18% 8%,
+            82% 16%,
+            66% 86%,
+            0 0;
+    }
+}
+
+@keyframes lightFloat {
+    0% {
+        transform: translate3d(-2%, -1%, 0) scale(1.02);
+    }
+
+    50% {
+        transform: translate3d(2%, 2%, 0) scale(1.05);
+    }
+
+    100% {
+        transform: translate3d(3%, -2%, 0) scale(1.03);
+    }
+}
+
+@keyframes lightSweep {
+    0%, 35% {
+        transform: translateX(-45%);
+    }
+
+    100% {
+        transform: translateX(45%);
+    }
+}
+
+@keyframes fadeUp {
     from {
         opacity: 0;
-        transform: translateY(16px);
-        filter: blur(4px);
+        transform: translateY(22px);
+        filter: blur(6px);
     }
 
     to {
@@ -25,225 +141,741 @@
     }
 }
 
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes softPulse {
+    0%, 100% {
+        opacity: .72;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.04);
+    }
+}
+
+@keyframes cardLift {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+@keyframes shine {
+    from {
+        transform: translateX(-120%) rotate(12deg);
+    }
+
+    to {
+        transform: translateX(160%) rotate(12deg);
+    }
+}
+
+@keyframes breathe {
+    0%, 100% {
+        transform: scale(1);
+        opacity: .75;
+    }
+
+    50% {
+        transform: scale(1.08);
+        opacity: 1;
+    }
+}
+
 .pageEnter {
-    animation: pageEnter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: fadeUp .55s cubic-bezier(.22, 1, .36, 1);
 }
 
-.withSidebar {
-    padding-left: 260px;
-}
-
-.main {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 3rem 2rem;
-}
-
-.exerciciMain {
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 3rem 1rem;
-}
-
-.mainFull {
-    max-width: none;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-}
-
-/* ======================================
-   TEST
-   ====================================== */
-.testSection {
-    margin-top: 2.5rem;
-    background: #ffffff;
-    padding: 2.5rem;
-    border-radius: 24px;
-    box-shadow: 0 10px 30px -10px rgba(37, 99, 235, 0.1);
-}
-
-.testHeader {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    margin-bottom: 1.5rem;
-}
-
-.testIconBox {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-width: 4rem;
-    height: 4rem;
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-    border-radius: 16px;
-    border: 1px solid #bfdbfe;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-}
-
-.testIcon {
-    font-size: 2rem;
-    line-height: 1;
-}
-
-.testTitle {
-    margin: 0;
-    font-size: 2.25rem;
-    font-weight: 800;
-    color: #1e3a8a;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
-}
-
-.textMuted {
-    color: #64748b;
-}
-
-/* ======================================
+/* =========================================================
    HOME
-   ====================================== */
+========================================================= */
+
 .homeSection {
-    text-align: center;
-    padding-top: 5rem;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1.05fr .95fr;
+    gap: 5rem;
+    align-items: center;
+    padding: 2rem 0;
+}
+
+.homeContent {
+    position: relative;
+    z-index: 2;
+}
+
+.homeContent::before {
+    content: 'RecoverIT';
+    display: inline-flex;
+    margin-bottom: 1.4rem;
+    padding: .55rem .8rem;
+    border: 1px solid rgba(15, 110, 122, .16);
+    border-radius: 999px;
+    background: rgba(255,255,255,.72);
+    color: #0f6e7a;
+    font-size: .75rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    box-shadow: 0 12px 30px rgba(19, 54, 78, .08);
+    backdrop-filter: blur(18px);
 }
 
 .title {
-    color: #0f172a;
-    font-size: 3.75rem;
+    max-width: 760px;
+    margin-bottom: 2rem;
+    color: #102333;
+    font-size: 6rem;
+    line-height: .92;
     font-weight: 900;
-    margin-bottom: 1.25rem;
-    letter-spacing: -0.04em;
-    line-height: 1.1;
+    letter-spacing: 0;
 }
 
 .titleAccent {
-    color: transparent;
-    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    color: #0f6e7a;
+    background: linear-gradient(135deg, #0f6e7a, #2f80ed);
     -webkit-background-clip: text;
-    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .subtitle {
-    color: #475569;
+    max-width: 660px;
+    margin-bottom: 3rem;
+    color: #607286;
     font-size: 1.25rem;
-    margin-bottom: 3.5rem;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.6;
+    line-height: 1.85;
 }
 
-.buttonGroup {
+/* =========================================================
+   BUTTONS & ACTIONS
+========================================================= */
+
+.heroActions {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+.primaryActions {
     display: flex;
     gap: 1.25rem;
-    justify-content: center;
     flex-wrap: wrap;
 }
 
-/* ======================================
-   BOTONES
-   ====================================== */
+.secondaryActionBox {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+}
+
+.actionHint {
+    margin: 0;
+    color: #607286;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.loginButton,
+.bigButton,
+.registerButton,
+.actionButtonPrimary,
+.textLinkButton {
+    font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+.loginButton,
+.bigButton,
+.registerButton {
+    position: relative;
+    min-height: 56px;
+    padding: 1rem 1.45rem;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    transition:
+        transform .25s ease,
+        box-shadow .25s ease,
+        border-color .25s ease,
+        background .25s ease;
+}
 
 .loginButton,
 .bigButton {
-    padding: 0.85rem 2rem;
-    background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
-    color: #ffffff;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 1.05rem;
-    box-shadow: 0 8px 20px -6px rgba(37, 99, 235, 0.5);
-    transition: all 0.25s ease;
+    background: linear-gradient(135deg, #0f6e7a, #2f80ed);
+    color: #fff;
+    box-shadow: 0 18px 38px rgba(47,128,237,.24);
 }
 
 .loginButton:hover,
 .bigButton:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 25px -8px rgba(37, 99, 235, 0.6);
+    box-shadow: 0 24px 50px rgba(47,128,237,.30);
 }
 
 .registerButton {
-    padding: 0.85rem 2rem;
-    background: #ffffff;
-    color: #2563eb;
-    border: 2px solid #e0e7ff;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 1.05rem;
-    transition: all 0.25s ease;
+    background: rgba(255,255,255,.78);
+    border-color: rgba(19,54,78,.12);
+    color: #102333;
+    box-shadow: 0 14px 34px rgba(19,54,78,.10);
+    backdrop-filter: blur(18px);
 }
 
 .registerButton:hover {
-    border-color: #bfdbfe;
-    background: #eff6ff;
     transform: translateY(-3px);
+    background: #fff;
+    border-color: rgba(15,110,122,.28);
 }
 
-.testButton {
-    padding: 0.85rem 2rem;
-    background: #ffffff;
-    color: #1e3a8a;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 1.05rem;
-    transition: all 0.25s ease;
-}
+/* =========================================================
+   VISUAL
+========================================================= */
 
-.testButton:hover {
-    background: #f8fafc;
-    border-color: #cbd5e1;
-    transform: translateY(-2px);
-}
-
-.profileButton {
-    padding: 0.85rem 2rem;
-    background: #0f172a;
-    color: #ffffff;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 1.05rem;
-    box-shadow: 0 8px 20px -6px rgba(15, 23, 42, 0.4);
-    transition: all 0.25s ease;
-}
-
-.profileButton:hover {
-    transform: translateY(-3px);
-    background: #1e293b;
-    box-shadow: 0 12px 25px -8px rgba(15, 23, 42, 0.5);
-}
-
-/* ======================================
-   IMAGEN
-   ====================================== */
-.imageSection {
-    margin-top: 5rem;
+.homeVisual {
+    position: relative;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    gap: 2rem;
+}
+
+.homeVisual::before {
+    content: '';
+    position: absolute;
+    width: 560px;
+    height: 560px;
+    border-radius: 999px;
+    background:
+        radial-gradient(circle, rgba(47,128,237,.18), transparent 64%),
+        radial-gradient(circle at 70% 30%, rgba(22,163,108,.16), transparent 48%);
+    animation: breathe 7s ease-in-out infinite;
+}
+
+.homeVisual::after {
+    content: '';
+    position: absolute;
+    width: 240px;
+    height: 240px;
+    right: 8%;
+    top: 6%;
+    border-radius: 999px;
+    background: rgba(239,111,108,.12);
+    animation: float 6s ease-in-out infinite;
 }
 
 .imageBox {
-    width: 260px;
-    height: 320px;
-    background: #ffffff;
-    border-radius: 24px;
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    aspect-ratio: 3 / 4;
+    padding: 2rem;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.96), rgba(235,245,249,.88));
+    border: 1px solid rgba(19,54,78,.12);
+    box-shadow: 0 30px 80px rgba(19,54,78,.16);
+    z-index: 2;
+    transition: transform .35s ease, box-shadow .35s ease;
+    animation: cardLift 8s ease-in-out infinite;
+}
+
+.imageBox::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(135deg, rgba(15,110,122,.08), transparent 48%),
+        linear-gradient(315deg, rgba(239,111,108,.08), transparent 42%);
+    pointer-events: none;
+}
+
+.imageBox::after {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: 0;
+    width: 38%;
+    height: 140%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent);
+    animation: shine 6.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.imageBox:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 40px 95px rgba(19,54,78,.20);
+}
+
+.imageBox img,
+.anatomyCard img {
+    filter: drop-shadow(0 20px 34px rgba(19,54,78,.14));
+}
+
+/* =========================================================
+   FLOATING BADGE
+========================================================= */
+
+.floatingBadge {
+    position: absolute;
+    right: -28px;
+    bottom: 24px;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    max-width: 260px;
+    padding: .95rem 1.1rem;
+    border-radius: 8px;
+    background: rgba(255,255,255,.86);
+    border: 1px solid rgba(19,54,78,.12);
+    box-shadow: 0 22px 48px rgba(19,54,78,.16);
+    backdrop-filter: blur(18px);
+    animation: float 5s ease-in-out infinite;
+}
+
+.badgeIcon {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #16a36c, #2f80ed);
+    color: #fff;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.badgeTitle {
+    display: block;
+    color: #102333;
+    font-weight: 900;
+}
+
+.badgeSub {
+    display: block;
+    margin-top: .15rem;
+    color: #607286;
+    font-size: .85rem;
+}
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+.dashboardContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.dashboardHeader {
+    padding: 1.8rem 0 .4rem;
+}
+
+.welcomeMessage {
+    max-width: 980px;
+}
+
+.dashboardTitle {
+    margin-bottom: 1rem;
+    color: #102333;
+    font-size: 3.6rem;
+    line-height: 1.05;
+    font-weight: 900;
+    letter-spacing: 0;
+}
+
+.highlightName {
+    color: #0f6e7a;
+    background: linear-gradient(135deg, #0f6e7a, #2f80ed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.dashboardSubtitle {
+    max-width: 860px;
+    color: #607286;
+    font-size: 1.12rem;
+    line-height: 1.8;
+}
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.dashboardGrid {
+    display: grid;
+    grid-template-columns: 1.1fr .9fr;
+    gap: 2rem;
+    align-items: stretch;
+}
+
+.widgetsColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.anatomyCard,
+.actionCardPrimary,
+.actionCardSecondary {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    border: 1px solid rgba(19,54,78,.12);
+    box-shadow: 0 24px 70px rgba(19,54,78,.13);
+    backdrop-filter: blur(18px);
+}
+
+.anatomyCard {
+    min-height: 680px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.96), rgba(235,245,249,.86));
+    animation: cardLift 9s ease-in-out infinite;
+}
+
+.anatomyCard::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(135deg, rgba(47,128,237,.10), transparent 48%),
+        linear-gradient(315deg, rgba(22,163,108,.10), transparent 44%);
+    pointer-events: none;
+}
+
+/* =========================================================
+   PRIMARY CARD
+========================================================= */
+
+.actionCardPrimary {
+    min-height: 300px;
+    padding: 2.2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background:
+        linear-gradient(135deg, #0f6e7a, #2f80ed);
+    color: #fff;
+    transition: transform .3s ease, box-shadow .3s ease;
+}
+
+.actionCardPrimary:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 34px 80px rgba(47,128,237,.22);
+}
+
+.actionCardPrimary::after {
+    content: '';
+    position: absolute;
+    inset: auto -20% -42% auto;
+    width: 70%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.18);
+    background: rgba(255,255,255,.08);
+    animation: softPulse 6s ease-in-out infinite;
+}
+
+.actionCardContent {
+    position: relative;
+    z-index: 1;
+}
+
+.actionCardContent h3 {
+    margin-bottom: .8rem;
+    font-size: 1.9rem;
+    line-height: 1.16;
+    font-weight: 900;
+    letter-spacing: 0;
+}
+
+.actionCardContent p {
+    color: inherit;
+    opacity: .9;
+    line-height: 1.6;
+    font-size: 1.15rem;
+    font-weight: 500;
+}
+
+.actionCardMeta {
+    display: inline-flex;
+    margin-top: 1.1rem;
+    padding: .55rem .8rem;
+    border-radius: 999px;
+    background: rgba(255,255,255,.16);
+    border: 1px solid rgba(255,255,255,.22);
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.actionButtonPrimary {
+    position: relative;
+    z-index: 1;
+    align-self: flex-start;
+    margin-top: 1.5rem;
+    border: none;
+    background: #fff;
+    color: #0f6e7a;
+    padding: 1.05rem 1.45rem;
+    border-radius: 10px;
+    font-size: 1.08rem;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 14px 28px rgba(0,0,0,.16);
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.actionButtonPrimary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 38px rgba(0,0,0,.20);
+}
+
+/* =========================================================
+   SECONDARY CARD
+========================================================= */
+
+.actionCardSecondary {
+    padding: 1.9rem;
+    display: flex;
+    gap: 1.25rem;
+    align-items: center;
+    background: rgba(255,255,255,.82);
+    transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+}
+
+.actionCardSecondary:hover {
+    transform: translateY(-4px);
+    border-color: rgba(15,110,122,.24);
+    box-shadow: 0 30px 72px rgba(19,54,78,.15);
+}
+
+.actionCardIcon {
+    width: 62px;
+    height: 62px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(239,111,108,.12);
+    color: #ef6f6c;
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.actionCardSecondary .actionCardContent h3 {
+    font-size: 1.5rem;
+    line-height: 1.22;
+}
+
+.actionCardSecondary .actionCardContent p {
+    margin-top: .45rem;
+    color: #607286;
+    font-size: 1.08rem;
+    line-height: 1.65;
+    font-weight: 500;
+}
+
+.textLinkButton {
+    margin-top: .85rem;
+    padding: 0;
+    background: none;
+    border: none;
+    color: #0f6e7a;
+    font-size: 1.02rem;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.textLinkButton:hover {
+    color: #2f80ed;
+}
+
+/* =========================================================
+   TEST / EXERCISE
+========================================================= */
+
+.testSection,
+.exerciciMain {
+    max-width: 1080px;
+    margin: 0 auto;
+}
+
+.testSection {
+    padding: 2rem;
+    border-radius: 8px;
+    background: rgba(255,255,255,.82);
+    border: 1px solid rgba(19,54,78,.12);
+    box-shadow: 0 24px 70px rgba(19,54,78,.13);
+    backdrop-filter: blur(18px);
+}
+
+.testHeader {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.testIconBox {
+    width: 58px;
+    height: 58px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #94a3b8;
-    font-size: 1rem;
-    font-weight: 500;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 20px 40px -10px rgba(37, 99, 235, 0.08);
+    background: linear-gradient(135deg, #0f6e7a, #2f80ed);
+    color: #fff;
+    box-shadow: 0 16px 34px rgba(47,128,237,.22);
+}
+
+.testIcon {
+    font-size: 1.7rem;
+}
+
+.testTitle {
+    color: #102333;
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 0;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+    .withSidebar {
+        padding-left: 0;
+    }
+
+    .main {
+        padding: 2rem 1.2rem;
+    }
+
+    .homeSection,
+    .dashboardGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .homeSection {
+        gap: 3rem;
+        min-height: auto;
+        padding-top: 4rem;
+    }
+
+    .title {
+        font-size: 4.4rem;
+    }
+
+    .dashboardTitle {
+        font-size: 2.8rem;
+    }
+
+    .floatingBadge {
+        right: 12px;
+    }
+
+    .anatomyCard {
+        min-height: 500px;
+    }
+}
+
+@media (max-width: 700px) {
+    .main {
+        padding: 1.25rem;
+    }
+
+    .homeSection {
+        padding-top: 2.4rem;
+    }
+
+    .title {
+        font-size: 3.1rem;
+    }
+
+    .subtitle {
+        font-size: 1.05rem;
+        margin-bottom: 2rem;
+    }
+
+    .dashboardTitle {
+        font-size: 2.2rem;
+    }
+
+    .dashboardSubtitle {
+        font-size: 1rem;
+    }
+
+    .primaryActions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .loginButton,
+    .registerButton,
+    .bigButton {
+        width: 100%;
+    }
+
+    .imageBox {
+        max-width: 360px;
+        border-radius: 8px;
+    }
+
+    .floatingBadge {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+    }
+
+    .actionCardPrimary {
+        padding: 1.6rem;
+        min-height: 270px;
+    }
+
+    .actionCardContent h3 {
+        font-size: 1.55rem;
+    }
+
+    .actionCardContent p {
+        font-size: 1rem;
+    }
+
+    .actionCardSecondary {
+        align-items: flex-start;
+        padding: 1.4rem;
+    }
+
+    .testSection {
+        padding: 1.25rem;
+    }
 }

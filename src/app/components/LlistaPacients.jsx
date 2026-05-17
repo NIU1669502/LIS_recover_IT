@@ -3,12 +3,32 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../utils/supabase'
 import { getPacientsDeFisio, getProgresTotal } from '../utils/fisio'
+import { desassignarFisio } from '../utils/diagFisio'
 import AfegirPacientModal from './AfegirPacientModal'
+import DetallsPacientModal from './DetallsPacientModal'
 import styles from './LlistaPacients.module.css'
 
-// ── Targeta individual de pacient ────────────────────────────
-function TarjetaPacient({ pacient }) {
+function TarjetaPacient({ pacient, onCanvi, onAfegirDiagnostic }) {
     const [progres, setProgres] = useState(null)
+    const [confirmantDesassignar, setConfirmantDesassignar] = useState(false)
+    const [desassignant, setDesassignant] = useState(false)
+    const [mostrarDetalls, setMostrarDetalls] = useState(false)
+
+    const handleDesassignar = async () => {
+        if (!confirmantDesassignar) {
+            setConfirmantDesassignar(true)
+            return
+        }
+        setDesassignant(true)
+        const res = await desassignarFisio(pacient.dni)
+        setDesassignant(false)
+        setConfirmantDesassignar(false)
+        if (res.ok) {
+            if (onCanvi) onCanvi()
+        } else {
+            alert(res.missatge || 'Error en desassignar el pacient')
+        }
+    }
 
     useEffect(() => {
         if (pacient.diagnostic) {
@@ -20,7 +40,6 @@ function TarjetaPacient({ pacient }) {
     const fase = pacient.diagnostic?.fase_actual
     const finalitzat = pacient.diagnostic?.finalitzat
 
-    // ── Badge: pendent / fase / completat / sense pla ───────
     const badgeLabel = esPendent
         ? 'Pla en confirmació'
         : finalitzat
@@ -49,7 +68,6 @@ function TarjetaPacient({ pacient }) {
             <h3 className={styles.nom}>{pacient.nom}</h3>
             <p className={styles.dni}>DNI: {pacient.dni}</p>
 
-            {/* ── Cas pendent: mostra info del diagnòstic assignat + codi ── */}
             {esPendent ? (
                 <div>
                     {pacient.diagnosticPendent && (
@@ -58,44 +76,81 @@ function TarjetaPacient({ pacient }) {
                         </p>
                     )}
                     <p className={styles.pendentText}>
-                        El pacient encara no ha confirmat l'assignació
+                        El pacient encara no ha confirmat l&apos;assignació
                     </p>
                     {pacient.codi_validacio && (
                         <p className={styles.codiValidacio}>
                             Codi: <strong>{pacient.codi_validacio}</strong>
                         </p>
                     )}
+                    <button onClick={() => setMostrarDetalls(true)} className={styles.veureDetallsBtn}>
+                        Veure detalls pacient
+                    </button>
+                    <button onClick={() => desassignarFisio(pacient.dni)} className={styles.cancelarPendentBtn}>
+                        Cancel·lar assignació
+                    </button>
                 </div>
-            ) : pacient.diagnostic ? (
-                // ── Cas normal: diagnòstic actiu amb progrés ─────────────
+            ) : (
                 <>
-                    <p className={styles.lesio}>
-                        {pacient.diagnostic.nom_lesio} · {pacient.diagnostic.nom_muscul}
-                    </p>
-                    {progres !== null && (
-                        <div className={styles.progresBox}>
-                            <div className={styles.progresCapçalera}>
-                                <span className={styles.progresText}>Progrés</span>
-                                <span className={styles.progresNum}>{progres}%</span>
-                            </div>
-                            <div className={styles.progresBarBg}>
-                                <div
-                                    className={styles.progresBarFill}
-                                    style={{ width: `${progres}%` }}
-                                />
-                            </div>
+                    {pacient.diagnostic ? (
+                        <>
+                            <p className={styles.lesio}>
+                                {pacient.diagnostic.nom_lesio} · {pacient.diagnostic.nom_muscul}
+                            </p>
+                            {progres !== null && (
+                                <div className={styles.progresBox}>
+                                    <div className={styles.progresCapçalera}>
+                                        <span className={styles.progresText}>Progrés</span>
+                                        <span className={styles.progresNum}>{progres}%</span>
+                                    </div>
+                                    <div className={styles.progresBarBg}>
+                                        <div className={styles.progresBarFill} style={{ width: `${progres}%` }} />
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    ) : (
+                        <p className={styles.senseDiag}>Sense diagnòstic assignat</p>
+                    )}
+
+                    <button onClick={() => setMostrarDetalls(true)} className={styles.veureDetallsBtn}>
+                        Veure detalls pacient
+                    </button>
+
+                    <button onClick={() => onAfegirDiagnostic(pacient.dni, pacient.nom)} className={styles.afegirPlaBtn}>
+                        Afegir un nou diagnòstic
+                    </button>
+
+                    {!confirmantDesassignar ? (
+                        <button onClick={handleDesassignar} className={styles.desvincularBtn}>
+                            Desvincular
+                        </button>
+                    ) : (
+                        <div className={styles.confirmInlineRow}>
+                            <span className={styles.confirmText}>Segur? Deixarà de fer-lo seguiment.</span>
+                            <button onClick={handleDesassignar} disabled={desassignant} className={styles.desvincularBtnActiu}>
+                                {desassignant ? '...' : 'Sí'}
+                            </button>
+                            <button onClick={() => setConfirmantDesassignar(false)} className={styles.cancelInlineButton}>✕</button>
                         </div>
                     )}
+                    
                 </>
-            ) : (
-                // ── Cas sense diagnòstic ──────────────────────────────────
-                <p className={styles.senseDiag}>Sense diagnòstic assignat</p>
+            )}
+
+            {mostrarDetalls && (
+                <DetallsPacientModal
+                    dniPacient={pacient.dni}
+                    nomPacient={pacient.nom}
+                    onTancar={() => setMostrarDetalls(false)}
+                />
             )}
         </div>
     )
 }
 
 export default function LlistaPacients({ perfilUsuari }) {
+    const [infoPacientModal, setInfoPacientModal] = useState({dniPacient: '', nomPacient: ''})
     const [pacients, setPacients] = useState([])
     const [carregant, setCarregant] = useState(true)
     const [modalObert, setModalObert] = useState(false)
@@ -114,7 +169,6 @@ export default function LlistaPacients({ perfilUsuari }) {
     useEffect(() => {
         carregarPacients()
 
-        // ── Realtime: actualitzar quan canvia la llista de pacients o diagnòstics ──
         if (perfilUsuari?.dni) {
             canalRef.current = supabase
                 .channel(`llista-pacients-${perfilUsuari.dni}`)
@@ -163,7 +217,7 @@ export default function LlistaPacients({ perfilUsuari }) {
             ) : pacientsFiltrats.length === 0 ? (
                 <div className={styles.buit}>
                     {cerca
-                        ? <p>No s'ha trobat cap pacient amb "{cerca}".</p>
+                        ? <p>No s&apos;ha trobat cap pacient amb &quot;{cerca}&quot;.</p>
                         : <>
                             <p>Encara no tens cap pacient vinculat.</p>
                             <button
@@ -178,15 +232,16 @@ export default function LlistaPacients({ perfilUsuari }) {
             ) : (
                 <div className={styles.grid}>
                     {pacientsFiltrats.map(p => (
-                        <TarjetaPacient key={p.dni} pacient={p} />
+                        <TarjetaPacient key={p.dni} pacient={p} onCanvi={carregarPacients} onAfegirDiagnostic={(dni, nom) => setInfoPacientModal({dniPacient: dni, nomPacient: nom})} />
                     ))}
                 </div>
             )}
 
-            {modalObert && (
+            { (modalObert || infoPacientModal.dniPacient) && (
                 <AfegirPacientModal
                     dniFisio={perfilUsuari.dni}
-                    onTancar={() => setModalObert(false)}
+                    infoPacientInicial={infoPacientModal}
+                    onTancar={() => {setModalObert(false); setInfoPacientModal({dniPacient: '', nomPacient: ''})}}
                     onPacientAfegit={carregarPacients}
                 />
             )}

@@ -266,6 +266,129 @@
     background: #1d4ed8;
 }
 
+.veureDetallsBtn {
+    margin-top: 16px;
+    padding: 8px 16px;
+    width: 100%;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    margin-bottom: 8px;
+}
+
+.veureDetallsBtn:hover {
+    background: #1d4ed8;
+}
+
+.veureDetallsBtn:active {
+    transform: scale(0.98);
+}
+
+.cancelarPendentBtn {
+    margin-top: 16px;
+    padding: 8px 16px;
+    width: 100%;
+    background: #eb2c25;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    margin-bottom: 8px;
+}
+
+.cancelarPendentBtn:hover {
+    background: #d88d1d;
+}
+
+.cancelarPendentBtn:active {
+    transform: scale(0.98);
+}
+.desvincularBtn {
+    margin-top: 16px;
+    padding: 8px 16px;
+    width: 100%;
+    background: #ef4444;
+    color: #ffffff;
+    border: 1px solid #fee2e2;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.desvincularBtn:hover {
+    background: #ffffff;
+    border-color: #fca5a5;
+    color: #ef4444;
+}
+
+.confirmInlineRow {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    background: #fff5f5;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #fee2e2;
+}
+
+.confirmText {
+    font-size: 0.8rem;
+    color: #cc3333;
+    font-weight: 500;
+    flex: 1;
+    min-width: 0;
+}
+
+.desvincularBtnActiu {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #ffffff;
+    background: #ef4444;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.desvincularBtnActiu:hover {
+    background: #dc2626;
+}
+
+.desvincularBtnActiu:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cancelInlineButton {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #888888;
+    background: transparent;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancelInlineButton:hover {
+    background: #f7f7f7;
+    color: #111;
+}
+
 /* Loading */
 .carregant {
     display: flex;
@@ -300,4 +423,27 @@
     .grid {
         grid-template-columns: 1fr;
     }
+}
+
+
+.afegirPlaBtn {
+    margin-top: 16px;
+    padding: 8px 16px;
+    width: 100%;
+    background: #2dad33;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    margin-bottom: 8px;
+}
+.afegirPlaBtn:hover {
+    background: #52d81d;
+}
+
+.afegirPlaBtn:active {
+    transform: scale(0.98);
 }

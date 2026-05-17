@@ -1,0 +1,505 @@
+/* ── DetallsPacientModal — premium blue & white design system ── */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    animation: fadeIn 0.18s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.panel {
+    background: #fff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 780px;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+    animation: slideUp 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow: hidden;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Capçalera ── */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 28px 20px;
+    border-bottom: 1.5px solid #f0f0f0;
+    flex-shrink: 0;
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    color: #1d4ed8;
+    font-weight: 800;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.nom {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 4px;
+}
+
+.rolBadge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #2563eb;
+    background: #eff6ff;
+    border-radius: 99px;
+    padding: 2px 10px;
+}
+
+.closeBtn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: #f5f5f5;
+    color: #888;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+}
+
+.closeBtn:hover {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+/* ── Cos scrollable ── */
+.cos {
+    overflow-y: auto;
+    padding: 24px 28px 32px;
+    flex: 1;
+}
+
+/* ── Loading ── */
+.carregant {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 60px 0;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e8f0ff;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Seccions ── */
+.seccio {
+    margin-bottom: 4px;
+}
+
+.seccioTitol {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #2563eb;
+    margin: 0 0 16px;
+}
+
+.seccioIcon {
+    font-size: 1rem;
+}
+
+.comptador {
+    margin-left: auto;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: #eff6ff;
+    color: #2563eb;
+    border-radius: 99px;
+    padding: 1px 8px;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.divider {
+    height: 1.5px;
+    background: #f0f0f0;
+    margin: 20px 0;
+}
+
+/* ── Grid d'informació ── */
+.infoGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 24px;
+    margin-bottom: 16px;
+}
+
+.infoItem {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.infoLabel {
+    font-size: 0.75rem;
+    color: #999;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.infoValue {
+    font-size: 0.95rem;
+    color: #111;
+    font-weight: 500;
+}
+
+.mono {
+    font-family: monospace;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* ── Badges ── */
+.badgeFase {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: #eff6ff;
+    color: #2563eb;
+    border-radius: 99px;
+    padding: 2px 10px;
+}
+
+.badgeComplet {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: #f0fdf4;
+    color: #16a34a;
+    border-radius: 99px;
+    padding: 2px 10px;
+}
+
+/* ── Descripció ── */
+.descripcioBox {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.descripcioText {
+    font-size: 0.88rem;
+    color: #555;
+    line-height: 1.55;
+    margin: 0;
+    background: #f8f9ff;
+    border-left: 3px solid #bfdbfe;
+    padding: 10px 14px;
+    border-radius: 0 8px 8px 0;
+}
+
+/* ── Progrés ── */
+.progresBox {
+    background: #f8f9ff;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.progresCapcalera {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.progresLabel {
+    font-size: 0.82rem;
+    color: #555;
+    font-weight: 500;
+}
+
+.progresNum {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.progresBarBg {
+    height: 8px;
+    background: #dbeafe;
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progresBarFill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #2563eb);
+    border-radius: 99px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progresDetall {
+    font-size: 0.78rem;
+    color: #888;
+    margin: 0;
+    text-align: right;
+}
+
+/* ── Historial de sessions ── */
+.sessionsList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sessioRow {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    align-items: center;
+    gap: 12px;
+    background: #fafafa;
+    border: 1.5px solid #f0f0f0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.sessioRow:hover {
+    border-color: #bfdbfe;
+    background: #f0f8ff;
+}
+
+.sessioData {
+    font-size: 0.85rem;
+    color: #444;
+    font-weight: 500;
+}
+
+.sessioBadge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: #eff6ff;
+    color: #2563eb;
+    border-radius: 99px;
+    padding: 2px 8px;
+    white-space: nowrap;
+}
+
+.sessioLesio {
+    font-size: 0.8rem;
+    color: #666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+}
+
+.sessioPunts {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #16a34a;
+    white-space: nowrap;
+}
+
+/* ── Sense dades ── */
+.senseDades {
+    font-size: 0.88rem;
+    color: #bbb;
+    font-style: italic;
+    margin: 0;
+    text-align: center;
+    padding: 16px 0;
+}
+
+/* ── Historial de lesions ── */
+.lesionsList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.lesioRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: #fafafa;
+    border: 1.5px solid #f0f0f0;
+    border-radius: 10px;
+    padding: 12px 16px;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.lesioRow:hover {
+    border-color: #bfdbfe;
+    background: #f0f8ff;
+}
+
+.lesioLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.lesioNom {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #111;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lesioMuscul {
+    font-size: 0.78rem;
+    color: #888;
+}
+
+.lesioRight {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.lesioSessions {
+    font-size: 0.78rem;
+    color: #999;
+    white-space: nowrap;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+    .panel {
+        max-height: 95vh;
+        border-radius: 16px;
+    }
+
+    .header {
+        padding: 18px 20px 16px;
+    }
+
+    .cos {
+        padding: 20px 20px 28px;
+    }
+
+    .infoGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .sessioRow {
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto;
+    }
+
+    .sessioLesio {
+        grid-column: 1;
+        max-width: 100%;
+    }
+
+    .sessioPunts {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+
+    .diagCard {
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    background: var(--card-bg, #fafafa);
+}
+
+.diagCardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+    gap: 0.5rem;
+}
+
+.diagNom {
+    display: block;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.diagMuscul {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted, #6b7280);
+    margin-top: 0.15rem;
+}
+
+.diagBadges {
+    display: flex;
+    gap: 0.4rem;
+    flex-shrink: 0;
+}
+
+.badgeNoConfirmat {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+}
+
+

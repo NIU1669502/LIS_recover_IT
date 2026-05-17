@@ -1,0 +1,138 @@
+/* ── GraficaRecuperacio — premium blue design system ── */
+
+.wrapper {
+    background: #fff;
+    border-radius: 16px;
+    border: 1.5px solid #e8f0ff;
+    padding: 20px 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.06);
+}
+
+/* ── Capçalera ── */
+.header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.chartTitle {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 2px;
+}
+
+.chartSubtitle {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+/* ── Xip de progrés ── */
+.progresChip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border: 1.5px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 8px 14px;
+    min-width: 64px;
+    flex-shrink: 0;
+}
+
+.progresNum {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #2563eb;
+    line-height: 1;
+}
+
+.progresLabel {
+    font-size: 0.65rem;
+    color: #60a5fa;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+}
+
+/* ── SVG ── */
+.svgWrapper {
+    width: 100%;
+    overflow: hidden;
+}
+
+.svg {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.dot {
+    cursor: pointer;
+    transition: r 0.15s;
+}
+
+.dot:hover {
+    r: 7px;
+}
+
+/* ── Estat buit ── */
+.empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 32px 16px;
+    text-align: center;
+}
+
+.emptyIcon {
+    font-size: 2rem;
+    opacity: 0.4;
+}
+
+.empty p {
+    font-size: 0.88rem;
+    color: #94a3b8;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ── Llegenda ── */
+.llegenda {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.llegendaItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.llegendaLiniaBlava {
+    display: inline-block;
+    width: 20px;
+    height: 3px;
+    background: linear-gradient(90deg, #60a5fa, #2563eb);
+    border-radius: 99px;
+}
+
+.llegendaLiniaVerde {
+    display: inline-block;
+    width: 20px;
+    height: 2px;
+    background: #22c55e;
+    border-radius: 99px;
+    opacity: 0.7;
+    border-top: 1px dashed #22c55e;
+}

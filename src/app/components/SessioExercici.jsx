@@ -98,6 +98,7 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
     const exercici = exercicis[index]
     const esUltimExercici = index === exercicis.length - 1
     const totalReps = exercici?.Repeticions
+    const esUltimaRep = true
 
     // Reset quan canvia d'exercici
     useEffect(() => {
@@ -204,6 +205,26 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
         setMostrarCompletada(true)
     }
 
+    useEffect(() => {
+        const carregarUrls = async () => {
+            const ids = exercicis.map(e => e.id_exercici)
+
+            const { data } = await supabase
+                .from('exercici_muscul')
+                .select('id_exercici, url_video')
+                .in('id_exercici', ids)
+                .eq('id_cos', musculActual.id_cos)
+
+            if (data) {
+                const mapa = {}
+                data.forEach(row => { mapa[row.id_exercici] = row.url_video })
+                setUrlsVideo(mapa)
+            }
+        }
+
+        if (musculActual && exercicis.length > 0) carregarUrls()
+    }, [musculActual, exercicis])
+
     const formatTemps = (s) => {
         const m = Math.floor(s / 60)
         const seg = s % 60
@@ -214,16 +235,6 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
     const circumferencia = 2 * Math.PI * 54
     const strokeDashoffset = circumferencia * (1 - pct / 100)
 
-    const convertirYoutubeURL = (url) => {
-        if (!url) return ''
-        let videoId = ''
-        const shortMatch = url.match(/youtu\.be\/([^?]+)/)
-        if (shortMatch) videoId = shortMatch[1]
-        const longMatch = url.match(/[?&]v=([^&]+)/)
-        if (longMatch) videoId = longMatch[1]
-        if (!videoId) return url
-        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0`
-    }
 
     // ── Pantalla completada ─────────────────────────────────
     if (mostrarCompletada && resultCompletada) {
@@ -273,10 +284,21 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
     if (!exercici) return null
 
     const textBoto = () => {
-        if (!esUltimExercici) return `Següent exercici: ${exercicis[index + 1]?.nom}`
+
+        if (!esUltimExercici) return `Següent exercici: ${exercicis[index + 1]?.nom + " del " + musculActual.nom.toLowerCase()}`
         return 'Completar sessió'
     }
+    const convertirYoutubeURL = (url) => {
+        if (!url) return ''
+        let videoId = ''
+        const shortMatch = url.match(/youtu\.be\/([^?]+)/)
+        if (shortMatch) videoId = shortMatch[1]
+        const longMatch = url.match(/[?&]v=([^&]+)/)
+        if (longMatch) videoId = longMatch[1]
 
+        if (!videoId) return url
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&showinfo=0&loop=1&playlist=${videoId}&enablejsapi=0`
+    }
     return (
         <div className={styles.container}>
             {/* Modal dolor per exercici */}
@@ -316,7 +338,7 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
                 </div>
             </div>
 
-            <h2 className={styles.exerciciNom}>{exercici.nom}</h2>
+            <h2 className={styles.exerciciNom}>{exercici.nom + " del " + musculActual.nom.toLowerCase()}</h2>
 
             <div className={styles.repsTracker}>
                 <span className={styles.repsLabel}>Repeticions necessàries: {totalReps}</span>

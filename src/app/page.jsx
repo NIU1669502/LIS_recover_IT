@@ -6,7 +6,6 @@ import { processarTestDiagnostic } from './utils/lesions'
 import SessioExercici from './components/SessioExercici'
 import ToastContainer from './components/ToastContainer'
 
-
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
 import LoginForm from './components/LoginForm'
@@ -17,6 +16,7 @@ import BibliotecaExercicis from './components/BibliotecaExercicis'
 import ExercicisEnCurs from './components/ExercicisEnCurs'
 import HistorialDiagnostics from './components/HistorialDiagnostics'
 import HistorialSessions from './components/HistorialSessions'
+import imatgeAnatomica from './data/Imatge_anatomica.png'
 
 // Vistes del fisio
 import PanellFisio from './components/PanellFisio'
@@ -31,10 +31,14 @@ export default function Page() {
   const [faseActual, setFaseActual] = useState(1)
   const [pageVisible, setPageVisible] = useState(true)
   const transitionRef = useRef(null)
-  const [musculActual, setMusculActual] = useState(null)
+  const lastDiagIndexRef = useRef(-1)
+  const [musculActual, setMusculActual] = useState({ id_cos: 0, nom: '' })
   const [idDiagnosticSessio, setIdDiagnosticSessio] = useState(null)
-
   const [idDiagnosticFiltreHistorial, setIdDiagnosticFiltreHistorial] = useState(null)
+  const [idDiagnosticPreseleccionat, setIdDiagnosticPreseleccionat] = useState(null)
+  const [rutinaAvui, setRutinaAvui] = useState(null)
+  const [carregantRutina, setCarregantRutina] = useState(false)
+  const [refreshProgres, setRefreshProgres] = useState(0)
 
   const navegarA = (novaVista, onTransition) => {
     if (transitionRef.current) clearTimeout(transitionRef.current)
@@ -46,11 +50,7 @@ export default function Page() {
       setPageVisible(true)
     }, 220)
   }
-  useEffect(() => {
-    if (vistaActual === 'perfil' && usuariSessio) {
-      obtenirPerfil(usuariSessio)
-    }
-  }, [vistaActual])
+
   const {
     usuariSessio, perfilUsuari,
     errorAuth,
@@ -60,8 +60,67 @@ export default function Page() {
     registrarUsuari, iniciarSessio, tancarSessio, editarPerfil, obtenirPerfil
   } = useAuth(navegarA)
 
+  useEffect(() => {
+    if (vistaActual === 'perfil' && usuariSessio) {
+      obtenirPerfil(usuariSessio)
+    }
+  }, [vistaActual])
+
+  useEffect(() => {
+    let isSubscribed = true
+    if (vistaActual === 'inici' && perfilUsuari?.dni && perfilUsuari?.es_fisioterapeuta !== true) {
+      setCarregantRutina(true)
+      import('./utils/lesions').then(({ getDiagnosticsActius, getExercicisDelaFase }) => {
+        import('../utils/supabase').then(({ supabase }) => {
+          getDiagnosticsActius(perfilUsuari.dni).then(async (listRaw) => {
+            if (!isSubscribed) return
+            if (!listRaw || listRaw.length === 0) {
+              setRutinaAvui(null)
+              setCarregantRutina(false)
+              return
+            }
+
+            let nextIndex = 0
+            if (listRaw.length > 1) {
+              nextIndex = (lastDiagIndexRef.current + 1) % listRaw.length
+            }
+            lastDiagIndexRef.current = nextIndex
+            const diag = listRaw[nextIndex]
+
+            const [{ data: lesio }, { data: muscul }, exs] = await Promise.all([
+              supabase.from('lesions').select('nom').eq('id_lesio', diag.id_lesio).single(),
+              supabase.from('musculs').select('nom').eq('id_cos', diag.part_cos).single(),
+              getExercicisDelaFase(diag)
+            ])
+
+            if (isSubscribed) {
+              const nomComplet = muscul && muscul.nom
+                ? `${lesio?.nom || 'Lesió'} de ${muscul.nom.toLowerCase()}`
+                : (lesio?.nom || 'Lesió')
+
+              const tempsTotalSegons = exs.reduce((acc, curr) => acc + ((curr.duracio_segons || 0) * (curr.Repeticions || 1)), 0)
+              const mins = Math.ceil(tempsTotalSegons / 60)
+
+              setRutinaAvui({
+                nomLesio: nomComplet,
+                numExercicis: exs.length,
+                minuts: mins > 0 ? mins : 1,
+                diagnostic: diag
+              })
+              setCarregantRutina(false)
+            }
+          })
+        })
+      })
+    }
+    return () => { isSubscribed = false }
+  }, [vistaActual, perfilUsuari])
+
   const esFisio = perfilUsuari?.es_fisioterapeuta === true
   const esPantallaAuth = vistaActual === 'login' || vistaActual === 'registre'
+
+
+
 
   return (
     <div className={`${styles.container} ${usuariSessio ? styles.withSidebar : ''}`}>
@@ -77,10 +136,12 @@ export default function Page() {
             vistaActual={vistaActual}
             onNavegar={(vista) => {
               if (vista === 'historial') setIdDiagnosticFiltreHistorial(null)
+              if (vista === 'exercicis-en-curs') setIdDiagnosticPreseleccionat(null)
               navegarA(vista)
             }}
             onTancarSessio={tancarSessio}
             esFisio={esFisio}
+            perfilUsuari={perfilUsuari}
           />
         )}
 
@@ -174,16 +235,21 @@ export default function Page() {
             <BibliotecaExercicis onTornar={() => navegarA('inici')} />
           )}
 
-
-
           {vistaActual === 'progres' && (
             <HistorialDiagnostics
               perfilUsuari={perfilUsuari}
               onNavegar={navegarA}
+              onPreseleccionarDiagnostic={(id) => setIdDiagnosticPreseleccionat(id)}
               onVeureHistorialSessions={(idDiagnostic) => {
                 setIdDiagnosticFiltreHistorial(idDiagnostic)
                 navegarA('historial')
               }}
+              onEsborrarDiagnostic={async (idDiagnostic) => {
+                const { eliminarDiagnostic } = await import('./utils/lesions')
+                await eliminarDiagnostic(idDiagnostic)
+                setRefreshProgres((r) => r + 1)
+              }}
+              refreshNonce={refreshProgres}
             />
           )}
 
@@ -207,50 +273,117 @@ export default function Page() {
                 navegarA('exercici')
               }}
               perfilUsuari={perfilUsuari}
+              idDiagnosticInicial={idDiagnosticPreseleccionat}
             />
           )}
 
           {vistaActual === 'inici' && (
-            <section className={styles.homeSection}>
-              <h1 className={styles.title}>
-                Recover<span className={styles.titleAccent}>IT</span>
-              </h1>
-              <p className={styles.subtitle}>
-                La teva plataforma de recuperació guiada i intel·ligent.
-              </p>
-              <div className={styles.buttonGroup}>
-                {!usuariSessio ? (
-                  <>
-                    <button onClick={() => navegarA('login')} className={styles.loginButton}>
-                      Iniciar sessió
-                    </button>
-                    <button onClick={() => navegarA('registre')} className={styles.registerButton}>
-                      Registrar-me
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button onClick={() => navegarA('test')} className={styles.testButton}>
-                      Realitzar test aproximat
-                    </button>
-                    <button onClick={() => navegarA('perfil')} className={styles.profileButton}>
-                      Anar al meu perfil
-                    </button>
-                  </>
-                )}
-              </div>
-              <div className={styles.imageSection}>
-                <div className={styles.imageBox}>
-                  [Imatge anatòmica]
-                </div>
-                <button
-                  onClick={() => navegarA('biblioteca')}
-                  className={styles.bigButton}
-                >
-                  Veure exercicis
-                </button>
-              </div>
-            </section>
+            <>
+              {!usuariSessio ? (
+                <section className={styles.homeSection}>
+                  <div className={styles.homeContent}>
+                    <h1 className={styles.title}>
+                      Recover<span className={styles.titleAccent}>IT</span>
+                    </h1>
+                    <p className={styles.subtitle}>
+                      La teva plataforma de recuperació guiada i intel·ligent. Torna a moure't amb confiança gràcies a rutines dissenyades exclusivament per a tu.
+                    </p>
+                    <div className={styles.heroActions}>
+                      <div className={styles.primaryActions}>
+                        <button onClick={() => navegarA('registre')} className={styles.loginButton}>
+                          Registrar-me
+                        </button>
+                        <button onClick={() => navegarA('login')} className={styles.registerButton}>
+                          Iniciar Sessió
+                        </button>
+                      </div>
+
+                      <div className={styles.secondaryActionBox}>
+                        <p className={styles.actionHint}>Vols veure com funciona abans?</p>
+                        <button
+                          onClick={() => navegarA('biblioteca')}
+                          className={styles.textLinkButton}
+                          style={{ marginTop: 0, fontSize: '1.1rem' }}
+                        >
+                          Explorar la biblioteca d'exercicis &rarr;
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.homeVisual}>
+                    <div className={styles.imageBox}>
+                      <img src={imatgeAnatomica.src} alt="Imatge anatòmica d'una persona" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                    </div>
+                  </div>
+                </section>
+              ) : (
+                <section className={styles.dashboardContainer}>
+                  <div className={styles.dashboardHeader}>
+                    <div className={styles.welcomeMessage}>
+                      <h1 className={styles.dashboardTitle}>
+                        Benvingut de nou, <span className={styles.highlightName}>{perfilUsuari?.nom || 'Usuari'}</span>!
+                      </h1>
+                      <p className={styles.dashboardSubtitle}>
+                        És un plaer tenir-te aquí. Continuem treballant junts per la teva recuperació. Escolta el teu cos, pren el teu temps i anem a donar-ho tot avui.
+                        {rutinaAvui && ` Avui tens ${rutinaAvui.numExercicis} exercicis programats. Dedica-li ${rutinaAvui.minuts} minuts a la teva salut.`}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className={styles.dashboardGrid}>
+                    <div className={styles.anatomyCard}>
+                      <img src={imatgeAnatomica.src} alt="Imatge anatomica" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', zIndex: 1 }} />
+                    </div>
+
+                    <div className={styles.widgetsColumn}>
+                      <div className={styles.actionCardPrimary}>
+                        {carregantRutina ? (
+                          <div className={styles.actionCardContent}>
+                            <h3>Carregant rutina...</h3>
+                          </div>
+                        ) : rutinaAvui ? (
+                          <>
+                            <div className={styles.actionCardContent}>
+                              <h3>Iniciar Sessió d'avui</h3>
+                              <p>Rutina: {rutinaAvui.nomLesio}</p>
+                              <span className={styles.actionCardMeta}>{rutinaAvui.minuts} min | {rutinaAvui.numExercicis} exercicis</span>
+                            </div>
+                            <button className={styles.actionButtonPrimary} onClick={() => {
+                              setIdDiagnosticPreseleccionat(rutinaAvui.diagnostic.id_diagnostic)
+                              navegarA('exercicis-en-curs')
+                            }}>
+                              Començar Ara
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <div className={styles.actionCardContent}>
+                              <h3>Cap rutina activa</h3>
+                              <p>Fes un test diagnòstic per obtenir una rutina.</p>
+                            </div>
+                            <button className={styles.actionButtonPrimary} onClick={() => navegarA('test')}>
+                              Realitzar Test
+                            </button>
+                          </>
+                        )}
+                      </div>
+
+                      <div className={styles.actionCardSecondary}>
+                        <div className={styles.actionCardIcon}>📋</div>
+                        <div className={styles.actionCardContent}>
+                          <h3>¿Vols realitzar un nou diagnòstic?</h3>
+                          <p>Realitza el test de diagnostic per obtenir una nova rutina.</p>
+                          <button className={styles.textLinkButton} onClick={() => navegarA('test')}>
+                            Realitzar Test
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              )}
+            </>
           )}
 
         </main>

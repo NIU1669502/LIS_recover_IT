@@ -80,7 +80,7 @@ export default function HistorialSessions({ perfilUsuari, idDiagnosticFiltre = n
                             <thead>
                                 <tr>
                                     <th>Dia</th>
-                                    <th>Lesió</th>
+                                    <th>Lesió i múscul</th>
                                     <th>Fase</th>
                                     <th>Punts</th>
                                 </tr>
@@ -101,6 +101,9 @@ export default function HistorialSessions({ perfilUsuari, idDiagnosticFiltre = n
                                         <td>
                                             <div className={styles.exerciseName}>
                                                 {s.lesions?.nom || 'Lesió desconeguda'}
+                                            </div>
+                                            <div className={styles.exerciseName}>
+                                                {s.diagnostic?.musculs?.nom || 'Muscul desconegut'}
                                             </div>
                                         </td>
 

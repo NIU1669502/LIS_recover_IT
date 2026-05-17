@@ -10,17 +10,26 @@
     background: #0f172a; /* Blau fosc profund */
     display: flex;
     flex-direction: column;
-    padding: 2rem 0;
+    padding: 2rem 0 1.25rem 0; /* Padding ajustat perquè el botó quedi una mica més avall */
     z-index: 100;
     box-shadow: 10px 0 30px rgba(15, 23, 42, 0.15);
     overflow-y: auto;
+    box-sizing: border-box; /* IMPORTANT: Evita que el padding faci créixer el 100vh */
+}
+
+.headerContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.5rem 2rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 1.5rem;
 }
 
 /* Logo */
 .logo {
-    padding: 0 1.5rem 2rem 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
 }
 
 .logoText {
@@ -35,6 +44,36 @@
     background: linear-gradient(135deg, #60a5fa, #3b82f6);
     -webkit-background-clip: text;
     background-clip: text;
+}
+
+/* Racha Badge (Fueguito) */
+.rachaBadge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, #fb923c, #ef4444);
+    padding: 4px 10px;
+    border-radius: 99px;
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+    animation: pulseFlame 2s infinite ease-in-out;
+}
+
+.rachaIcon {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.rachaNum {
+    color: white;
+    font-weight: 800;
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
+@keyframes pulseFlame {
+    0% { transform: scale(1); box-shadow: 0 0 12px rgba(239, 68, 68, 0.4); }
+    50% { transform: scale(1.05); box-shadow: 0 0 18px rgba(239, 68, 68, 0.6); }
+    100% { transform: scale(1); box-shadow: 0 0 12px rgba(239, 68, 68, 0.4); }
 }
 
 /* Nav */
@@ -102,11 +141,11 @@
     gap: 0.85rem;
     width: 100%;
     padding: 0.85rem 1.25rem;
-    background: transparent;
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.2);
     border-radius: 12px;
     cursor: pointer;
-    color: #cbd5e1;
+    color: #fca5a5;
     font-size: 0.95rem;
     font-weight: 600;
     text-align: left;
@@ -114,7 +153,9 @@
 }
 
 .logoutButton:hover {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: rgba(239, 68, 68, 0.3);
-    color: #fca5a5;
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #f87171;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
 }

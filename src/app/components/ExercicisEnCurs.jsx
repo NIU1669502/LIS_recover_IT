@@ -21,12 +21,12 @@ function deriveSelectedId(list, currentId, userDni) {
     return list[0]?.id_diagnostic ?? null
 }
 
-export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsuari }) {
+export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsuari,idDiagnosticInicial }) {
     const [diagnosticsOpcions, setDiagnosticsOpcions] = useState([])
     const [idDiagnosticSeleccionat, setIdDiagnosticSeleccionat] = useState(null)
     const [diagnostic, setDiagnostic] = useState(null)
     const [exercicis, setExercicis] = useState([])
-    const [nomMuscul, setNomMuscul] = useState('')
+    const [infoMuscul, setInfoMuscul] = useState({ id_cos: 0, nom: '' })
     const [nomLesio, setNomLesio] = useState('')
     const [sessionsFetes, setSessionsFetes] = useState(0)
     const [sessionsTotals, setSessionsTotals] = useState(0)
@@ -36,6 +36,11 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
     const [mostrarResumSessio, setMostrarResumSessio] = useState(false)
 
     const canalRef = useRef(null)
+
+    useEffect(() => {
+        if (!idDiagnosticInicial) return
+        obrirResumSessio(idDiagnosticInicial)
+    }, [idDiagnosticInicial])
 
     const seleccionarDiagnostic = useCallback(
         (id) => {
@@ -122,7 +127,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
             }
 
             const [{ data: muscul }, { data: lesio }, exs, { fetes, totals }] = await Promise.all([
-                supabase.from('musculs').select('nom').eq('id_cos', diag.part_cos).single(),
+                supabase.from('musculs').select('id_cos, nom').eq('id_cos', diag.part_cos).single(),
                 supabase.from('lesions').select('nom').eq('id_lesio', diag.id_lesio).single(),
                 getExercicisDelaFase(diag),
                 getResumSessions(diag),
@@ -130,7 +135,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
 
             if (cancelat) return
 
-            if (muscul) setNomMuscul(muscul.nom)
+            if (muscul) setInfoMuscul(muscul)
             if (lesio) setNomLesio(lesio.nom)
             setExercicis(exs)
             setSessionsFetes(fetes)
@@ -239,7 +244,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
                     </p>
                 )}
                 <button className={styles.primaryButton} onClick={() => onNavegar('test')}>
-                    Fer un nou test →
+                    Fer un nou test
                 </button>
             </div>
         )
@@ -281,84 +286,82 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
             )}
 
             {mostrarResum && (
-            <>
-            {multiples && (
-                <button
-                    type="button"
-                    className={styles.backToListButton}
-                    onClick={tornarALlistatSessions}
-                >
-                    ← Tornar al llistat de lesions
-                </button>
-            )}
+                <>
+                    {multiples && (
+                        <button
+                            type="button"
+                            className={styles.backToListButton}
+                            onClick={tornarALlistatSessions}
+                        >
+                            Tornar al llistat de lesions
+                        </button>
+                    )}
 
-            <div className={styles.rutinaInfo}>
-                <div className={styles.rutinaTag}>
-                    <span className={styles.tagLabel}>Múscul</span>
-                    <span className={styles.tagValue}>{nomMuscul}</span>
-                </div>
-                <div className={styles.rutinaTag}>
-                    <span className={styles.tagLabel}>Lesió</span>
-                    <span className={styles.tagValue}>{nomLesio}</span>
-                </div>
-                <div className={styles.rutinaTag}>
-                    <span className={styles.tagLabel}>Fase</span>
-                    <span className={styles.tagValue}>{diagnostic.fase_actual} / 3</span>
-                </div>
-                <div className={styles.rutinaTag}>
-                    <span className={styles.tagLabel}>Progrés</span>
-                    <span className={styles.tagValue}>
-                        {puntsActuals} / {puntsObjectiu} pts
-                    </span>
-                </div>
-            </div>
-
-            <div className={styles.sessionsCounter}>
-                <span>Sessions necessàries/dia per superar la fase (fetes / requerides): </span>
-                <strong>
-                    {sessionsFetes} / {sessionsTotals}
-                </strong>
-            </div>
-
-            <div className={styles.faseProgress}>
-                {[1, 2, 3].map((f) => (
-                    <div
-                        key={f}
-                        className={`${styles.faseDot} ${f < diagnostic.fase_actual ? styles.faseDotDone : ''} ${f === diagnostic.fase_actual ? styles.faseDotActive : ''}`}
-                    >
-                        <span className={styles.faseNum}>{f}</span>
-                        <span className={styles.faseLabel}>
-                            {f === 1 ? 'Inicial' : f === 2 ? 'Progressió' : 'Avançada'}
-                        </span>
-                    </div>
-                ))}
-            </div>
-
-            <div className={styles.exercicisList}>
-                {exercicis.map((ex, idx) => (
-                    <div key={ex.id_exercici} className={styles.exerciciCard}>
-                        <div className={styles.exerciciNum}>{idx + 1}</div>
-                        <div className={styles.exerciciInfo}>
-                            <h3 className={styles.exerciciNom}>{ex.nom}</h3>
-                            <div className={styles.exerciciMeta}>
-                                <span>⏱ {ex.duracio_segons}s</span>
-                                <span>🔁 {ex.Repeticions} reps</span>
-                                <span>⭐ {ex.punts * diagnostic.fase_actual} pts</span>
-                            </div>
+                    <div className={styles.rutinaInfo}>
+                        <div className={styles.rutinaTag}>
+                            <span className={styles.tagLabel}>Múscul</span>
+                            <span className={styles.tagValue}>{infoMuscul.nom}</span>
+                        </div>
+                        <div className={styles.rutinaTag}>
+                            <span className={styles.tagLabel}>Lesió</span>
+                            <span className={styles.tagValue}>{nomLesio}</span>
+                        </div>
+                        <div className={styles.rutinaTag}>
+                            <span className={styles.tagLabel}>Fase</span>
+                            <span className={styles.tagValue}>{diagnostic.fase_actual} / 3</span>
+                        </div>
+                        <div className={styles.rutinaTag}>
+                            <span className={styles.tagLabel}>Progrés</span>
+                            <span className={styles.tagValue}>
+                                {puntsActuals} / {puntsObjectiu} pts
+                            </span>
                         </div>
                     </div>
-                ))}
-            </div>
 
-            <button
-                className={styles.primaryButton}
-                onClick={() =>
-                    onIniciarSessio(exercicis, diagnostic.fase_actual, diagnostic.part_cos, diagnostic.id_diagnostic)
-                }
-            >
-                Iniciar sessió d&apos;exercicis
-            </button>
-            </>
+                    <div className={styles.sessionsCounter}>
+                        <span>Sessions necessàries/dia per superar la fase (fetes / requerides): </span>
+                        <strong>
+                            {sessionsFetes} / {sessionsTotals}
+                        </strong>
+                    </div>
+
+                    <div className={styles.faseProgress}>
+                        {[1, 2, 3].map((f) => (
+                            <div
+                                key={f}
+                                className={`${styles.faseDot} ${f < diagnostic.fase_actual ? styles.faseDotDone : ''} ${f === diagnostic.fase_actual ? styles.faseDotActive : ''}`}
+                            >
+                                <span className={styles.faseNum}>{f}</span>
+                                <span className={styles.faseLabel}>
+                                    {f === 1 ? 'Inicial' : f === 2 ? 'Progressió' : 'Avançada'}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className={styles.exercicisList}>
+                        {exercicis.map((ex, idx) => (
+                            <div key={ex.id_exercici} className={styles.exerciciCard}>
+                                <div className={styles.exerciciNum}>{idx + 1}</div>
+                                <div className={styles.exerciciInfo}>
+                                    <h3 className={styles.exerciciNom}>{ex.nom}</h3>
+                                    <div className={styles.exerciciMeta}>
+                                        <span>⏱ {ex.duracio_segons}s</span>
+                                        <span>🔁 {ex.Repeticions} reps</span>
+                                        <span>⭐ {ex.punts * diagnostic.fase_actual} pts</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <button
+                        className={styles.primaryButton}
+                        onClick={() => onIniciarSessio(exercicis, diagnostic.fase_actual, infoMuscul, diagnostic.id_diagnostic)}
+                    >
+                        Iniciar sessió d&apos;exercicis
+                    </button>
+                </>
             )}
         </div>
     )

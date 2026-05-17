@@ -1,9 +1,37 @@
 .container {
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 2rem;
   animation: fadeIn 0.4s ease-out;
 }
+
+/* ── Layout dues columnes ── */
+.layoutDuoColumnes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.columnaEsquerra {
+  min-width: 0;
+}
+
+.columnaDreta {
+  min-width: 0;
+  position: sticky;
+  top: 24px;
+}
+
+@media (max-width: 900px) {
+  .layoutDuoColumnes {
+    grid-template-columns: 1fr;
+  }
+  .columnaDreta {
+    position: static;
+  }
+}
+
 
 .title {
   font-size: 2rem;
@@ -162,6 +190,25 @@
 .secondaryButton:hover {
   background-color: #eff6ff;
   border-color: #3b82f6;
+}
+
+.esborrarButton {
+  margin-top: 0.65rem;
+  width: 100%;
+  padding: 0.7rem 0.75rem;
+  background-color: #fd0000;
+  color: #ffffff;
+  border: 1px solid #fdcf93;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.esborrarButton:hover {
+  background-color: #f75206;
+  border-color: #f6413b;
 }
 
 @keyframes fadeIn {

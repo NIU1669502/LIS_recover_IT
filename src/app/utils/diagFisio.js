@@ -105,7 +105,7 @@ export async function confirmarCodiFisio(dniPacient, codiIntroduit) {
             dni_pacient: relacio.dni_pacient,
             id_lesio: relacio.id_lesio,
             part_cos: relacio.part_cos,
-            descripcio: relacio.descripcio || null,
+            descripcio: relacio.descripcio || 'Sense descripció',
             fase_actual: 1,
             finalitzat: false,
             num_sessions: 0,
@@ -126,6 +126,7 @@ export async function confirmarCodiFisio(dniPacient, codiIntroduit) {
 // ============================================================
 export async function desassignarFisio(dniPacient) {
     // ── 1. Obtenir la relació activa ─────────────────────────
+    console.log('Desassignar fisio:', dniPacient)
     const { data: relacio, error: errorRelacio } = await supabase
         .from('relacio_fisio_pacient')
         .select('dni_fisio')
@@ -150,13 +151,5 @@ export async function desassignarFisio(dniPacient) {
     if (errorDelete) {
         return { ok: false, missatge: errorDelete.message }
     }
-
-    // ── 3. Finalitzar el diagnòstic actiu (si n'hi ha) ───────
-    await supabase
-        .from('diagnostic')
-        .update({ finalitzat: true })
-        .eq('dni_pacient', dniPacient)
-        .eq('finalitzat', false)
-
     return { ok: true }
 }
