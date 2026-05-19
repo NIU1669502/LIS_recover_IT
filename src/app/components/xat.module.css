@@ -1,0 +1,254 @@
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    height: calc(100vh - 4rem);
+    display: flex;
+    flex-direction: column;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #0f172a;
+    margin: 0 0 0.35rem;
+    letter-spacing: -0.03em;
+}
+
+.subtitle {
+    margin: 0 0 1.25rem;
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+.muted {
+    color: #64748b;
+    text-align: center;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+}
+
+.error {
+    color: #b91c1c;
+    background: #fef2f2;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+/* ── Layout fisio (llista + conversa) ─────────────────────── */
+.fisioLayout {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 1rem;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+}
+
+.llistaPanel {
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: #f8fafc;
+}
+
+.llistaHeader {
+    padding: 1rem 1.1rem;
+    font-weight: 800;
+    color: #1e3a8a;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.llistaScroll {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.conversaItem {
+    width: 100%;
+    text-align: left;
+    padding: 0.9rem 1rem;
+    border: none;
+    border-bottom: 1px solid #f1f5f9;
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.conversaItem:hover {
+    background: #eff6ff;
+}
+
+.conversaItemActiva {
+    background: #dbeafe;
+}
+
+.conversaNom {
+    display: block;
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 0.95rem;
+    margin-bottom: 0.2rem;
+}
+
+.conversaPreview {
+    display: block;
+    font-size: 0.8rem;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.conversaBuit {
+    padding: 1.5rem 1rem;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.chatPanel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+}
+
+.chatPlaceholder {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    padding: 2rem;
+    text-align: center;
+}
+
+/* ── Àrea de missatges ──────────────────────────────────── */
+.chatBox {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+}
+
+.chatHeader {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e2e8f0;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.missatgesArea {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.bombolla {
+    max-width: 78%;
+    padding: 0.65rem 0.9rem;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+.bombollaPropi {
+    align-self: flex-end;
+    background: #2563eb;
+    color: #fff;
+    border-bottom-right-radius: 4px;
+}
+
+.bombollaAltre {
+    align-self: flex-start;
+    background: #fff;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    border-bottom-left-radius: 4px;
+}
+
+.hora {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.7rem;
+    opacity: 0.75;
+}
+
+.inputRow {
+    display: flex;
+    gap: 0.65rem;
+    padding: 0.85rem 1rem;
+    border-top: 1px solid #e2e8f0;
+    background: #fff;
+}
+
+.input {
+    flex: 1;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    resize: none;
+    min-height: 44px;
+    max-height: 120px;
+    font-family: inherit;
+}
+
+.input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.enviarBtn {
+    align-self: flex-end;
+    padding: 0.65rem 1.25rem;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.enviarBtn:hover:not(:disabled) {
+    background: #1d4ed8;
+}
+
+.enviarBtn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .fisioLayout {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+    }
+
+    .llistaPanel {
+        max-height: 200px;
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+    }
+}

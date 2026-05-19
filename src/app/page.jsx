@@ -16,14 +16,17 @@ import BibliotecaExercicis from './components/BibliotecaExercicis'
 import ExercicisEnCurs from './components/ExercicisEnCurs'
 import HistorialDiagnostics from './components/HistorialDiagnostics'
 import HistorialSessions from './components/HistorialSessions'
+import XatPacient from './components/XatPacient'
 import imatgeAnatomica from './data/Imatge_anatomica.png'
 
 // Vistes del fisio
 import PanellFisio from './components/PanellFisio'
 import LlistaPacients from './components/LlistaPacients'
+import XatFisio from './components/XatFisio'
 
 // Overlay de diagnòstics sobre la imatge anatòmica
 import OverlayAnatomic from './components/OverlayAnatomic'
+import { useRelacioFisioConfirmada } from './hooks/useRelacioFisio'
 
 import styles from './page.module.css'
 
@@ -120,6 +123,8 @@ export default function Page() {
   }, [vistaActual, perfilUsuari])
 
   const esFisio = perfilUsuari?.es_fisioterapeuta === true
+  const dniPacient = !esFisio ? perfilUsuari?.dni : null
+  const { teFisio, relacio, carregant: carregantRelacioFisio } = useRelacioFisioConfirmada(dniPacient)
   const esPantallaAuth = vistaActual === 'login' || vistaActual === 'registre'
 
   return (
@@ -142,6 +147,7 @@ export default function Page() {
             onTancarSessio={tancarSessio}
             esFisio={esFisio}
             perfilUsuari={perfilUsuari}
+            teFisio={teFisio}
           />
         )}
 
@@ -201,6 +207,10 @@ export default function Page() {
             />
           )}
 
+          {vistaActual === 'xat-fisio' && (
+            <XatFisio perfilUsuari={perfilUsuari} />
+          )}
+
           {/* ── Vistes del pacient ──────────────────────── */}
 
           {vistaActual === 'test' && (
@@ -258,6 +268,14 @@ export default function Page() {
               perfilUsuari={perfilUsuari}
               idDiagnosticFiltre={idDiagnosticFiltreHistorial}
               onClearFiltreHistorial={() => setIdDiagnosticFiltreHistorial(null)}
+            />
+          )}
+
+          {vistaActual === 'xat' && (
+            <XatPacient
+              perfilUsuari={perfilUsuari}
+              relacio={relacio}
+              carregantRelacio={carregantRelacioFisio}
             />
           )}
 

@@ -3,7 +3,7 @@
 import styles from './Sidebar.module.css'
 import { useHistorial } from '../hooks/useHistorial'
 
-const seccionsPackient = [
+const seccionsPackientBase = [
     { id: 'inici', label: 'Inici' },
     { id: 'progres', label: 'Progrés i Historial' },
     { id: 'exercicis-en-curs', label: 'Exercicis en curs' },
@@ -14,15 +14,30 @@ const seccionsPackient = [
 const secciosFisio = [
     { id: 'inici-fisio', label: 'Inici' },
     { id: 'pacients', label: 'Pacients' },
+    { id: 'xat-fisio', label: 'Xat' },
     { id: 'perfil', label: 'Perfil' },
 ]
 
-export default function Sidebar({ vistaActual, onNavegar, onTancarSessio, esFisio, perfilUsuari }) {
+export default function Sidebar({
+    vistaActual,
+    onNavegar,
+    onTancarSessio,
+    esFisio,
+    perfilUsuari,
+    teFisio = false,
+}) {
+    const dni = !esFisio ? perfilUsuari?.dni : null
+    const { racha } = useHistorial(dni)
+
+    const seccionsPackient = teFisio
+        ? [
+            ...seccionsPackientBase.slice(0, 3),
+            { id: 'xat', label: 'Xat' },
+            ...seccionsPackientBase.slice(3),
+        ]
+        : seccionsPackientBase
+
     const seccions = esFisio ? secciosFisio : seccionsPackient
-    
-    // Obtenir racha només si és pacient
-    const dni = !esFisio ? perfilUsuari?.dni : null;
-    const { racha } = useHistorial(dni);
 
     return (
         <aside className={styles.sidebar}>
@@ -41,13 +56,12 @@ export default function Sidebar({ vistaActual, onNavegar, onTancarSessio, esFisi
             </div>
 
             <nav className={styles.nav}>
-                {seccions.map(({ id, label, icon }) => (
+                {seccions.map(({ id, label }) => (
                     <button
                         key={id}
                         onClick={() => onNavegar(id)}
                         className={`${styles.navItem} ${vistaActual === id ? styles.navItemActive : ''}`}
                     >
-                        <span className={styles.navIcon}>{icon}</span>
                         <span className={styles.navLabel}>{label}</span>
                         {vistaActual === id && <span className={styles.activeIndicator} />}
                     </button>
