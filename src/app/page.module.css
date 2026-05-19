@@ -10,6 +10,7 @@
     color: #102333;
     overflow-x: hidden;
     font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+    scrollbar-gutter: stable;
     background:
         radial-gradient(circle at 12% 18%, rgba(47, 128, 237, .18), transparent 24%),
         radial-gradient(circle at 88% 14%, rgba(22, 163, 108, .15), transparent 24%),

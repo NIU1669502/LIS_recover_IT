@@ -58,6 +58,7 @@ export async function getPacientsDeFisio(dniFisio) {
             part_cos
         `)
         .in('dni_pacient', dniPacients)
+        .eq('finalitzat', false)
         .order('id_diagnostic', { ascending: false })
 
     // IDs necessaris (diagnòstics + pendents)

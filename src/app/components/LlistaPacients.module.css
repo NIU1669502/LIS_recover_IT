@@ -311,6 +311,7 @@
 .cancelarPendentBtn:active {
     transform: scale(0.98);
 }
+
 .desvincularBtn {
     margin-top: 16px;
     padding: 8px 16px;
@@ -440,6 +441,7 @@
     transition: background 0.15s, transform 0.1s;
     margin-bottom: 8px;
 }
+
 .afegirPlaBtn:hover {
     background: #52d81d;
 }

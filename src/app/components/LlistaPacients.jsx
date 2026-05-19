@@ -155,7 +155,6 @@ export default function LlistaPacients({ perfilUsuari }) {
     const [carregant, setCarregant] = useState(true)
     const [modalObert, setModalObert] = useState(false)
     const [cerca, setCerca] = useState('')
-
     const canalRef = useRef(null)
 
     const carregarPacients = async () => {

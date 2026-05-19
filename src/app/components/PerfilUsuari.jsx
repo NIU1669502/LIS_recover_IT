@@ -6,32 +6,25 @@ import { confirmarCodiFisio, desassignarFisio } from '../utils/diagFisio'
 import { showToast } from '../utils/toast'
 import styles from './perfilUsuari.module.css'
 
-// ============================================================
-// Component: PerfilUsuari — RF-AUTH-07, RF-AUTH-09, RF-AUTH-10
-// Distingeix entre pacient (mostra progrés + codi fisio)
-// i fisioterapeuta (sense progrés ni codi)
-// ============================================================
 export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
     const [editant, setEditant] = useState(false)
     const [nouNom, setNouNom] = useState('')
     const [animant, setAnimant] = useState(false)
     const puntsAnteriors = useRef(perfilUsuari?.punts_recuperacio ?? 0)
     const [nomFisio, setNomFisio] = useState('')
-    
-    // Canvi de contrasenya
+    const [carregantFisio, setCarregantFisio] = useState(true)
+
     const [mostrarContrasenya, setMostrarContrasenya] = useState(false)
     const [novaContrasenya, setNovaContrasenya] = useState('')
     const [confirmarContrasenya, setConfirmarContrasenya] = useState('')
     const [missatgeContrasenya, setMissatgeContrasenya] = useState(null)
     const [guardantContrasenya, setGuardantContrasenya] = useState(false)
 
-    // Afegir codi de confirmació del fisio (només pacients)
     const [mostrarCodi, setMostrarCodi] = useState(false)
     const [codiInput, setCodiInput] = useState('')
     const [missatgeCodi, setMissatgeCodi] = useState(null)
     const [enviantCodi, setEnviantCodi] = useState(false)
 
-    // Desassignar fisioterapeuta
     const [confirmantDesassignar, setConfirmantDesassignar] = useState(false)
     const [desassignant, setDesassignant] = useState(false)
     const [teFisioAssignat, setTeFisioAssignat] = useState(false)
@@ -47,7 +40,6 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
         puntsAnteriors.current = nous
     }, [perfilUsuari?.punts_recuperacio])
 
-    // Comprova si el pacient té un fisio assignat + Realtime
     useEffect(() => {
         if (!perfilUsuari?.dni || esFisio) return
 
@@ -61,11 +53,11 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
                 .maybeSingle()
             setTeFisioAssignat(!!data)
             setNomFisio(data?.usuaris?.nom || '')
+            setCarregantFisio(false)
         }
 
         comprovarFisio()
 
-        // ── Realtime: actualitzar quan canvia la relació fisio-pacient ──
         const canal = supabase
             .channel(`perfil-relacio-${perfilUsuari.dni}`)
             .on('postgres_changes', { event: '*', schema: 'public', table: 'relacio_fisio_pacient', filter: `dni_pacient=eq.${perfilUsuari.dni}` }, comprovarFisio)
@@ -93,7 +85,6 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
 
     const canviarContrasenya = async () => {
         setMissatgeContrasenya(null)
-
         if (!novaContrasenya || !confirmarContrasenya) {
             setMissatgeContrasenya({ tipus: 'error', text: 'Omple tots els camps.' })
             return
@@ -106,11 +97,9 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
             setMissatgeContrasenya({ tipus: 'error', text: 'Les contrasenyes no coincideixen.' })
             return
         }
-
         setGuardantContrasenya(true)
         const { error } = await supabase.auth.updateUser({ password: novaContrasenya })
         setGuardantContrasenya(false)
-
         if (error) {
             setMissatgeContrasenya({ tipus: 'error', text: `Error: ${error.message}` })
         } else {
@@ -124,19 +113,15 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
         }
     }
 
-    // ── RF-PAC-XX — Confirmar codi del fisioterapeuta ────────
     const confirmarCodi = async () => {
         setMissatgeCodi(null)
-
         if (!codiInput.trim()) {
             setMissatgeCodi({ tipus: 'error', text: 'Introdueix el codi.' })
             return
         }
-
         setEnviantCodi(true)
         const resultat = await confirmarCodiFisio(perfilUsuari.dni, codiInput)
         setEnviantCodi(false)
-
         if (!resultat.ok) {
             setMissatgeCodi({ tipus: 'error', text: resultat.missatge })
         } else {
@@ -150,7 +135,6 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
         }
     }
 
-    // ── Desassignar fisioterapeuta ────────────────────────────
     const handleDesassignar = async () => {
         if (!confirmantDesassignar) {
             setConfirmantDesassignar(true)
@@ -169,19 +153,19 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
     }
 
     return (
-    <section className={styles.container}>
+        <section className={styles.container}>
 
-        {!perfilUsuari && (
-            <p className={styles.textMuted}>No s'han trobat dades del perfil.</p>
-        )}
+            {!perfilUsuari && (
+                <p className={styles.textMuted}>No s'han trobat dades del perfil.</p>
+            )}
 
-        {perfilUsuari && (
-            <>
-
+            {perfilUsuari && (
                 <div className={styles.card}>
+
+                    {/* ── Capçalera ── */}
                     <div className={styles.header}>
                         <div className={styles.avatar}>
-                        {perfilUsuari.nom?.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()}
+                            {perfilUsuari.nom?.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()}
                         </div>
                         <div className={styles.headerText}>
                             <p className={styles.headerName}>{perfilUsuari.nom}</p>
@@ -190,7 +174,8 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
                             </p>
                         </div>
                     </div>
-                    {/* Informació personal */}
+
+                    {/* ── Informació personal ── */}
                     <p className={styles.sectionTitle}>Informació personal</p>
 
                     <div className={styles.fieldRow}>
@@ -238,7 +223,7 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
                         <span className={styles.badge}>{esFisio ? 'Fisioterapeuta' : 'Pacient'}</span>
                     </div>
 
-                    {/* Recuperació — només pacients */}
+                    {/* ── Recuperació — només pacients ── */}
                     {!esFisio && (
                         <>
                             <div className={styles.sectionDivider} />
@@ -266,75 +251,81 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
                         </>
                     )}
 
-                    {/* Fisioterapeuta — només pacients */}
+                    {/* ── Fisioterapeuta — només pacients ── */}
                     {!esFisio && (
                         <>
                             <div className={styles.sectionDivider} />
                             <p className={styles.sectionTitle}>Fisioterapeuta</p>
 
-                            {!teFisioAssignat && (
-                                <div className={styles.fieldRow}>
-                                    <span className={styles.fieldLabel}>
-                                        <i className="ti ti-stethoscope" aria-hidden="true" />
-                                        Codi de confirmació
-                                    </span>
-                                    {!mostrarCodi ? (
-                                        <button onClick={() => setMostrarCodi(true)} className={styles.codiButton}>
-                                            <i className="ti ti-plus" aria-hidden="true" />
-                                            Afegir codi
-                                        </button>
-                                    ) : (
-                                        <div className={styles.editRow}>
-                                            <input
-                                                type="text"
-                                                placeholder="Codi del fisioterapeuta"
-                                                value={codiInput}
-                                                onChange={(e) => setCodiInput(e.target.value.toUpperCase())}
-                                                onKeyDown={(e) => e.key === 'Enter' && confirmarCodi()}
-                                                className={styles.inputEdit}
-                                                style={{ letterSpacing: '0.1em', fontFamily: 'monospace' }}
-                                                autoFocus
-                                            />
-                                            <button onClick={confirmarCodi} disabled={enviantCodi} className={styles.saveButton}>
-                                                {enviantCodi ? '...' : 'Confirmar'}
-                                            </button>
-                                            <button onClick={() => { setMostrarCodi(false); setMissatgeCodi(null); setCodiInput('') }} className={styles.cancelButton}>✕</button>
+                            {carregantFisio ? (
+                                <p className={styles.textMuted} style={{ padding: '0 1.25rem 0.75rem' }}>Carregant...</p>
+                            ) : (
+                                <>
+                                    {!teFisioAssignat && (
+                                        <div className={styles.fieldRow}>
+                                            <span className={styles.fieldLabel}>
+                                                <i className="ti ti-stethoscope" aria-hidden="true" />
+                                                Codi de confirmació
+                                            </span>
+                                            {!mostrarCodi ? (
+                                                <button onClick={() => setMostrarCodi(true)} className={styles.codiButton}>
+                                                    <i className="ti ti-plus" aria-hidden="true" />
+                                                    Afegir codi
+                                                </button>
+                                            ) : (
+                                                <div className={styles.editRow}>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Codi del fisioterapeuta"
+                                                        value={codiInput}
+                                                        onChange={(e) => setCodiInput(e.target.value.toUpperCase())}
+                                                        onKeyDown={(e) => e.key === 'Enter' && confirmarCodi()}
+                                                        className={styles.inputEdit}
+                                                        style={{ letterSpacing: '0.1em', fontFamily: 'monospace' }}
+                                                        autoFocus
+                                                    />
+                                                    <button onClick={confirmarCodi} disabled={enviantCodi} className={styles.saveButton}>
+                                                        {enviantCodi ? '...' : 'Confirmar'}
+                                                    </button>
+                                                    <button onClick={() => { setMostrarCodi(false); setMissatgeCodi(null); setCodiInput('') }} className={styles.cancelButton}>✕</button>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
-                                </div>
-                            )}
 
-                            {missatgeCodi && (
-                                <p className={missatgeCodi.tipus === 'ok' ? styles.successText : styles.errorText} style={{ padding: '0 1.25rem 0.75rem' }}>
-                                    {missatgeCodi.text}
-                                </p>
-                            )}
+                                    {missatgeCodi && (
+                                        <p className={missatgeCodi.tipus === 'ok' ? styles.successText : styles.errorText} style={{ padding: '0 1.25rem 0.75rem' }}>
+                                            {missatgeCodi.text}
+                                        </p>
+                                    )}
 
-                            {teFisioAssignat && (
-                                <div className={styles.fieldRow}>
-                                    <span className={styles.fieldLabel}>
-                                        <i className="ti ti-stethoscope" aria-hidden="true" />
-                                        Fisioterapeuta assignat : <span className={styles.fieldValue}>{nomFisio}</span>
-                                    </span>
-                                    {!confirmantDesassignar ? (
-                                        <button onClick={handleDesassignar} className={styles.dangerButton}>
-                                            Desassignar
-                                        </button>
-                                    ) : (
-                                        <div className={styles.confirmInlineRow}>
-                                            <span className={styles.confirmText}>Segur? El teu fisio deixarà de fer-te seguiment.</span>
-                                            <button onClick={handleDesassignar} disabled={desassignant} className={styles.dangerButton}>
-                                                {desassignant ? '...' : 'Sí'}
-                                            </button>
-                                            <button onClick={() => setConfirmantDesassignar(false)} className={styles.cancelInlineButton}>✕</button>
+                                    {teFisioAssignat && (
+                                        <div className={styles.fieldRow}>
+                                            <span className={styles.fieldLabel}>
+                                                <i className="ti ti-stethoscope" aria-hidden="true" />
+                                                Fisioterapeuta assignat: <span className={styles.fieldValue}>{nomFisio}</span>
+                                            </span>
+                                            {!confirmantDesassignar ? (
+                                                <button onClick={handleDesassignar} className={styles.dangerButton}>
+                                                    Desassignar
+                                                </button>
+                                            ) : (
+                                                <div className={styles.confirmInlineRow}>
+                                                    <span className={styles.confirmText}>Segur? El teu fisio deixarà de fer-te seguiment.</span>
+                                                    <button onClick={handleDesassignar} disabled={desassignant} className={styles.dangerButton}>
+                                                        {desassignant ? '...' : 'Sí'}
+                                                    </button>
+                                                    <button onClick={() => setConfirmantDesassignar(false)} className={styles.cancelInlineButton}>✕</button>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
-                                </div>
+                                </>
                             )}
                         </>
                     )}
 
-                    {/* Seguretat */}
+                    {/* ── Seguretat ── */}
                     <div className={styles.sectionDivider} />
                     <p className={styles.sectionTitle}>Seguretat</p>
 
@@ -343,11 +334,11 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
                             <i className="ti ti-lock" aria-hidden="true" />
                             Contrasenya
                         </span>
-                        {!mostrarContrasenya ? (
+                        {!mostrarContrasenya && (
                             <button onClick={() => setMostrarContrasenya(true)} className={styles.editInlineButton}>
                                 Canviar
                             </button>
-                        ) : null}
+                        )}
                     </div>
 
                     {mostrarContrasenya && (
@@ -369,7 +360,7 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
                     )}
 
                 </div>
-            </>
-        )}
-    </section>
-)}
+            )}
+        </section>
+    )
+}

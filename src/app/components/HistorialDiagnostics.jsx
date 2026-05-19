@@ -14,6 +14,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
     const [nomsMusculs, setNomsMusculs] = useState({})
     // Sessions de TOTS els diagnòstics actius (per a la gràfica)
     const [sessionsActives, setSessionsActives] = useState([])
+    const [esborrantId, setEsborrantId] = useState(null)
 
     const canalRef = useRef(null)
 
@@ -131,7 +132,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
                                     const pct = puntsObjectiu > 0 ? Math.min(100, (puntsActuals / puntsObjectiu) * 100) : 0
 
                                     return (
-                                        <div key={diag.id_diagnostic} className={styles.card}>
+                                        <div key={diag.id_diagnostic} className={`${styles.card} ${esborrantId === diag.id_diagnostic ? styles.esborrantCard : ''}`}>
                                             <div className={styles.cardHeader}>
                                                 <div>
                                                     <h3 className={styles.lesioName}>
@@ -178,9 +179,15 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
                                             <button
                                                 type="button"
                                                 className={styles.esborrarButton}
-                                                onClick={() => onEsborrarDiagnostic?.(diag.id_diagnostic)}
+                                                disabled={esborrantId === diag.id_diagnostic}
+                                                onClick={() => {
+                                                    setEsborrantId(diag.id_diagnostic)
+                                                    setTimeout(async () => {
+                                                        await onEsborrarDiagnostic?.(diag.id_diagnostic)
+                                                    }, 500)
+                                                }}
                                             >
-                                                Esborrar diagnòstic
+                                                {esborrantId === diag.id_diagnostic ? 'Esborrant...' : 'Esborrar diagnòstic'}
                                             </button>
                                         </div>
                                     )
