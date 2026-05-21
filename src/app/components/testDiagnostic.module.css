@@ -67,7 +67,7 @@
 
 .highlight {
     font-weight: 700;
-    color: #2563eb;
+    color: var(--accent-blue);
 }
 
 .resultGrid {
@@ -87,8 +87,8 @@
 }
 
 .resultCard:hover {
-    background: #eff6ff;
-    border-color: #bfdbfe;
+    background: var(--accent-blue-bg);
+    border-color: var(--accent-blue-border);
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.05);
 }
 
@@ -170,7 +170,7 @@
 .progressBar {
     width: 100%;
     height: 6px;
-    background: #e2e8f0;
+    background: var(--border-color);
     border-radius: 99px;
     margin-bottom: 2.5rem;
     overflow: hidden;
@@ -186,11 +186,11 @@
 .warningBox {
     display: flex;
     align-items: flex-start;
-    background: #fffbeb;
-    border: 1px solid #fde68a;
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-border);
     padding: 1rem;
     border-radius: 12px;
-    color: #b45309;
+    color: var(--danger-color);
     margin-bottom: 2rem;
     gap: 0.75rem;
     font-size: 0.95rem;
@@ -231,9 +231,9 @@
 }
 
 .optionButton:hover {
-    border-color: #3b82f6;
-    background: #eff6ff;
-    color: #1e3a8a;
+    border-color: var(--accent-blue);
+    background: var(--accent-blue-bg);
+    color: var(--accent-blue);
     transform: translateX(4px);
 }
 
