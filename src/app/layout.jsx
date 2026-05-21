@@ -1,4 +1,7 @@
 import ToastContainer from './components/ToastContainer'
+import { ThemeProvider } from './context/ThemeContext'
+import './styles/globals.css'
+
 export const metadata = {
   title: "RecoverIT",
 };
@@ -12,8 +15,10 @@ export default function RootLayout({ children }) {
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
       </head>
       <body>
-        {children}
-        <ToastContainer />
+        <ThemeProvider>
+          {children}
+          <ToastContainer />
+        </ThemeProvider>
       </body>
     </html>
   );

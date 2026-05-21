@@ -4,9 +4,11 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../utils/supabase'
 import { confirmarCodiFisio, desassignarFisio } from '../utils/diagFisio'
 import { showToast } from '../utils/toast'
+import { useTheme } from '../context/ThemeContext'
 import styles from './perfilUsuari.module.css'
 
 export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
+    const { tema, canviarTema } = useTheme()
     const [editant, setEditant] = useState(false)
     const [nouNom, setNouNom] = useState('')
     const [animant, setAnimant] = useState(false)
@@ -172,6 +174,18 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
                             <p className={styles.headerRole}>
                                 {esFisio ? 'Fisioterapeuta' : 'Pacient'} · {perfilUsuari.dni}
                             </p>
+                        </div>
+                        <div className={styles.themeToggle}>
+                            <label htmlFor="switch" className={styles.switch}>
+                                <input
+                                    id="switch"
+                                    type="checkbox"
+                                    checked={tema === 'claro'}
+                                    onChange={canviarTema}
+                                />
+                                <span className={styles.slider}></span>
+                                <span className={styles.decoration}></span>
+                            </label>
                         </div>
                     </div>
 

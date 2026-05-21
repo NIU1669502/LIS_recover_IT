@@ -7,7 +7,7 @@
 .container {
     min-height: 100vh;
     position: relative;
-    color: #102333;
+    color: var(--text-primary);
     overflow-x: hidden;
     font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
     scrollbar-gutter: stable;
@@ -23,6 +23,15 @@
         100% 100%;
     animation: backgroundShift 18s ease-in-out infinite alternate;
     isolation: isolate;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+:root[data-tema="oscuro"] .container {
+    background:
+        radial-gradient(circle at 12% 18%, rgba(47, 128, 237, .08), transparent 24%),
+        radial-gradient(circle at 88% 14%, rgba(22, 163, 108, .06), transparent 24%),
+        radial-gradient(circle at 76% 86%, rgba(239, 111, 108, .05), transparent 26%),
+        linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 42%, #161616 100%);
 }
 
 .container *,
@@ -248,11 +257,12 @@
 .title {
     max-width: 760px;
     margin-bottom: 2rem;
-    color: #102333;
+    color: var(--text-primary);
     font-size: 6rem;
     line-height: .92;
     font-weight: 900;
     letter-spacing: 0;
+    transition: color 0.3s ease;
 }
 
 .titleAccent {
@@ -260,14 +270,23 @@
     background: linear-gradient(135deg, #0f6e7a, #2f80ed);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    transition: background 0.3s ease;
+}
+
+:root[data-tema="oscuro"] .titleAccent {
+    color: #ffffff;
+    background: none;
+    -webkit-background-clip: unset;
+    -webkit-text-fill-color: unset;
 }
 
 .subtitle {
     max-width: 660px;
     margin-bottom: 3rem;
-    color: #607286;
+    color: var(--text-secondary);
     font-size: 1.25rem;
     line-height: 1.85;
+    transition: color 0.3s ease;
 }
 
 /* =========================================================
@@ -295,9 +314,10 @@
 
 .actionHint {
     margin: 0;
-    color: #607286;
+    color: var(--text-secondary);
     font-size: 0.95rem;
     font-weight: 500;
+    transition: color 0.3s ease;
 }
 
 .loginButton,
@@ -478,15 +498,17 @@
 
 .badgeTitle {
     display: block;
-    color: #102333;
+    color: var(--text-primary);
     font-weight: 900;
+    transition: color 0.3s ease;
 }
 
 .badgeSub {
     display: block;
     margin-top: .15rem;
-    color: #607286;
+    color: var(--text-secondary);
     font-size: .85rem;
+    transition: color 0.3s ease;
 }
 
 /* =========================================================
@@ -509,11 +531,12 @@
 
 .dashboardTitle {
     margin-bottom: 1rem;
-    color: #102333;
+    color: var(--text-primary);
     font-size: 3.6rem;
     line-height: 1.05;
     font-weight: 900;
     letter-spacing: 0;
+    transition: color 0.3s ease;
 }
 
 .highlightName {
@@ -525,9 +548,10 @@
 
 .dashboardSubtitle {
     max-width: 860px;
-    color: #607286;
+    color: var(--text-secondary);
     font-size: 1.12rem;
     line-height: 1.8;
+    transition: color 0.3s ease;
 }
 
 /* =========================================================
@@ -560,6 +584,7 @@
     border: 1px solid rgba(19, 54, 78, .12);
     box-shadow: 0 24px 70px rgba(19, 54, 78, .13);
     backdrop-filter: blur(18px);
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .anatomyCard {
@@ -571,6 +596,12 @@
     background:
         linear-gradient(180deg, rgba(255, 255, 255, .96), rgba(235, 245, 249, .86));
     animation: cardLift 9s ease-in-out infinite;
+    transition: background 0.3s ease;
+}
+
+:root[data-tema="oscuro"] .anatomyCard {
+    background:
+        linear-gradient(180deg, rgba(26, 26, 26, .96), rgba(20, 20, 20, .86));
 }
 
 .anatomyCard::before {
@@ -680,7 +711,11 @@
     gap: 1.25rem;
     align-items: center;
     background: rgba(255, 255, 255, .82);
-    transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+    transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease, background 0.3s ease;
+}
+
+:root[data-tema="oscuro"] .actionCardSecondary {
+    background: rgba(26, 26, 26, .82);
 }
 
 .actionCardSecondary:hover {
@@ -747,6 +782,11 @@
     border: 1px solid rgba(19, 54, 78, .12);
     box-shadow: 0 24px 70px rgba(19, 54, 78, .13);
     backdrop-filter: blur(18px);
+    transition: background 0.3s ease;
+}
+
+:root[data-tema="oscuro"] .testSection {
+    background: rgba(26, 26, 26, .82);
 }
 
 .testHeader {
@@ -773,10 +813,11 @@
 }
 
 .testTitle {
-    color: #102333;
+    color: var(--text-primary);
     font-size: 2rem;
     font-weight: 900;
     letter-spacing: 0;
+    transition: color 0.3s ease;
 }
 
 /* =========================================================
