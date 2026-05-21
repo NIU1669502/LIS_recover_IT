@@ -10,7 +10,6 @@
     color: var(--text-primary);
     overflow-x: hidden;
     font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
-    scrollbar-gutter: stable;
     background:
         radial-gradient(circle at 12% 18%, rgba(47, 128, 237, .18), transparent 24%),
         radial-gradient(circle at 88% 14%, rgba(22, 163, 108, .15), transparent 24%),
@@ -370,7 +369,7 @@
 
 .registerButton:hover {
     transform: translateY(-3px);
-    background: #fff;
+    background: var(--bg-secondary);
     border-color: rgba(15, 110, 122, .28);
 }
 
@@ -685,7 +684,7 @@
     align-self: flex-start;
     margin-top: 1.5rem;
     border: none;
-    background: #fff;
+    background: var(--bg-secondary);
     color: #0f6e7a;
     padding: 1.05rem 1.45rem;
     border-radius: 10px;

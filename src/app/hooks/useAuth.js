@@ -109,24 +109,29 @@ export function useAuth(navegarA) {
         }
         comprovarSessio()
 
-        // ── Realtime: refrescar el perfil quan canvia el diagnòstic de l'usuari ──
-        let canalDiag = null
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            const dni = session?.user?.user_metadata?.dni
-            if (!dni) return
-            canalDiag = supabase
-                .channel(`perfil-diagnostic-${dni}`)
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'diagnostic', filter: `dni_pacient=eq.${dni}` },
-                    () => obtenirPerfil(session.user)
-                )
-                .subscribe()
-        })
-
         return () => {
             window.removeEventListener('popstate', manejarPopState)
-            if (canalDiag) supabase.removeChannel(canalDiag)
         }
     }, [])
+
+    // ── Realtime: refrescar el perfil quan canvia el diagnòstic de l'usuari ──
+    // Separat de l'efecte principal per garantir que el cleanup és síncron
+    // i evitar el error "cannot add callbacks after subscribe()".
+    useEffect(() => {
+        const dni = usuariSessio?.user_metadata?.dni
+        if (!dni) return
+
+        const canalDiag = supabase
+            .channel(`perfil-diagnostic-${dni}`)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'diagnostic', filter: `dni_pacient=eq.${dni}` },
+                () => obtenirPerfil(usuariSessio)
+            )
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(canalDiag)
+        }
+    }, [usuariSessio?.user_metadata?.dni])
 
     // ── RF-AUTH-01 — Registre ────────────────────────────────
     const registrarUsuari = async () => {

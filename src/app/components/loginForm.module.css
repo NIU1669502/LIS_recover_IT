@@ -84,12 +84,12 @@
 .card {
     width: 100%;
     max-width: 440px;
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--bg-primary);
     backdrop-filter: blur(20px);
     border-radius: 24px;
     overflow: hidden;
     box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--border-color);
     animation: cardIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -138,12 +138,12 @@
 .title {
     font-size: 1.5rem;
     font-weight: 800;
-    color: #0f172a;
+    color: var(--text-primary);
     margin-bottom: 0.5rem;
 }
 
 .subtitle {
-    color: #64748b;
+    color: var(--text-secondary);
     margin-bottom: 2rem;
     font-size: 0.95rem;
 }
@@ -158,32 +158,32 @@
     width: 100%;
     padding: 0.9rem 1rem;
     border-radius: 12px;
-    border: 2px solid #e2e8f0;
-    background: #f8fafc;
+    border: 2px solid var(--border-color);
+    background: var(--bg-tertiary);
     transition: all 0.25s ease;
     box-sizing: border-box;
     font-size: 0.95rem;
-    color: #0f172a;
+    color: var(--text-primary);
 }
 
 .input::placeholder {
-    color: #94a3b8;
+    color: var(--text-muted);
 }
 
 .inputFocus {
     border-color: #3b82f6;
-    background: #ffffff;
+    background: var(--bg-secondary);
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
     outline: none;
 }
 
 /* ERROR */
 .error {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-border);
     padding: 0.85rem;
     border-radius: 12px;
-    color: #dc2626;
+    color: var(--danger-color);
     margin-bottom: 1.5rem;
     font-size: 0.9rem;
     font-weight: 500;
@@ -350,9 +350,9 @@
 }
 
 .success {
-    background: #f0fdf4;
-    color: #16a34a;
-    border: 1px solid #bbf7d0;
+    background: var(--danger-bg);
+    color: var(--success-color);
+    border: 1px solid var(--success-color);
     border-radius: 8px;
     padding: 0.75rem;
     font-size: 0.875rem;

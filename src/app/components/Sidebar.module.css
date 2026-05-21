@@ -97,7 +97,7 @@
     border: none;
     border-radius: 12px;
     cursor: pointer;
-    color: #94a3b8;
+    color: var(--text-muted);
     font-size: 0.95rem;
     font-weight: 600;
     text-align: left;
@@ -124,7 +124,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #ffffff;
+    background: var(--bg-secondary);
     flex-shrink: 0;
     box-shadow: 0 0 8px rgba(255,255,255,0.8);
 }

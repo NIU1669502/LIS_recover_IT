@@ -7,7 +7,7 @@
 .title {
     font-size: 2.25rem;
     font-weight: 900;
-    color: #0f172a;
+    color: var(--text-primary);
     margin-bottom: 2.5rem;
     letter-spacing: -0.03em;
 }
@@ -20,8 +20,8 @@
     gap: 1rem;
     margin-bottom: 1.75rem;
     padding: 1rem 1.25rem;
-    background: linear-gradient(to right, #eff6ff, #ffffff);
-    border: 1px solid #bfdbfe;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 14px;
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.06);
 }
@@ -30,7 +30,7 @@
     margin: 0;
     font-size: 0.95rem;
     font-weight: 600;
-    color: #1e40af;
+    color: var(--text-primary);
     line-height: 1.45;
     flex: 1;
     min-width: 200px;
@@ -41,9 +41,9 @@
     font-size: 0.9rem;
     font-weight: 600;
     font-family: inherit;
-    color: #1e40af;
-    background: #ffffff;
-    border: 1px solid #93c5fd;
+    color: var(--accent-blue);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--accent-blue-border);
     border-radius: 10px;
     cursor: pointer;
     transition: background 0.2s ease, border-color 0.2s ease;
@@ -51,18 +51,18 @@
 }
 
 .filtreBannerButton:hover {
-    background: #dbeafe;
-    border-color: #3b82f6;
+    background: var(--accent-blue-bg);
+    border-color: var(--accent-blue);
 }
 
 .muted {
-    color: #64748b;
+    color: var(--text-secondary);
     font-size: 1.05rem;
     text-align: center;
     padding: 3rem;
-    background: #ffffff;
+    background: var(--bg-secondary);
     border-radius: 16px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
     box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05);
 }
 
@@ -93,11 +93,11 @@
 }
 
 .tableWrapper {
-    background: #ffffff;
+    background: var(--bg-secondary);
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 15px 35px -5px rgba(37, 99, 235, 0.08);
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
 }
 
 .table {
@@ -107,15 +107,15 @@
 }
 
 .table thead {
-    background: #f8fafc;
-    border-bottom: 2px solid #e2e8f0;
+    background: var(--bg-tertiary);
+    border-bottom: 2px solid var(--border-color);
 }
 
 .table th {
     padding: 1rem 1.25rem;
     font-size: 0.8rem;
     font-weight: 700;
-    color: #64748b;
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.08em;
 }
@@ -123,8 +123,8 @@
 .table td {
     padding: 1.25rem;
     font-size: 0.95rem;
-    color: #334155;
-    border-bottom: 1px solid #f1f5f9;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .table tbody tr {
@@ -132,7 +132,7 @@
 }
 
 .table tbody tr:hover {
-    background: #eff6ff;
+    background: var(--bg-tertiary);
 }
 
 .table tbody tr:last-child td {
@@ -141,12 +141,12 @@
 
 .exerciseName {
     font-weight: 700;
-    color: #0f172a;
+    color: var(--text-primary);
     display: block;
     margin-bottom: 0.25rem;
 }
 
 .exerciseDesc {
     font-size: 0.85rem;
-    color: #64748b;
+    color: var(--text-secondary);
 }

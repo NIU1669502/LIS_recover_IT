@@ -24,7 +24,7 @@
 .progressText {
     font-size: 0.85rem;
     font-weight: 700;
-    color: #64748b;
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.08em;
 }
@@ -32,7 +32,7 @@
 .progressBar {
     width: 100%;
     height: 6px;
-    background: #e2e8f0;
+    background: var(--bg-tertiary);
     border-radius: 99px;
     overflow: hidden;
 }
@@ -47,7 +47,7 @@
 .exerciciNom {
     font-size: 2rem;
     font-weight: 900;
-    color: #0f172a;
+    color: var(--text-primary);
     text-align: center;
     margin: 0;
     min-height: 5rem;
@@ -63,21 +63,21 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #eff6ff;
+    background: var(--bg-tertiary);
     padding: 0.75rem 1.5rem;
     border-radius: 99px;
-    border: 1px solid #bfdbfe;
+    border: 1px solid var(--border-color);
 }
 
 .repsLabel {
     font-size: 1rem;
-    color: #1e40af;
+    color: var(--accent-blue);
     font-weight: 700;
 }
 
 .exerciciReps {
     font-size: 1rem;
-    color: #1e40af;
+    color: var(--accent-blue);
     margin: 0;
 }
 
@@ -91,7 +91,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 4px solid #ffffff;
+    border: 4px solid var(--border-color);
     box-shadow: 0 15px 35px -10px rgba(15, 23, 42, 0.2);
     flex-shrink: 0;
     position: relative;
@@ -128,7 +128,7 @@
 }
 
 .videoSub {
-    color: #94a3b8;
+    color: var(--text-muted);
     font-size: 0.8rem;
     margin: 0;
     margin-top: 0.2rem;
@@ -180,7 +180,7 @@
 .cronometreTemps {
     font-size: 2.5rem;
     font-weight: 900;
-    color: #0f172a;
+    color: var(--text-primary);
     line-height: 1;
     letter-spacing: -0.04em;
 }
@@ -188,7 +188,7 @@
 .cronometreLabel {
     font-size: 0.75rem;
     font-weight: 700;
-    color: #64748b;
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.1em;
 }
@@ -220,8 +220,8 @@
 
 .pauseButton {
     padding: 0.8rem 1.75rem;
-    background: #f1f5f9;
-    color: #334155;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
     border: none;
     border-radius: 99px;
     font-size: 1rem;
@@ -231,7 +231,7 @@
 }
 
 .pauseButton:hover {
-    background: #e2e8f0;
+    background: var(--hover-bg);
 }
 
 .doneButton {
@@ -257,8 +257,8 @@
 .resetButton {
     padding: 0.8rem 1.25rem;
     background: transparent;
-    color: #64748b;
-    border: 2px solid #e2e8f0;
+    color: var(--text-secondary);
+    border: 2px solid var(--border-color);
     border-radius: 99px;
     font-size: 0.9rem;
     font-weight: 600;
@@ -267,9 +267,9 @@
 }
 
 .resetButton:hover {
-    color: #0f172a;
-    border-color: #cbd5e1;
-    background: #f8fafc;
+    color: var(--text-primary);
+    border-color: var(--border-color);
+    background: var(--bg-tertiary);
 }
 
 /* Punts */
@@ -286,9 +286,9 @@
 .completarButton {
     width: 100%;
     padding: 1.1rem;
-    background: #f1f5f9;
-    color: #94a3b8;
-    border: 2px dashed #cbd5e1;
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+    border: 2px dashed var(--border-color);
     border-radius: 16px;
     font-size: 1.05rem;
     font-weight: 700;
@@ -321,7 +321,7 @@
     gap: 1.5rem;
     text-align: center;
     padding: 3rem 2rem;
-    background: white;
+    background: var(--bg-primary);
     border-radius: 24px;
     box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.08);
 }
@@ -334,19 +334,19 @@
 .completadaTitle {
     font-size: 2rem;
     font-weight: 900;
-    color: #0f172a;
+    color: var(--text-primary);
     margin: 0;
 }
 
 .completadaText {
-    color: #64748b;
+    color: var(--text-secondary);
     line-height: 1.6;
     font-size: 1.1rem;
     margin: 0;
 }
 
 .completadaSubtext {
-    color: #64748b;
+    color: var(--text-secondary);
     line-height: 1.55;
     font-size: 1rem;
     margin: 0;
@@ -354,7 +354,7 @@
 }
 
 .completadaSubtext strong {
-    color: #1e40af;
+    color: var(--accent-blue);
 }
 
 .puntsBadge {
@@ -566,7 +566,7 @@
 }
 
 .modalCard {
-    background: white;
+    background: var(--bg-primary);
     border-radius: 24px;
     padding: 2rem 1.5rem;
     width: 100%;
@@ -598,7 +598,7 @@
 .modalTitol {
     font-size: 1.2rem;
     font-weight: 800;
-    color: #0f172a;
+    color: var(--text-primary);
     text-align: center;
     margin: 0;
     line-height: 1.3;
@@ -610,7 +610,7 @@
 
 .modalSubtitol {
     font-size: 0.9rem;
-    color: #64748b;
+    color: var(--text-secondary);
     text-align: center;
     margin: 0;
     line-height: 1.5;
@@ -630,10 +630,10 @@
 
 .dolorBtn {
     aspect-ratio: 1;
-    border: 2px solid #e2e8f0;
+    border: 2px solid var(--border-color);
     border-radius: 12px;
-    background: #f8fafc;
-    color: #334155;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
     font-size: 1.1rem;
     font-weight: 700;
     cursor: pointer;
@@ -641,8 +641,8 @@
 }
 
 .dolorBtn:hover {
-    border-color: #94a3b8;
-    background: #f1f5f9;
+    border-color: var(--text-muted);
+    background: var(--bg-tertiary);
     transform: scale(1.05);
 }
 
@@ -657,7 +657,7 @@
     display: flex;
     justify-content: space-between;
     font-size: 0.75rem;
-    color: #94a3b8;
+    color: var(--text-muted);
     font-weight: 600;
 }
 
@@ -703,7 +703,7 @@
 
 .modalConfirmarDisabled {
     background: #e2e8f0 !important;
-    color: #94a3b8 !important;
+    color: var(--text-muted) !important;
     cursor: not-allowed !important;
     box-shadow: none !important;
     border: none !important;
@@ -712,7 +712,7 @@
 .modalSaltar {
     background: none;
     border: none;
-    color: #94a3b8;
+    color: var(--text-muted);
     font-size: 0.85rem;
     cursor: pointer;
     padding: 0;
@@ -720,7 +720,7 @@
 }
 
 .modalSaltar:hover {
-    color: #64748b;
+    color: var(--text-secondary);
 }
 
 .modalSaltarBlau {

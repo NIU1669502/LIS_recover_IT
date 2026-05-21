@@ -10,24 +10,24 @@
 .title {
     font-size: 2rem;
     font-weight: 900;
-    color: #0f172a;
+    color: var(--text-primary);
     margin: 0 0 0.35rem;
     letter-spacing: -0.03em;
 }
 
 .subtitle {
     margin: 0 0 1.25rem;
-    color: #64748b;
+    color: var(--text-secondary);
     font-size: 0.95rem;
 }
 
 .muted {
-    color: #64748b;
+    color: var(--text-secondary);
     text-align: center;
     padding: 2rem;
-    background: #fff;
+    background: var(--bg-secondary);
     border-radius: 16px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
 }
 
 .error {
@@ -46,26 +46,26 @@
     display: grid;
     grid-template-columns: 280px 1fr;
     gap: 1rem;
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
 }
 
 .llistaPanel {
-    border-right: 1px solid #e2e8f0;
+    border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     min-height: 0;
-    background: #f8fafc;
+    background: var(--bg-secondary);
 }
 
 .llistaHeader {
     padding: 1rem 1.1rem;
     font-weight: 800;
     color: #1e3a8a;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--border-color);
     font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -81,24 +81,24 @@
     text-align: left;
     padding: 0.9rem 1rem;
     border: none;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border-color);
     background: transparent;
     cursor: pointer;
     transition: background 0.15s ease;
 }
 
 .conversaItem:hover {
-    background: #eff6ff;
+    background: var(--hover-bg);
 }
 
 .conversaItemActiva {
-    background: #dbeafe;
+    background: var(--accent-blue-bg);
 }
 
 .conversaNom {
     display: block;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--text-primary);
     font-size: 0.95rem;
     margin-bottom: 0.2rem;
 }
@@ -106,7 +106,7 @@
 .conversaPreview {
     display: block;
     font-size: 0.8rem;
-    color: #64748b;
+    color: var(--text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -114,7 +114,7 @@
 
 .conversaBuit {
     padding: 1.5rem 1rem;
-    color: #94a3b8;
+    color: var(--text-muted);
     font-size: 0.9rem;
     text-align: center;
 }
@@ -131,7 +131,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #94a3b8;
+    color: var(--text-muted);
     padding: 2rem;
     text-align: center;
 }
@@ -142,14 +142,14 @@
     min-height: 0;
     display: flex;
     flex-direction: column;
-    background: #fff;
+    background: var(--bg-secondary);
 }
 
 .chatHeader {
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--border-color);
     font-weight: 700;
-    color: #0f172a;
+    color: var(--text-primary);
 }
 
 .missatgesArea {
@@ -159,7 +159,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.65rem;
-    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    background: var(--bg-primary);
 }
 
 .bombolla {
@@ -180,9 +180,9 @@
 
 .bombollaAltre {
     align-self: flex-start;
-    background: #fff;
-    color: #334155;
-    border: 1px solid #e2e8f0;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
     border-bottom-left-radius: 4px;
 }
 
@@ -197,14 +197,14 @@
     display: flex;
     gap: 0.65rem;
     padding: 0.85rem 1rem;
-    border-top: 1px solid #e2e8f0;
-    background: #fff;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
 }
 
 .input {
     flex: 1;
     padding: 0.7rem 0.9rem;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     font-size: 0.95rem;
     resize: none;
@@ -249,6 +249,6 @@
     .llistaPanel {
         max-height: 200px;
         border-right: none;
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 1px solid var(--border-color);
     }
 }

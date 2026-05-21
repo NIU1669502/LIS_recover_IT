@@ -2,25 +2,27 @@
    Navbar contenedor
    ====================================== */
 .navbar {
+    width: 100%;
+    box-sizing: border-box;
     padding: 1rem 2rem;
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--bg-secondary);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
     position: sticky;
     top: 0;
     z-index: 50;
-    box-shadow: 0 4px 20px -10px rgba(37, 99, 235, 0.05);
+    box-shadow: 0 4px 20px -10px rgba(0, 0, 0, 0.3);
 }
 
 /* ======================================
    Logo
    ====================================== */
 .logo {
-    color: #0f172a;
+    color: var(--text-primary);
     font-weight: 900;
     font-size: 1.5rem;
     cursor: pointer;
@@ -49,7 +51,7 @@
 .backButton {
     background: none;
     border: none;
-    color: #64748b;
+    color: var(--text-primary);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -72,9 +74,9 @@
    Botón logout
    ====================================== */
 .logoutButton {
-    background: #ffffff;
-    border: 2px solid #e2e8f0;
-    color: #475569;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    color: var(--text-secondary);
     padding: 0.5rem 1.2rem;
     border-radius: 8px;
     cursor: pointer;
@@ -84,7 +86,7 @@
 }
 
 .logoutButton:hover {
-    background: #f8fafc;
-    border-color: #cbd5e1;
-    color: #0f172a;
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
 }

@@ -20,7 +20,7 @@
 .titol {
     font-size: 2rem;
     font-weight: 800;
-    color: #111;
+    color: var(--text-primary);
     margin: 0;
     letter-spacing: -0.02em;
 }
@@ -68,8 +68,8 @@
 }
 
 .statCard {
-    background: #fff;
-    border: 1.5px solid #f0f0f0;
+    background: var(--bg-secondary);
+    border: 1.5px solid var(--border-color);
     border-radius: 16px;
     padding: 24px;
     display: flex;
@@ -99,21 +99,21 @@
 .statValor {
     font-size: 2.5rem;
     font-weight: 800;
-    color: #111;
+    color: var(--text-primary);
     line-height: 1;
     letter-spacing: -0.03em;
 }
 
 .statLabel {
     font-size: 0.85rem;
-    color: #777;
+    color: var(--text-secondary);
     font-weight: 500;
 }
 
 /* Secció pacients */
 .seccio {
-    background: #fff;
-    border: 1.5px solid #f0f0f0;
+    background: var(--bg-secondary);
+    border: 1.5px solid var(--border-color);
     border-radius: 16px;
     overflow: hidden;
 }
@@ -123,13 +123,13 @@
     align-items: center;
     justify-content: space-between;
     padding: 24px 28px 20px;
-    border-bottom: 1.5px solid #f5f5f5;
+    border-bottom: 1.5px solid var(--border-color);
 }
 
 .seccioTitol {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #111;
+    color: var(--text-primary);
     margin: 0;
 }
 
@@ -158,7 +158,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 20px 28px;
-    border-bottom: 1px solid #f5f5f5;
+    border-bottom: 1px solid var(--border-color);
     gap: 16px;
     transition: background 0.12s;
 }
@@ -168,7 +168,7 @@
 }
 
 .pacientFila:hover {
-    background: #fafafa;
+    background: var(--hover-bg);
 }
 
 .pacientInfo {
@@ -183,8 +183,8 @@
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    background: #e8f0ff;
-    color: #2563eb;
+    background: var(--accent-blue-bg);
+    color: var(--accent-blue);
     font-weight: 700;
     font-size: 1.1rem;
     display: flex;
@@ -195,14 +195,14 @@
 
 .pacientNom {
     font-weight: 600;
-    color: #111;
+    color: var(--text-primary);
     margin: 0 0 2px;
     font-size: 0.95rem;
 }
 
 .pacientLesio {
     font-size: 0.82rem;
-    color: #888;
+    color: var(--text-secondary);
     margin: 0;
 }
 
@@ -223,7 +223,7 @@
 .progresBarBg {
     width: 120px;
     height: 6px;
-    background: #e8f0ff;
+    background: var(--bg-tertiary);
     border-radius: 99px;
     overflow: hidden;
 }
@@ -237,10 +237,10 @@
 
 .configurarBtn {
     padding: 8px 18px;
-    border: 1.5px solid #e8f0ff;
+    border: 1.5px solid var(--accent-blue-border);
     border-radius: 10px;
-    background: #f0f5ff;
-    color: #2563eb;
+    background: var(--bg-primary);
+    color: var(--accent-blue);
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
@@ -250,8 +250,8 @@
 }
 
 .configurarBtn:hover {
-    background: #dbeafe;
-    border-color: #2563eb;
+    background: var(--accent-blue-bg);
+    border-color: var(--accent-blue);
 }
 
 /* Estat buit */

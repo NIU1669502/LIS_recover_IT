@@ -51,6 +51,7 @@ export default function Page() {
     setPageVisible(false)
     transitionRef.current = setTimeout(() => {
       if (onTransition) onTransition()
+      setErrorAuth('')
       setVistaActual(novaVista)
       window.history.pushState({ vista: novaVista }, '', `#${novaVista}`)
       setPageVisible(true)
@@ -59,7 +60,7 @@ export default function Page() {
 
   const {
     usuariSessio, perfilUsuari,
-    errorAuth,
+    errorAuth, setErrorAuth,
     carregantAuth,
     registreForm, setRegistreForm,
     loginForm, setLoginForm,
