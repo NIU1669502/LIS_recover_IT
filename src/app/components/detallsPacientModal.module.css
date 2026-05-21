@@ -14,8 +14,13 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .panel {
@@ -32,8 +37,15 @@
 }
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ── Capçalera ── */
@@ -132,7 +144,9 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ── Seccions ── */
@@ -525,4 +539,89 @@
 .editarRutinaBtn:hover {
     background: #dbeafe;
     border-color: #2563eb;
+}
+
+/* ── Afegir al final de detallsPacientModal.module.css ── */
+
+.dolorHint {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin: -0.5rem 0 0.75rem;
+}
+
+.sessioCard {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.sessioRowClickable {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.sessioRowClickable:hover {
+    background: #f8fafc;
+}
+
+.dolorBadge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.6rem;
+    border-radius: 99px;
+    border: 1px solid;
+    white-space: nowrap;
+}
+
+.dolorBadgeNull {
+    font-size: 0.75rem;
+    color: #cbd5e1;
+    font-style: italic;
+}
+
+.expandIcon {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    margin-left: auto;
+}
+
+.dolorDetall {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.dolorDetallTitol {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+}
+
+.dolorExerciciRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+}
+
+.dolorExerciciNom {
+    color: #334155;
+}
+
+.dolorExerciciVal {
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.dolorExerciciNull {
+    color: #cbd5e1;
+    font-size: 0.8rem;
+    font-style: italic;
 }
