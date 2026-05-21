@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { supabase } from '../../utils/supabase'
 import GraficaRecuperacio from './GraficaRecuperacio'
 import styles from './detallsPacientModal.module.css'
+import EditarRutinaModal from './EditarRutinaModal'
 
 // ============================================================
 // Component: DetallsPacientModal
@@ -163,9 +164,10 @@ const formatDia = (iso) => {
     }
 }
 
-export default function DetallsPacientModal({ dniPacient, nomPacient, onTancar }) {
+export default function DetallsPacientModal({ dniPacient, nomPacient, dniFisio, onTancar }) {
     const [dades, setDades] = useState(null)
     const [carregant, setCarregant] = useState(true)
+    const [modalRutina, setModalRutina] = useState(null)
 
     useEffect(() => {
         setCarregant(true)
@@ -299,6 +301,16 @@ export default function DetallsPacientModal({ dniPacient, nomPacient, onTancar }
                                                     {diag.confirmat === false && (
                                                         <span className={styles.badgeNoConfirmat}>No confirmat</span>
                                                     )}
+                                                    <button
+                                                        className={styles.editarRutinaBtn}
+                                                        onClick={() => setModalRutina({
+                                                            idDiagnostic: diag.id_diagnostic,
+                                                            idLesio: diag.id_lesio,
+                                                            partCos: diag.part_cos,
+                                                        })}
+                                                    >
+                                                        Editar rutina
+                                                    </button>
                                                 </div>
                                             </div>
 
@@ -411,5 +423,21 @@ export default function DetallsPacientModal({ dniPacient, nomPacient, onTancar }
     )
 
     if (typeof document === 'undefined') return null
-    return createPortal(modal, document.body)
+    return (
+        <>
+            {createPortal(modal, document.body)}
+            {modalRutina && (
+                <EditarRutinaModal
+                    dniPacient={dniPacient}
+                    nomPacient={nomPacient}
+                    idDiagnostic={modalRutina.idDiagnostic}
+                    idLesio={modalRutina.idLesio}
+                    partCos={modalRutina.partCos}
+                    dniFisio={dniFisio}
+                    onTancar={() => setModalRutina(null)}
+                />
+            )}
+        </>
+    )
 }
+

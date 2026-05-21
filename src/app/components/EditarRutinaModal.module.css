@@ -1,0 +1,438 @@
+/* ── Overlay i panel ────────────────────────────────────── */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(2px);
+}
+
+.panel {
+    background: #fff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 620px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Capçalera ──────────────────────────────────────────── */
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 28px 20px;
+    border-bottom: 1.5px solid #f0f0f0;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 1;
+    border-radius: 20px 20px 0 0;
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #e8f0ff;
+    color: #2563eb;
+    font-weight: 700;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.titol {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #111;
+    margin: 0 0 2px;
+    letter-spacing: -0.01em;
+}
+
+.subtitol {
+    font-size: 0.85rem;
+    color: #888;
+    margin: 0;
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: #aaa;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: background 0.12s, color 0.12s;
+    line-height: 1;
+}
+
+.closeBtn:hover {
+    background: #f5f5f5;
+    color: #333;
+}
+
+/* ── Contingut ──────────────────────────────────────────── */
+
+.cos {
+    padding: 24px 28px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ── Tabs de fase ───────────────────────────────────────── */
+
+.faseTabs {
+    display: flex;
+    gap: 8px;
+    background: #f5f7fa;
+    padding: 6px;
+    border-radius: 12px;
+}
+
+.faseTab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 10px 8px;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.faseTab:hover {
+    background: #eaecf0;
+    color: #333;
+}
+
+.faseTabActiva {
+    background: #fff;
+    color: #2563eb;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.faseSessionsLabel {
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: inherit;
+    opacity: 0.7;
+}
+
+/* ── Nota informativa ───────────────────────────────────── */
+
+.nota {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 0.83rem;
+    color: #1e40af;
+    line-height: 1.5;
+}
+
+.notaIcon {
+    flex-shrink: 0;
+    font-size: 0.95rem;
+    margin-top: 1px;
+}
+
+/* ── Slots ──────────────────────────────────────────────── */
+
+.slotsList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.slotCard {
+    border: 1.5px solid #f0f0f0;
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+}
+
+.slotCard:hover {
+    border-color: #dbeafe;
+}
+
+.slotPersonalitzat {
+    border-color: #bfdbfe;
+    background: #fafcff;
+}
+
+.slotEditant {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+/* Capçalera del slot */
+.slotHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 10px;
+}
+
+.slotHeaderLeft {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.slotNum {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.badgeModificat {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #2563eb;
+    background: #dbeafe;
+    padding: 2px 8px;
+    border-radius: 99px;
+}
+
+.editBtn {
+    padding: 6px 14px;
+    background: #f0f5ff;
+    border: 1.5px solid #e8f0ff;
+    border-radius: 8px;
+    color: #2563eb;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+}
+
+.editBtn:hover {
+    background: #dbeafe;
+    border-color: #2563eb;
+}
+
+/* Resum del slot */
+.slotResum {
+    padding: 0 16px 14px;
+}
+
+.slotNom {
+    font-size: 0.97rem;
+    font-weight: 600;
+    color: #111;
+    margin: 0 0 8px;
+}
+
+.slotParams {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.param {
+    font-size: 0.8rem;
+    color: #666;
+    background: #f5f7fa;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-weight: 500;
+}
+
+.slotOriginal {
+    font-size: 0.76rem;
+    color: #aaa;
+    margin: 8px 0 0;
+    font-style: italic;
+}
+
+/* ── Formulari d'edició ─────────────────────────────────── */
+
+.formEdicio {
+    padding: 0 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 16px;
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.formLabel {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.formInput {
+    padding: 9px 12px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #111;
+    background: #fff;
+    transition: border-color 0.12s;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.formInput:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+select.formInput {
+    cursor: pointer;
+}
+
+.formHint {
+    font-size: 0.72rem;
+    color: #aaa;
+}
+
+/* Botons del formulari */
+.formActions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 4px;
+}
+
+.cancelBtn {
+    padding: 9px 18px;
+    background: none;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    color: #666;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.12s;
+}
+
+.cancelBtn:hover {
+    background: #f5f5f5;
+}
+
+.cancelBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.desarBtn {
+    padding: 9px 20px;
+    background: #2563eb;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.desarBtn:hover {
+    background: #1d4ed8;
+}
+
+.desarBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ── Loading ────────────────────────────────────────────── */
+
+.carregant {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 60px 28px;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e8f0ff;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+    .overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .panel {
+        max-height: 95vh;
+        border-radius: 20px 20px 0 0;
+        max-width: 100%;
+    }
+
+    .formRow {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .cos {
+        padding: 20px 20px 28px;
+    }
+
+    .header {
+        padding: 20px 20px 16px;
+    }
+}
