@@ -233,7 +233,7 @@ export async function getEstadistiquesFisio(dniFisio) {
 
         if (!p.diagnostic) {
             actius++
-        } else if (p.diagnostic.finalitzat) {
+        } else if (p.diagnostic.finalitzat && p.diagnostic.punts_recuperacio !== -1) {
             finalitzats++
         } else {
             enRecuperacio++

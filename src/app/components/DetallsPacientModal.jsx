@@ -37,6 +37,9 @@ async function getDetallsPacient(dniPacient) {
         .eq('dni_pacient', dniPacient)
         .order('id_diagnostic', { ascending: false })
 
+    // Filtrem els esborrats (soft-delete)
+    const diagnosticsReals = (diagnostics || []).filter(d => d.punts_recuperacio !== -1)
+
     // ── 3. Relacions fisio-pacient per saber quins estan confirmats ──
     const { data: relacions } = await supabase
         .from('relacio_fisio_pacient')
@@ -48,11 +51,11 @@ async function getDetallsPacient(dniPacient) {
     let diagnosticsPendents = []
 
     const allLesions = [
-        ...(diagnostics || []).map(d => d.id_lesio),
+        ...(diagnosticsReals || []).map(d => d.id_lesio),
         ...(relacions || []).map(r => r.id_lesio)
     ]
     const allMusculs = [
-        ...(diagnostics || []).map(d => d.part_cos),
+        ...(diagnosticsReals || []).map(d => d.part_cos),
         ...(relacions || []).map(r => r.part_cos)
     ]
 
@@ -71,10 +74,10 @@ async function getDetallsPacient(dniPacient) {
     const nomLesions = Object.fromEntries((lesions || []).map(l => [l.id_lesio, l.nom]))
     const nomMusculs = Object.fromEntries((musculs || []).map(m => [m.id_cos, m.nom]))
 
-    if (diagnostics && diagnostics.length > 0) {
+    if (diagnosticsReals && diagnosticsReals.length > 0) {
         // Buscar si la relació corresponent està confirmada
         // Fem match per id_lesio + part_cos
-        diagnosticsEnriquits = diagnostics.map(d => {
+        diagnosticsEnriquits = diagnosticsReals.map(d => {
             const relacio = (relacions || []).find(
                 r => r.id_lesio === d.id_lesio && r.part_cos === d.part_cos
             )

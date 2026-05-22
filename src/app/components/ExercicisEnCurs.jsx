@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '../../utils/supabase'
 import { getDiagnosticsActius, getExercicisDelaFase, getResumSessions } from '../utils/lesions'
+import { comprovarIAplicarPenalitzacio } from '../utils/penalitzacio'
 import styles from './exercicisEnCurs.module.css'
 
 const storageKeyDiagnostic = (dni) => `recoverit_exercicis_diagnostic_${dni}`
@@ -32,6 +33,8 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
     const [sessionsTotals, setSessionsTotals] = useState(0)
     const [carregant, setCarregant] = useState(true)
     const [refreshNonce, setRefreshNonce] = useState(0)
+    /** Informació de penalització activa per al diagnòstic seleccionat */
+    const [infoPenalitzacio, setInfoPenalitzacio] = useState(null)
     /** Amb diverses lesions: false = només llistat; true = resum de sessió (exercicis, iniciar…). */
     const [mostrarResumSessio, setMostrarResumSessio] = useState(false)
 
@@ -74,6 +77,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
             }
 
             setCarregant(true)
+            setInfoPenalitzacio(null)
             const userDni = perfilUsuari.dni
             const listRaw = await getDiagnosticsActius(userDni)
 
@@ -126,11 +130,35 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
                 return
             }
 
+            // ── Comprovació de penalització per inactivitat (>72h) ──────────
+            let infoPen = { penalitzat: false }
+            try {
+                infoPen = await comprovarIAplicarPenalitzacio(userDni, seleccionat)
+            } catch (e) {
+                console.error('[Penalització] Error en la comprovació:', e)
+            }
+            if (cancelat) return
+            setInfoPenalitzacio(infoPen)
+
+            // Si s'acaba d'aplicar una penalització, tornem a llegir el diagnòstic
+            // de la BD per tenir num_sessions i punts_recuperacio actualitzats
+            let diagActualitzat = diag
+            if (infoPen.penalitzat && !infoPen.jaPenalitzat) {
+                const { data: freshDiag } = await supabase
+                    .from('diagnostic')
+                    .select('*')
+                    .eq('id_diagnostic', seleccionat)
+                    .maybeSingle()
+                if (freshDiag) diagActualitzat = { ...diag, ...freshDiag }
+            }
+            if (cancelat) return
+            // ────────────────────────────────────────────────────────────────
+
             const [{ data: muscul }, { data: lesio }, exs, { fetes, totals }] = await Promise.all([
-                supabase.from('musculs').select('id_cos, nom').eq('id_cos', diag.part_cos).single(),
-                supabase.from('lesions').select('nom').eq('id_lesio', diag.id_lesio).single(),
-                getExercicisDelaFase(diag),
-                getResumSessions(diag),
+                supabase.from('musculs').select('id_cos, nom').eq('id_cos', diagActualitzat.part_cos).single(),
+                supabase.from('lesions').select('nom').eq('id_lesio', diagActualitzat.id_lesio).single(),
+                getExercicisDelaFase(diagActualitzat),
+                getResumSessions(diagActualitzat),
             ])
 
             if (cancelat) return
@@ -140,7 +168,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
             setExercicis(exs)
             setSessionsFetes(fetes)
             setSessionsTotals(totals)
-            setDiagnostic(diag)
+            setDiagnostic(diagActualitzat)
             setCarregant(false)
         }
 
@@ -295,6 +323,20 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
                         >
                             Tornar al llistat de lesions
                         </button>
+                    )}
+
+                    {infoPenalitzacio?.penalitzat && (
+                        <div className={styles.penalitzacioBanner}>
+                            <span className={styles.penalitzacioIcon}>⚠️</span>
+                            <div className={styles.penalitzacioText}>
+                                <strong>Penalització per inactivitat</strong>
+                                <p>
+                                    Han passat més de 3 dies des de l&apos;última sessió.
+                                    S&apos;han restat <strong>{infoPenalitzacio.puntsRestats ?? 0} punts</strong> i una sessió del teu progrés.
+                                    Completa la sessió avui per recuperar-los!
+                                </p>
+                            </div>
+                        </div>
                     )}
 
                     <div className={styles.rutinaInfo}>

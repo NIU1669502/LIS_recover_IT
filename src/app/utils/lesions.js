@@ -1,6 +1,7 @@
 import { supabase } from '../../utils/supabase'
 import { TEST_STEPS } from '../data/testSteps.js'
 import { showToast } from '../utils/toast'
+import { recuperarSessioPenalitzada } from '../utils/penalitzacio'
 
 // ============================================================
 // Determina el tipus de lesió a partir de les respostes del test
@@ -200,6 +201,13 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
         console.error('No s\'ha pogut registrar la sessió a l\'historial', err)
     }
 
+    // Si hi havia una sessió penalitzada, la marquem com a recuperada
+    try {
+        await recuperarSessioPenalitzada(diagnostic.id_diagnostic)
+    } catch (err) {
+        console.error('No s\'ha pogut recuperar la sessió penalitzada', err)
+    }
+
     return { completada, novaFase: completada ? null : novaFase, faseAvançada, nSessionsRestants: nSessionsRequerides - nouNumSessions }
 }
 
@@ -345,20 +353,29 @@ export async function getResumSessions(diagnostic) {
 
 
 // ============================================================
-// Elimina un diagnòstic i totes les seves sessions ( CASCADE implicit)
+// Elimina (soft-delete) un diagnòstic
+// Manté les sessions fetes per l'historial però elimina
+// les penalitzacions i l'oculta de les vistes principals.
 // ============================================================
 export async function eliminarDiagnostic(idDiagnostic) {
+    // 1. Treure la penalització de totes les sessions d'aquest diagnòstic
+    await supabase
+        .from('historial_sessions')
+        .update({ penalitzat: false })
+        .eq('id_diagnostic', idDiagnostic)
+
+    // 2. Soft-delete del diagnòstic
     const { error } = await supabase
         .from('diagnostic')
-        .delete()
+        .update({ finalitzat: true, punts_recuperacio: -1 })
         .eq('id_diagnostic', idDiagnostic)
 
     if (error) {
-        console.error('Error esborrant diagnòstic:', error)
+        console.error('Error esborrant diagnòstic (soft-delete):', error)
         showToast('No s\'ha pogut esborrar el diagnòstic', 'error')
         return false
     }
-showToast('Diagnòstic esborrat correctament', 'success')
-    // Les sessions s'esborren automàticament per la restricció CASCADE en la BD
+
+    showToast('Diagnòstic esborrat correctament', 'success')
     return true
 }
