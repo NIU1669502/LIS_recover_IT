@@ -64,15 +64,20 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
 
     // Quan es canvia l'exercici al select, omple els camps amb els valors base del nou exercici
     const handleCanviExercici = (idExercici) => {
-        const ex = exercicisDisponibles.find(e => e.id_exercici === parseInt(idExercici))
-        if (!ex) return
-        setForm(prev => ({
-            ...prev,
-            id_exercici: ex.id_exercici,
-            duracio_segons: ex.duracio_segons,
-            repeticions: ex.Repeticions,
-            punts: ex.punts,
-        }))
+    const idNum = parseInt(idExercici, 10)
+    const ex = exercicisDisponibles.find(e => e.id_exercici === idNum)
+    if (!ex) {
+        setForm(prev => ({ ...prev, id_exercici: idNum }))
+        return
+    }
+    setForm({
+        ...form,
+        id_exercici: ex.id_exercici,
+        duracio_segons: ex.duracio_segons,
+        repeticions: ex.Repeticions,
+        punts: ex.punts,
+        multiplicador: form.multiplicador,
+    })
     }
 
     const handleDesar = async () => {
@@ -84,7 +89,7 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
             dni_pacient: dniPacient,
             fase: editant.fase,
             slot_exercici: editant.slot,
-            id_exercici: parseInt(form.id_exercici),
+            id_exercici: parseInt(form.id_exercici, 10),
             duracio_segons: parseInt(form.duracio_segons),
             repeticions: form.repeticions,
             punts: parseInt(form.punts),

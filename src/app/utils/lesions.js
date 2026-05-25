@@ -51,7 +51,7 @@ export async function getDiagnosticsActius(userDni) {
 }
 
 export async function getExercicisDelaFase(diagnostic) {
-    const { part_cos, id_lesio, fase_actual } = diagnostic
+    const { part_cos, id_lesio, fase_actual, id_diagnostic, dni_pacient } = diagnostic
 
     const { data: rutina, error: rutinaError } = await supabase
         .from('rutines_lesio')
@@ -60,39 +60,60 @@ export async function getExercicisDelaFase(diagnostic) {
         .eq('id_lesio', id_lesio)
         .single()
 
-    if (rutinaError || !rutina) {
-        console.error('No s\'ha trobat rutina per aquest diagnòstic', rutinaError)
-        return []
-    }
+    if (rutinaError || !rutina) return []
 
     const idFase = fase_actual === 1 ? rutina.id_fase_1
         : fase_actual === 2 ? rutina.id_fase_2
-            : rutina.id_fase_3
+        : rutina.id_fase_3
 
     const { data: fase, error: faseError } = await supabase
         .from('fases')
-        .select('exercici_1, exercici_2, exercici_3')
+        .select('exercici_1, exercici_2, exercici_3, multiplicador')
         .eq('id_fase', idFase)
         .single()
 
-    if (faseError || !fase) {
-        console.error('No s\'ha trobat la fase', faseError)
-        return []
-    }
+    if (faseError || !fase) return []
 
-    const ids = [fase.exercici_1, fase.exercici_2, fase.exercici_3].filter(Boolean)
-
-    const { data: exercicis, error: exError } = await supabase
+    // Carregar tots els exercicis disponibles
+    const { data: exercicis } = await supabase
         .from('exercicis')
         .select('*')
-        .in('id_exercici', ids)
 
-    if (exError) {
-        console.error('Error carregant exercicis', exError)
-        return []
-    }
+    const exMap = Object.fromEntries((exercicis || []).map(e => [e.id_exercici, e]))
 
-    return ids.map(id => exercicis.find(e => e.id_exercici === id)).filter(Boolean)
+    // Carregar personalitzacions del fisio per aquest diagnòstic i fase
+    const { data: personalitzacions } = await supabase
+        .from('rutina_personalitzada_pacient')
+        .select('*')
+        .eq('id_diagnostic', id_diagnostic)
+        .eq('fase', fase_actual)
+
+    const getPerso = (slot) =>
+        (personalitzacions || []).find(p => p.slot_exercici === slot) || null
+
+    // Construir la llista aplicant overrides
+    const slots = [
+        { slot: 1, idBase: fase.exercici_1 },
+        { slot: 2, idBase: fase.exercici_2 },
+        { slot: 3, idBase: fase.exercici_3 },
+    ]
+
+    return slots
+        .filter(s => s.idBase)
+        .map(s => {
+            const perso = getPerso(s.slot)
+            const exBase = exMap[s.idBase] || {}
+            const exFinal = perso?.id_exercici ? exMap[perso.id_exercici] : exBase
+
+            return {
+                ...exFinal,
+                // Aplicar overrides camp a camp
+                duracio_segons: perso?.duracio_segons ?? exFinal.duracio_segons,
+                Repeticions: perso?.repeticions ?? exFinal.Repeticions,
+                punts: perso?.punts ?? exFinal.punts,
+                multiplicador: perso?.multiplicador ?? fase.multiplicador ?? 1,
+            }
+        })
 }
 
 // ============================================================

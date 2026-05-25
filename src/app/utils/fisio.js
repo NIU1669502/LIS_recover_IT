@@ -356,7 +356,7 @@ export async function getRutinaAmbPersonalitzacio(idDiagnostic, idLesio, partCos
     const { data: exercicis } = await supabase
         .from('exercicis')
         .select('id_exercici, nom, duracio_segons, Repeticions, punts')
-        .in('id_exercici', idsExercicis)
+        
 
     const exMap = Object.fromEntries((exercicis || []).map(e => [e.id_exercici, e]))
 
