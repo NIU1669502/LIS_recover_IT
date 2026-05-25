@@ -24,7 +24,7 @@
 }
 
 .panel {
-    background: var(--bg-secondary);
+    background: #fff;
     border-radius: 20px;
     width: 100%;
     max-width: 780px;
@@ -54,7 +54,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 24px 28px 20px;
-    border-bottom: 1.5px solid var(--border-color);
+    border-bottom: 1.5px solid #f0f0f0;
     flex-shrink: 0;
 }
 
@@ -81,7 +81,7 @@
 .nom {
     font-size: 1.15rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: #111;
     margin: 0 0 4px;
 }
 
@@ -99,8 +99,8 @@
     height: 36px;
     border-radius: 50%;
     border: none;
-    background: var(--bg-tertiary);
-    color: var(--text-secondary);
+    background: #f5f5f5;
+    color: #888;
     font-size: 1rem;
     cursor: pointer;
     display: flex;
@@ -174,8 +174,8 @@
     margin-left: auto;
     font-size: 0.72rem;
     font-weight: 600;
-    background: var(--bg-tertiary);
-    color: var(--accent-blue);
+    background: #eff6ff;
+    color: #2563eb;
     border-radius: 99px;
     padding: 1px 8px;
     text-transform: none;
@@ -184,7 +184,7 @@
 
 .divider {
     height: 1.5px;
-    background: var(--border-color);
+    background: #f0f0f0;
     margin: 20px 0;
 }
 
@@ -212,7 +212,7 @@
 
 .infoValue {
     font-size: 0.95rem;
-    color: var(--text-primary);
+    color: #111;
     font-weight: 500;
 }
 
@@ -227,8 +227,8 @@
     display: inline-block;
     font-size: 0.78rem;
     font-weight: 600;
-    background: var(--bg-tertiary);
-    color: var(--accent-blue);
+    background: #eff6ff;
+    color: #2563eb;
     border-radius: 99px;
     padding: 2px 10px;
 }
@@ -237,8 +237,8 @@
     display: inline-block;
     font-size: 0.78rem;
     font-weight: 600;
-    background: var(--bg-tertiary);
-    color: var(--success-color);
+    background: #f0fdf4;
+    color: #16a34a;
     border-radius: 99px;
     padding: 2px 10px;
 }
@@ -253,18 +253,18 @@
 
 .descripcioText {
     font-size: 0.88rem;
-    color: var(--text-secondary);
+    color: #555;
     line-height: 1.55;
     margin: 0;
-    background: var(--bg-tertiary);
-    border-left: 3px solid var(--accent-blue-border);
+    background: #f8f9ff;
+    border-left: 3px solid #bfdbfe;
     padding: 10px 14px;
     border-radius: 0 8px 8px 0;
 }
 
 /* ── Progrés ── */
 .progresBox {
-    background: var(--bg-tertiary);
+    background: #f8f9ff;
     border-radius: 12px;
     padding: 16px;
 }
@@ -290,7 +290,7 @@
 
 .progresBarBg {
     height: 8px;
-    background: var(--border-color);
+    background: #dbeafe;
     border-radius: 99px;
     overflow: hidden;
     margin-bottom: 8px;
@@ -322,29 +322,29 @@
     grid-template-columns: 1fr auto auto auto;
     align-items: center;
     gap: 12px;
-    background: var(--bg-tertiary);
-    border: 1.5px solid var(--border-color);
+    background: #fafafa;
+    border: 1.5px solid #f0f0f0;
     border-radius: 10px;
     padding: 10px 14px;
     transition: border-color 0.15s, background 0.15s;
 }
 
 .sessioRow:hover {
-    border-color: var(--accent-blue);
-    background: var(--hover-bg);
+    border-color: #bfdbfe;
+    background: #f0f8ff;
 }
 
 .sessioData {
     font-size: 0.85rem;
-    color: var(--text-primary);
+    color: #444;
     font-weight: 500;
 }
 
 .sessioBadge {
     font-size: 0.72rem;
     font-weight: 600;
-    background: var(--bg-tertiary);
-    color: var(--accent-blue);
+    background: #eff6ff;
+    color: #2563eb;
     border-radius: 99px;
     padding: 2px 8px;
     white-space: nowrap;
@@ -352,7 +352,7 @@
 
 .sessioLesio {
     font-size: 0.8rem;
-    color: var(--text-secondary);
+    color: #666;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -388,16 +388,16 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    background: var(--bg-tertiary);
-    border: 1.5px solid var(--border-color);
+    background: #fafafa;
+    border: 1.5px solid #f0f0f0;
     border-radius: 10px;
     padding: 12px 16px;
     transition: border-color 0.15s, background 0.15s;
 }
 
 .lesioRow:hover {
-    border-color: var(--accent-blue);
-    background: var(--hover-bg);
+    border-color: #bfdbfe;
+    background: #f0f8ff;
 }
 
 .lesioLeft {
@@ -410,7 +410,7 @@
 .lesioNom {
     font-size: 0.9rem;
     font-weight: 600;
-    color: var(--text-primary);
+    color: #111;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

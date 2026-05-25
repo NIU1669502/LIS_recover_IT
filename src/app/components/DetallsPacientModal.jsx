@@ -125,8 +125,6 @@ async function getDetallsPacient(dniPacient) {
         ...(diagnosticsReals || []).map(d => d.part_cos),
         ...(relacions || []).map(r => r.part_cos)
     ]
-    const allLesions = [...(diagnostics || []).map(d => d.id_lesio), ...(relacions || []).map(r => r.id_lesio)]
-    const allMusculs = [...(diagnostics || []).map(d => d.part_cos), ...(relacions || []).map(r => r.part_cos)]
 
     const idsLesions = [...new Set(allLesions.filter(Boolean))]
     const idsMusculs = [...new Set(allMusculs.filter(Boolean))]
@@ -138,9 +136,6 @@ async function getDetallsPacient(dniPacient) {
 
     const nomLesions = Object.fromEntries((lesions || []).map(l => [l.id_lesio, l.nom]))
     const nomMusculs = Object.fromEntries((musculs || []).map(m => [m.id_cos, m.nom]))
-
-    let diagnosticsEnriquits = []
-    let diagnosticsPendents = []
 
     if (diagnostics?.length > 0) {
         diagnosticsEnriquits = diagnostics.map(d => {
