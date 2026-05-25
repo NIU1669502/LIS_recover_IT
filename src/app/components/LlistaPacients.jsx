@@ -8,6 +8,27 @@ import AfegirPacientModal from './AfegirPacientModal'
 import DetallsPacientModal from './DetallsPacientModal'
 import styles from './LlistaPacients.module.css'
 
+const FILTRES = [
+    { key: 'tots', label: 'Tots' },
+    { key: 'fase1', label: 'Fase 1' },
+    { key: 'fase2', label: 'Fase 2' },
+    { key: 'fase3', label: 'Fase 3' },
+    { key: 'completat', label: 'Completat' },
+    { key: 'sensepla', label: 'Sense pla' },
+    { key: 'pendent', label: 'Pendent' },
+]
+
+function coincideixFiltro(pacient, filtre) {
+    if (filtre === 'tots') return true
+    if (filtre === 'pendent') return pacient.confirmat === false
+    if (filtre === 'completat') return pacient.diagnostic?.finalitzat === true
+    if (filtre === 'sensepla') return !pacient.diagnostic
+    if (filtre === 'fase1') return pacient.diagnostic?.fase_actual === 1 && !pacient.diagnostic?.finalitzat
+    if (filtre === 'fase2') return pacient.diagnostic?.fase_actual === 2 && !pacient.diagnostic?.finalitzat
+    if (filtre === 'fase3') return pacient.diagnostic?.fase_actual === 3 && !pacient.diagnostic?.finalitzat
+    return true
+}
+
 function TarjetaPacient({ pacient, onCanvi, onAfegirDiagnostic, dniFisio }) {
     const [progres, setProgres] = useState(null)
     const [confirmantDesassignar, setConfirmantDesassignar] = useState(false)
@@ -15,53 +36,30 @@ function TarjetaPacient({ pacient, onCanvi, onAfegirDiagnostic, dniFisio }) {
     const [mostrarDetalls, setMostrarDetalls] = useState(false)
 
     const handleDesassignar = async () => {
-        if (!confirmantDesassignar) {
-            setConfirmantDesassignar(true)
-            return
-        }
+        if (!confirmantDesassignar) { setConfirmantDesassignar(true); return }
         setDesassignant(true)
         const res = await desassignarFisio(pacient.dni)
         setDesassignant(false)
         setConfirmantDesassignar(false)
-        if (res.ok) {
-            if (onCanvi) onCanvi()
-        } else {
-            alert(res.missatge || 'Error en desassignar el pacient')
-        }
+        if (res.ok) { if (onCanvi) onCanvi() }
+        else alert(res.missatge || 'Error en desassignar el pacient')
     }
 
     useEffect(() => {
-        if (pacient.diagnostic) {
-            getProgresTotal(pacient.diagnostic).then(setProgres)
-        }
+        if (pacient.diagnostic) getProgresTotal(pacient.diagnostic).then(setProgres)
     }, [pacient])
 
     const esPendent = pacient.confirmat === false
     const fase = pacient.diagnostic?.fase_actual
     const finalitzat = pacient.diagnostic?.finalitzat
 
-    const badgeLabel = esPendent
-        ? 'Pla en confirmació'
-        : finalitzat
-            ? 'Completat'
-            : fase
-                ? `Fase ${fase}`
-                : 'Sense pla'
-
-    const badgeClass = esPendent
-        ? styles.badgePendent
-        : finalitzat
-            ? styles.badgeComplet
-            : fase
-                ? styles.badgeFase
-                : styles.badgeSensePla
+    const badgeLabel = esPendent ? 'Pla en confirmació' : finalitzat ? 'Completat' : fase ? `Fase ${fase}` : 'Sense pla'
+    const badgeClass = esPendent ? styles.badgePendent : finalitzat ? styles.badgeComplet : fase ? styles.badgeFase : styles.badgeSensePla
 
     return (
         <div className={styles.tarjeta}>
             <div className={styles.tarjetaTop}>
-                <div className={styles.avatar}>
-                    {pacient.nom.charAt(0).toUpperCase()}
-                </div>
+                <div className={styles.avatar}>{pacient.nom.charAt(0).toUpperCase()}</div>
                 <span className={`${styles.badge} ${badgeClass}`}>{badgeLabel}</span>
             </div>
 
@@ -71,32 +69,20 @@ function TarjetaPacient({ pacient, onCanvi, onAfegirDiagnostic, dniFisio }) {
             {esPendent ? (
                 <div>
                     {pacient.diagnosticPendent && (
-                        <p className={styles.lesio}>
-                            {pacient.diagnosticPendent.nom_lesio} · {pacient.diagnosticPendent.nom_muscul}
-                        </p>
+                        <p className={styles.lesio}>{pacient.diagnosticPendent.nom_lesio} · {pacient.diagnosticPendent.nom_muscul}</p>
                     )}
-                    <p className={styles.pendentText}>
-                        El pacient encara no ha confirmat l&apos;assignació
-                    </p>
+                    <p className={styles.pendentText}>El pacient encara no ha confirmat l&apos;assignació</p>
                     {pacient.codi_validacio && (
-                        <p className={styles.codiValidacio}>
-                            Codi: <strong>{pacient.codi_validacio}</strong>
-                        </p>
+                        <p className={styles.codiValidacio}>Codi: <strong>{pacient.codi_validacio}</strong></p>
                     )}
-                    <button onClick={() => setMostrarDetalls(true)} className={styles.veureDetallsBtn}>
-                        Veure detalls pacient
-                    </button>
-                    <button onClick={() => desassignarFisio(pacient.dni)} className={styles.cancelarPendentBtn}>
-                        Cancel·lar assignació
-                    </button>
+                    <button onClick={() => setMostrarDetalls(true)} className={styles.veureDetallsBtn}>Veure detalls pacient</button>
+                    <button onClick={() => desassignarFisio(pacient.dni)} className={styles.cancelarPendentBtn}>Cancel·lar assignació</button>
                 </div>
             ) : (
                 <>
                     {pacient.diagnostic ? (
                         <>
-                            <p className={styles.lesio}>
-                                {pacient.diagnostic.nom_lesio} · {pacient.diagnostic.nom_muscul}
-                            </p>
+                            <p className={styles.lesio}>{pacient.diagnostic.nom_lesio} · {pacient.diagnostic.nom_muscul}</p>
                             {progres !== null && (
                                 <div className={styles.progresBox}>
                                     <div className={styles.progresCapçalera}>
@@ -113,18 +99,11 @@ function TarjetaPacient({ pacient, onCanvi, onAfegirDiagnostic, dniFisio }) {
                         <p className={styles.senseDiag}>Sense diagnòstic assignat</p>
                     )}
 
-                    <button onClick={() => setMostrarDetalls(true)} className={styles.veureDetallsBtn}>
-                        Veure detalls pacient
-                    </button>
-
-                    <button onClick={() => onAfegirDiagnostic(pacient.dni, pacient.nom)} className={styles.afegirPlaBtn}>
-                        Afegir un nou diagnòstic
-                    </button>
+                    <button onClick={() => setMostrarDetalls(true)} className={styles.veureDetallsBtn}>Veure detalls pacient</button>
+                    <button onClick={() => onAfegirDiagnostic(pacient.dni, pacient.nom)} className={styles.afegirPlaBtn}>Afegir un nou diagnòstic</button>
 
                     {!confirmantDesassignar ? (
-                        <button onClick={handleDesassignar} className={styles.desvincularBtn}>
-                            Desvincular
-                        </button>
+                        <button onClick={handleDesassignar} className={styles.desvincularBtn}>Desvincular</button>
                     ) : (
                         <div className={styles.confirmInlineRow}>
                             <span className={styles.confirmText}>Segur? Deixarà de fer-lo seguiment.</span>
@@ -134,7 +113,6 @@ function TarjetaPacient({ pacient, onCanvi, onAfegirDiagnostic, dniFisio }) {
                             <button onClick={() => setConfirmantDesassignar(false)} className={styles.cancelInlineButton}>✕</button>
                         </div>
                     )}
-                    
                 </>
             )}
 
@@ -151,11 +129,12 @@ function TarjetaPacient({ pacient, onCanvi, onAfegirDiagnostic, dniFisio }) {
 }
 
 export default function LlistaPacients({ perfilUsuari }) {
-    const [infoPacientModal, setInfoPacientModal] = useState({dniPacient: '', nomPacient: ''})
+    const [infoPacientModal, setInfoPacientModal] = useState({ dniPacient: '', nomPacient: '' })
     const [pacients, setPacients] = useState([])
     const [carregant, setCarregant] = useState(true)
     const [modalObert, setModalObert] = useState(false)
     const [cerca, setCerca] = useState('')
+    const [filtreActiu, setFiltreActiu] = useState('tots')
     const canalRef = useRef(null)
 
     const carregarPacients = async () => {
@@ -168,7 +147,6 @@ export default function LlistaPacients({ perfilUsuari }) {
 
     useEffect(() => {
         carregarPacients()
-
         if (perfilUsuari?.dni) {
             canalRef.current = supabase
                 .channel(`llista-pacients-${perfilUsuari.dni}`)
@@ -176,16 +154,19 @@ export default function LlistaPacients({ perfilUsuari }) {
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'diagnostic' }, carregarPacients)
                 .subscribe()
         }
-
-        return () => {
-            if (canalRef.current) supabase.removeChannel(canalRef.current)
-        }
+        return () => { if (canalRef.current) supabase.removeChannel(canalRef.current) }
     }, [perfilUsuari?.dni])
 
-    const pacientsFiltrats = pacients.filter(p =>
-        p.nom.toLowerCase().includes(cerca.toLowerCase()) ||
-        p.dni.toLowerCase().includes(cerca.toLowerCase())
-    )
+    const pacientsFiltrats = pacients.filter(p => {
+        const coincideixCerca = p.nom.toLowerCase().includes(cerca.toLowerCase()) || p.dni.toLowerCase().includes(cerca.toLowerCase())
+        return coincideixCerca && coincideixFiltro(p, filtreActiu)
+    })
+
+    // Comptar per cada filtre
+    const comptadors = {}
+    FILTRES.forEach(f => {
+        comptadors[f.key] = f.key === 'tots' ? pacients.length : pacients.filter(p => coincideixFiltro(p, f.key)).length
+    })
 
     return (
         <div className={styles.contenidor}>
@@ -210,20 +191,33 @@ export default function LlistaPacients({ perfilUsuari }) {
                 />
             </div>
 
+            {/* Filtres per fase */}
+            <div className={styles.filtresContainer}>
+                {FILTRES.map(f => (
+                    comptadors[f.key] > 0 || f.key === 'tots' ? (
+                        <button
+                            key={f.key}
+                            className={`${styles.filtreBtn} ${filtreActiu === f.key ? styles.filtreBtnActiu : ''}`}
+                            onClick={() => setFiltreActiu(f.key)}
+                        >
+                            {f.label}
+                            <span className={`${styles.filtreBadge} ${filtreActiu === f.key ? styles.filtreBadgeActiu : ''}`}>
+                                {comptadors[f.key]}
+                            </span>
+                        </button>
+                    ) : null
+                ))}
+            </div>
+
             {carregant ? (
-                <div className={styles.carregant}>
-                    <div className={styles.spinner} />
-                </div>
+                <div className={styles.carregant}><div className={styles.spinner} /></div>
             ) : pacientsFiltrats.length === 0 ? (
                 <div className={styles.buit}>
-                    {cerca
-                        ? <p>No s&apos;ha trobat cap pacient amb &quot;{cerca}&quot;.</p>
+                    {cerca || filtreActiu !== 'tots'
+                        ? <p>No s&apos;ha trobat cap pacient amb els filtres actuals.</p>
                         : <>
                             <p>Encara no tens cap pacient vinculat.</p>
-                            <button
-                                className={styles.afegirBtnSecundari}
-                                onClick={() => setModalObert(true)}
-                            >
+                            <button className={styles.afegirBtnSecundari} onClick={() => setModalObert(true)}>
                                 Afegir el primer pacient
                             </button>
                         </>
@@ -232,16 +226,22 @@ export default function LlistaPacients({ perfilUsuari }) {
             ) : (
                 <div className={styles.grid}>
                     {pacientsFiltrats.map(p => (
-                        <TarjetaPacient key={p.dni} pacient={p} onCanvi={carregarPacients} onAfegirDiagnostic={(dni, nom) => setInfoPacientModal({dniPacient: dni, nomPacient: nom})} dniFisio={perfilUsuari.dni} />
+                        <TarjetaPacient
+                            key={p.dni}
+                            pacient={p}
+                            onCanvi={carregarPacients}
+                            onAfegirDiagnostic={(dni, nom) => setInfoPacientModal({ dniPacient: dni, nomPacient: nom })}
+                            dniFisio={perfilUsuari.dni}
+                        />
                     ))}
                 </div>
             )}
 
-            { (modalObert || infoPacientModal.dniPacient) && (
+            {(modalObert || infoPacientModal.dniPacient) && (
                 <AfegirPacientModal
                     dniFisio={perfilUsuari.dni}
                     infoPacientInicial={infoPacientModal}
-                    onTancar={() => {setModalObert(false); setInfoPacientModal({dniPacient: '', nomPacient: ''})}}
+                    onTancar={() => { setModalObert(false); setInfoPacientModal({ dniPacient: '', nomPacient: '' }) }}
                     onPacientAfegit={carregarPacients}
                 />
             )}

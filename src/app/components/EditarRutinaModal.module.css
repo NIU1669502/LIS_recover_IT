@@ -407,7 +407,9 @@ select.formInput {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ── Responsive ─────────────────────────────────────────── */
@@ -435,4 +437,267 @@ select.formInput {
     .header {
         padding: 20px 20px 16px;
     }
+}
+
+/* ── Afegir al final de EditarRutinaModal.module.css ── */
+
+.faseTabActual {
+    position: relative;
+}
+
+.faseActualDot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: #2563eb;
+    border-radius: 50%;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+.faseTabActiva .faseActualDot {
+    background: white;
+}
+
+/* Caixa d'avançar fase */
+.avancarFaseBox {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: #f0f9ff;
+    border: 1.5px solid #bae6fd;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.avancarFaseInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.avancarFaseLabel {
+    font-size: 0.9rem;
+    color: #0f172a;
+}
+
+.avancarFaseHint {
+    font-size: 0.78rem;
+    color: #64748b;
+}
+
+.avancarBtn {
+    padding: 0.6rem 1.2rem;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+    flex-shrink: 0;
+}
+
+.avancarBtn:hover {
+    background: #1d4ed8;
+}
+
+.avancarConfirm {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.avancarConfirmText {
+    font-size: 0.8rem;
+    color: #dc2626;
+    font-weight: 500;
+}
+
+.avancarConfirmSi {
+    padding: 0.5rem 1rem;
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.avancarConfirmSi:hover:not(:disabled) {
+    background: #b91c1c;
+}
+
+.avancarConfirmSi:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.avancarConfirmNo {
+    padding: 0.5rem 0.9rem;
+    background: transparent;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.avancarConfirmNo:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+/* ── Afegir al final de EditarRutinaModal.module.css ── */
+
+.faseTabActual {
+    position: relative;
+}
+
+.faseActualDot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: #2563eb;
+    border-radius: 50%;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+.faseTabActiva .faseActualDot {
+    background: white;
+}
+
+/* Caixa d'avançar/recular fase */
+.avancarFaseBox {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: #f0f9ff;
+    border: 1.5px solid #bae6fd;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.avancarFaseInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.avancarFaseLabel {
+    font-size: 0.9rem;
+    color: #0f172a;
+}
+
+.avancarFaseHint {
+    font-size: 0.78rem;
+    color: #64748b;
+}
+
+.faseAccions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.avancarBtn {
+    padding: 0.6rem 1.2rem;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+    flex-shrink: 0;
+}
+
+.avancarBtn:hover {
+    background: #1d4ed8;
+}
+
+.recullarBtn {
+    padding: 0.6rem 1.2rem;
+    background: transparent;
+    color: #64748b;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+
+.recullarBtn:hover {
+    border-color: #94a3b8;
+    color: #0f172a;
+    background: #f8fafc;
+}
+
+.avancarConfirm {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.avancarConfirmText {
+    font-size: 0.8rem;
+    color: #dc2626;
+    font-weight: 500;
+}
+
+.avancarConfirmSi {
+    padding: 0.5rem 1rem;
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.avancarConfirmSi:hover:not(:disabled) {
+    background: #b91c1c;
+}
+
+.avancarConfirmSi:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.avancarConfirmNo {
+    padding: 0.5rem 0.9rem;
+    background: transparent;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.avancarConfirmNo:hover {
+    background: #f1f5f9;
+    color: #0f172a;
 }
