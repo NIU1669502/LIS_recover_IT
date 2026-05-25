@@ -8,7 +8,7 @@ import AfegirPacientModal from './AfegirPacientModal'
 import DetallsPacientModal from './DetallsPacientModal'
 import styles from './LlistaPacients.module.css'
 
-function TarjetaPacient({ pacient, onCanvi, onAfegirDiagnostic }) {
+function TarjetaPacient({ pacient, onCanvi, onAfegirDiagnostic, dniFisio }) {
     const [progres, setProgres] = useState(null)
     const [confirmantDesassignar, setConfirmantDesassignar] = useState(false)
     const [desassignant, setDesassignant] = useState(false)
@@ -142,6 +142,7 @@ function TarjetaPacient({ pacient, onCanvi, onAfegirDiagnostic }) {
                 <DetallsPacientModal
                     dniPacient={pacient.dni}
                     nomPacient={pacient.nom}
+                    dniFisio={dniFisio}
                     onTancar={() => setMostrarDetalls(false)}
                 />
             )}
@@ -231,7 +232,7 @@ export default function LlistaPacients({ perfilUsuari }) {
             ) : (
                 <div className={styles.grid}>
                     {pacientsFiltrats.map(p => (
-                        <TarjetaPacient key={p.dni} pacient={p} onCanvi={carregarPacients} onAfegirDiagnostic={(dni, nom) => setInfoPacientModal({dniPacient: dni, nomPacient: nom})} />
+                        <TarjetaPacient key={p.dni} pacient={p} onCanvi={carregarPacients} onAfegirDiagnostic={(dni, nom) => setInfoPacientModal({dniPacient: dni, nomPacient: nom})} dniFisio={perfilUsuari.dni} />
                     ))}
                 </div>
             )}

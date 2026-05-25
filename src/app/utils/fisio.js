@@ -319,3 +319,150 @@ export async function afegirDiagnosticAPacient(dniFisio, dniPacient, partCos, id
     if (error) return { ok: false, missatge: error.message }
     return { ok: true }
 }
+
+
+// ============================================================
+// Obté la rutina base d'un diagnòstic + les personalitzacions
+// del fisio per a les 3 fases. Retorna un objecte amb:
+//   { fase1: [slot1, slot2, slot3], fase2: [...], fase3: [...] }
+// Cada slot té: { id_exercici, nom, duracio_segons, repeticions,
+//                punts, multiplicador, slot, fase, personalitzat }
+// ============================================================
+export async function getRutinaAmbPersonalitzacio(idDiagnostic, idLesio, partCos) {
+    // 1. Rutina base: obtenir les fases per a aquesta lesió+múscul
+    const { data: rutina } = await supabase
+        .from('rutines_lesio')
+        .select('id_fase_1, id_fase_2, id_fase_3')
+        .eq('id_lesio', idLesio)
+        .eq('id_muscul', partCos)
+        .single()
+
+    if (!rutina) return null
+
+    // 2. Dades de les 3 fases (exercicis + multiplicador)
+    const [{ data: fase1 }, { data: fase2 }, { data: fase3 }] = await Promise.all([
+        supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutina.id_fase_1).single(),
+        supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutina.id_fase_2).single(),
+        supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutina.id_fase_3).single(),
+    ])
+
+    // 3. Tots els exercicis referenciats
+    const idsExercicis = [...new Set([
+        fase1?.exercici_1, fase1?.exercici_2, fase1?.exercici_3,
+        fase2?.exercici_1, fase2?.exercici_2, fase2?.exercici_3,
+        fase3?.exercici_1, fase3?.exercici_2, fase3?.exercici_3,
+    ].filter(Boolean))]
+
+    const { data: exercicis } = await supabase
+        .from('exercicis')
+        .select('id_exercici, nom, duracio_segons, Repeticions, punts')
+        .in('id_exercici', idsExercicis)
+
+    const exMap = Object.fromEntries((exercicis || []).map(e => [e.id_exercici, e]))
+
+    // 4. Personalitzacions existents per a aquest diagnòstic
+    const { data: personalitzacions } = await supabase
+        .from('rutina_personalitzada_pacient')
+        .select('*')
+        .eq('id_diagnostic', idDiagnostic)
+
+    // Helper: busca personalització per fase+slot
+    const getPerso = (fase, slot) =>
+        (personalitzacions || []).find(p => p.fase === fase && p.slot_exercici === slot) || null
+
+    // Helper: construeix un slot combinant base + override
+    const buildSlot = (faseNum, slotNum, idExerciciBase, multiplicadorBase) => {
+        const perso = getPerso(faseNum, slotNum)
+        const exBase = exMap[idExerciciBase] || {}
+        const idExerciciFinal = perso?.id_exercici ?? idExerciciBase
+        const exFinal = exMap[idExerciciFinal] || exBase
+
+        return {
+            slot: slotNum,
+            fase: faseNum,
+            // Valors finals (personalitzat > base)
+            id_exercici: idExerciciFinal,
+            nom: exFinal.nom || '—',
+            duracio_segons: perso?.duracio_segons ?? exFinal.duracio_segons ?? 0,
+            repeticions: perso?.repeticions ?? exFinal.Repeticions ?? '—',
+            punts: perso?.punts ?? exFinal.punts ?? 0,
+            multiplicador: perso?.multiplicador ?? multiplicadorBase ?? 1,
+            // Valors originals (per mostrar al fisio si han canviat)
+            id_exercici_base: idExerciciBase,
+            nom_base: exBase.nom || '—',
+            duracio_segons_base: exBase.duracio_segons ?? 0,
+            repeticions_base: exBase.Repeticions ?? '—',
+            punts_base: exBase.punts ?? 0,
+            multiplicador_base: multiplicadorBase ?? 1,
+            // Indica si aquest slot té algun override actiu
+            personalitzat: perso !== null,
+            // L'id de la personalització si existeix (per a futurs UPDATEs)
+            id_personalitzacio: perso?.id_personalitzacio ?? null,
+        }
+    }
+
+    return {
+        fase1: [
+            buildSlot(1, 1, fase1?.exercici_1, fase1?.multiplicador),
+            buildSlot(1, 2, fase1?.exercici_2, fase1?.multiplicador),
+            buildSlot(1, 3, fase1?.exercici_3, fase1?.multiplicador),
+        ],
+        fase2: [
+            buildSlot(2, 1, fase2?.exercici_1, fase2?.multiplicador),
+            buildSlot(2, 2, fase2?.exercici_2, fase2?.multiplicador),
+            buildSlot(2, 3, fase2?.exercici_3, fase2?.multiplicador),
+        ],
+        fase3: [
+            buildSlot(3, 1, fase3?.exercici_1, fase3?.multiplicador),
+            buildSlot(3, 2, fase3?.exercici_2, fase3?.multiplicador),
+            buildSlot(3, 3, fase3?.exercici_3, fase3?.multiplicador),
+        ],
+        nSessions: {
+            1: fase1?.n_sessions ?? 0,
+            2: fase2?.n_sessions ?? 0,
+            3: fase3?.n_sessions ?? 0,
+        }
+    }
+}
+
+// ============================================================
+// Guarda (INSERT o UPDATE via upsert) una personalització
+// per a un slot concret d'un diagnòstic.
+// Si tots els camps són iguals als valors base, esborra la fila
+// per mantenir la taula neta (opcional, però elegant).
+// ============================================================
+export async function guardarPersonalitzacio(dniFisio, {
+    id_diagnostic,
+    dni_pacient,
+    fase,
+    slot_exercici,
+    id_exercici,
+    duracio_segons,
+    repeticions,
+    punts,
+    multiplicador,
+}) {
+    const { error } = await supabase
+        .from('rutina_personalitzada_pacient')
+        .upsert(
+            {
+                id_diagnostic,
+                dni_pacient,
+                fase,
+                slot_exercici,
+                id_exercici,
+                duracio_segons,
+                repeticions,
+                punts,
+                multiplicador,
+                modificat_per: dniFisio,
+                data_modificacio: new Date().toISOString(),
+            },
+            { onConflict: 'id_diagnostic,fase,slot_exercici' }
+        )
+
+    if (error) {
+        return { ok: false, missatge: error.message }
+    }
+    return { ok: true }
+}
