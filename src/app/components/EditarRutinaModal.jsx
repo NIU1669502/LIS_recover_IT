@@ -32,9 +32,42 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
             const [rutinaData, { data: exs }, { data: diag }] = await Promise.all([
                 getRutinaAmbPersonalitzacio(idDiagnostic, idLesio, partCos),
                 supabase.from('exercicis').select('id_exercici, nom, duracio_segons, Repeticions, punts'),
-                supabase.from('diagnostic').select('fase_actual, finalitzat').eq('id_diagnostic', idDiagnostic).maybeSingle(),
+                supabase.from('diagnostic').select('fase_actual, finalitzat, punts_recuperacio, num_sessions').eq('id_diagnostic', idDiagnostic).maybeSingle(),
             ])
-            setRutina(rutinaData)
+
+            const diagVal = diag || {}
+            let umbralFase1 = 0
+            let umbralFase2 = 0
+            
+            if (rutinaData) {
+                // Calcular umbral fase 1
+                const p1 = [rutinaData.fase1?.[0]?.punts_base, rutinaData.fase1?.[1]?.punts_base, rutinaData.fase1?.[2]?.punts_base].reduce((a,b)=>a+(b||0),0)
+                umbralFase1 = p1 * (rutinaData.fase1?.[0]?.multiplicador_base || 1) * (rutinaData.nSessions[1] || 1)
+                
+                // Calcular umbral fase 2
+                const p2 = [rutinaData.fase2?.[0]?.punts_base, rutinaData.fase2?.[1]?.punts_base, rutinaData.fase2?.[2]?.punts_base].reduce((a,b)=>a+(b||0),0)
+                umbralFase2 = p2 * (rutinaData.fase2?.[0]?.multiplicador_base || 1) * (rutinaData.nSessions[2] || 1)
+            }
+
+            let ptsFetsFaseActual = 0
+            const puntsTotalsUsuari = diagVal.punts_recuperacio || 0
+
+            // Apliquem la lògica de restar umbrals de fases anteriors
+            if (diagVal.fase_actual === 1) {
+                ptsFetsFaseActual = puntsTotalsUsuari
+            } else if (diagVal.fase_actual === 2) {
+                ptsFetsFaseActual = Math.max(0, puntsTotalsUsuari - umbralFase1)
+            } else if (diagVal.fase_actual === 3) {
+                ptsFetsFaseActual = Math.max(0, puntsTotalsUsuari - umbralFase1 - umbralFase2)
+            }
+            
+            const rutinaAmbProgres = {
+                ...rutinaData,
+                ptsFetsFaseActual,
+                sessionsFetesFaseActual: diagVal.num_sessions || 0
+            }
+
+            setRutina(rutinaAmbProgres)
             setExercicisDisponibles(exs || [])
             setFaseActualDiag(diag?.fase_actual ?? null)
             setCarregant(false)
@@ -161,7 +194,12 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
                                 >
                                     Fase {f}
                                     {faseActualDiag === f && <span className={styles.faseActualDot} />}
-                                    <span className={styles.faseSessionsLabel}>{rutina.nSessions[f]} sessions</span>
+                                    <span className={styles.faseSessionsLabel}>
+                                        {rutina.nSessionsOverride?.[f] ?? rutina.nSessions[f]} sessions
+                                        {rutina.nSessionsOverride?.[f] != null && rutina.nSessionsOverride[f] !== rutina.nSessions[f] && (
+                                            <span className={styles.faseSessionsOrig}> (orig: {rutina.nSessions[f]})</span>
+                                        )}
+                                    </span>
                                 </button>
                             ))}
                         </div>
@@ -284,6 +322,45 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
                                                         <label className={styles.formLabel}>Punts</label>
                                                         <input className={styles.formInput} type="number" min="0" value={form.punts} onChange={e => setForm(p => ({ ...p, punts: e.target.value }))} />
                                                         <span className={styles.formHint}>Base: {slot.punts_base}</span>
+                                                        {(() => {
+                                                            const nousPunts = parseInt(form.punts) || 0
+                                                            const mult = parseInt(form.multiplicador) || 1
+                                                            const nSessionsOriginal = rutina.nSessions[faseActiva] ?? 0
+                                                            const altresSlots = slotsActuals.filter(s2 => s2.slot !== slot.slot)
+                                                            const puntsSenseAquest = altresSlots.reduce((acc, s2) => acc + (s2.punts ?? 0), 0)
+                                                            const ptsPorSessio = (puntsSenseAquest + nousPunts) * mult
+                                                            const ptsOriginalsPerSessio = slotsActuals.reduce((acc, s2) => acc + (s2.punts_base ?? 0), 0)
+                                                            const multiplicadorBase = slot.multiplicador_base ?? 1
+                                                            const umbralFase = ptsOriginalsPerSessio * multiplicadorBase * nSessionsOriginal
+                                                            if (ptsPorSessio <= 0 || umbralFase <= 0) return null
+
+                                                            let ptsFetsEnAquestaFase = 0
+                                                            let sessionsFetes = 0
+                                                            // Només descomptem el que porta si estem simulant la fase activa de l'usuari
+                                                            if (faseActualDiag === faseActiva) {
+                                                                ptsFetsEnAquestaFase = rutina.ptsFetsFaseActual || 0
+                                                                sessionsFetes = rutina.sessionsFetesFaseActual || 0
+                                                            }
+                                                        console.log("faseActualDiag", faseActualDiag)
+                                                        console.log("sessionsFetes", sessionsFetes)
+                                                        console.log("faseActiva", faseActiva)
+                                                            const puntsRestantsFase = Math.max(0, umbralFase - ptsFetsEnAquestaFase)
+                                                            const novasSessions = Math.ceil(puntsRestantsFase / ptsPorSessio)
+                                                            
+
+                                                            const diff = nSessionsOriginal - (novasSessions + sessionsFetes)
+                                                            return (
+                                                                <div className={styles.previewSessions}>
+                                                                    <span className={styles.previewLabel}>⭐ Amb aquest canvi:</span>
+                                                                    <span>
+                                                                        Sessions necessàries: <strong>{novasSessions}</strong>
+                                                                        {diff > 0 && <span className={styles.previewPositiu}> · S&apos;estalvia {diff} {diff === 1 ? 'sessió' : 'sessions'}</span>}
+                                                                        {diff < 0 && <span className={styles.previewNegatiu}> · Necessita {Math.abs(diff)} {Math.abs(diff) === 1 ? 'sessió' : 'sessions'} més</span>}
+                                                                        {diff === 0 && <span className={styles.previewNeutral}> · (sense canvis)</span>}
+                                                                    </span>
+                                                                </div>
+                                                            )
+                                                        })()}
                                                     </div>
                                                     <div className={styles.formGroup}>
                                                         <label className={styles.formLabel}>Multiplicador</label>

@@ -390,7 +390,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
                                     <div className={styles.exerciciMeta}>
                                         <span>⏱ {ex.duracio_segons}s</span>
                                         <span>🔁 {ex.Repeticions} reps</span>
-                                        <span>⭐ {ex.punts * diagnostic.fase_actual} pts</span>
+                                        <span>⭐ {ex.punts * (ex.multiplicador ?? 1)} pts</span>
                                     </div>
                                 </div>
                             </div>

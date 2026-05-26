@@ -139,11 +139,11 @@ export async function getPacientsDeFisio(dniFisio) {
 export async function getProgresTotal(diagnostic) {
     if (!diagnostic) return 0
 
-    const {data : punts} = await supabase
-    .from('diagnostic')
-    .select('punts_recuperacio, puntsFinals')
-    .eq('id_diagnostic', diagnostic.id_diagnostic)
-    .single() 
+    const { data: punts } = await supabase
+        .from('diagnostic')
+        .select('punts_recuperacio, puntsFinals')
+        .eq('id_diagnostic', diagnostic.id_diagnostic)
+        .single()
 
     if (diagnostic.finalitzat) return 100
 
@@ -296,8 +296,8 @@ export async function afegirDiagnosticAPacient(dniFisio, dniPacient, partCos, id
                     .reduce((acc, id) => acc + (puntsPer[id] ?? 0), 0) * (multiplicador ?? 1) * (infoFase.n_sessions ?? 1)
 
             puntsTotal = calcularPuntsFase(infoFase1, multifase1?.multiplicador)
-                       + calcularPuntsFase(infoFase2, multifase2?.multiplicador)
-                       + calcularPuntsFase(infoFase3, multifase3?.multiplicador)
+                + calcularPuntsFase(infoFase2, multifase2?.multiplicador)
+                + calcularPuntsFase(infoFase3, multifase3?.multiplicador)
         }
     }
 
@@ -356,7 +356,7 @@ export async function getRutinaAmbPersonalitzacio(idDiagnostic, idLesio, partCos
     const { data: exercicis } = await supabase
         .from('exercicis')
         .select('id_exercici, nom, duracio_segons, Repeticions, punts')
-        
+
 
     const exMap = Object.fromEntries((exercicis || []).map(e => [e.id_exercici, e]))
 
@@ -401,6 +401,12 @@ export async function getRutinaAmbPersonalitzacio(idDiagnostic, idLesio, partCos
         }
     }
 
+    // n_sessions_override per fase (pren el valor de qualsevol fila no-nul·la de la fase)
+    const getSessionsOverride = (faseNum) => {
+        const fila = (personalitzacions || []).find(p => p.fase === faseNum && p.n_sessions_override != null)
+        return fila?.n_sessions_override ?? null
+    }
+
     return {
         fase1: [
             buildSlot(1, 1, fase1?.exercici_1, fase1?.multiplicador),
@@ -421,6 +427,11 @@ export async function getRutinaAmbPersonalitzacio(idDiagnostic, idLesio, partCos
             1: fase1?.n_sessions ?? 0,
             2: fase2?.n_sessions ?? 0,
             3: fase3?.n_sessions ?? 0,
+        },
+        nSessionsOverride: {
+            1: getSessionsOverride(1),
+            2: getSessionsOverride(2),
+            3: getSessionsOverride(3),
         }
     }
 }
@@ -442,6 +453,125 @@ export async function guardarPersonalitzacio(dniFisio, {
     punts,
     multiplicador,
 }) {
+    // ── Calcular n_sessions_override ──────────────────────────
+    let n_sessions_override = null
+    try {
+        const { data: diag } = await supabase
+            .from('diagnostic')
+            .select('id_lesio, part_cos, fase_actual, punts_recuperacio, num_sessions')
+            .eq('id_diagnostic', id_diagnostic)
+            .maybeSingle()
+
+        if (diag) {
+            const { data: rutina } = await supabase
+                .from('rutines_lesio')
+                .select('id_fase_1, id_fase_2, id_fase_3')
+                .eq('id_lesio', diag.id_lesio)
+                .eq('id_muscul', diag.part_cos)
+                .single()
+
+            if (rutina) {
+                const idFase = fase === 1 ? rutina.id_fase_1
+                    : fase === 2 ? rutina.id_fase_2
+                        : rutina.id_fase_3
+
+                const { data: faseInfo } = await supabase
+                    .from('fases')
+                    .select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions')
+                    .eq('id_fase', idFase)
+                    .single()
+
+                if (faseInfo) {
+                    const idsBase = [faseInfo.exercici_1, faseInfo.exercici_2, faseInfo.exercici_3].filter(Boolean)
+                    const { data: exercicisInfo } = await supabase
+                        .from('exercicis').select('id_exercici, punts').in('id_exercici', idsBase)
+                    const puntsPer = Object.fromEntries((exercicisInfo || []).map(e => [e.id_exercici, e.punts]))
+
+                    // Overrides dels altres slots de la mateixa fase
+                    const { data: altresOverrides } = await supabase
+                        .from('rutina_personalitzada_pacient')
+                        .select('slot_exercici, punts')
+                        .eq('id_diagnostic', id_diagnostic)
+                        .eq('fase', fase)
+                        .neq('slot_exercici', slot_exercici)
+                    const overrideMap = Object.fromEntries((altresOverrides || []).map(p => [p.slot_exercici, p.punts]))
+
+                    // Punts per sessió amb tots els overrides actuals
+                    const ptsSessio = [1, 2, 3].reduce((acc, s) => {
+                        const idEx = faseInfo[`exercici_${s}`]
+                        if (!idEx) return acc
+                        const ptsSlot = s === slot_exercici ? punts : (overrideMap[s] ?? puntsPer[idEx] ?? 0)
+                        return acc + ptsSlot
+                    }, 0)
+                    const ptsPorSessio = ptsSessio * (multiplicador ?? faseInfo.multiplicador ?? 1)
+
+                    // Umbral original (IMMUTABLE)
+                    const ptsOriginalsPerSessio = [1, 2, 3].reduce((acc, s) => {
+                        const idEx = faseInfo[`exercici_${s}`]
+                        return acc + (idEx ? (puntsPer[idEx] ?? 0) : 0)
+                    }, 0)
+                    const umbralFase = ptsOriginalsPerSessio * (faseInfo.multiplicador ?? 1) * (faseInfo.n_sessions ?? 1)
+
+                    if (ptsPorSessio > 0) {
+                        let ptsFetsEnAquestaFase = 0
+                        let sessionsFetes = 0
+
+                        // Només tenim en compte els punts que porta si el pacient està actualment en la fase que estem editant
+                        if (diag.fase_actual === fase) {
+                            sessionsFetes = diag.num_sessions || 0
+                            let puntsTotalsUsuari = diag.punts_recuperacio || 0
+
+                            // Càlcul d'umbrals de fases anteriors per restar-los
+                            let umbralFase1 = 0
+                            let umbralFase2 = 0
+
+                            if (fase === 2 || fase === 3) {
+                                const { data: f1 } = await supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutina.id_fase_1).single()
+                                if (f1) {
+                                    const ids1 = [f1.exercici_1, f1.exercici_2, f1.exercici_3].filter(Boolean)
+                                    const { data: ex1 } = await supabase.from('exercicis').select('id_exercici, punts').in('id_exercici', ids1)
+                                    const p1 = Object.fromEntries((ex1 || []).map(e => [e.id_exercici, e.punts]))
+                                    const ptsSessio1 = ids1.reduce((acc, id) => acc + (p1[id] ?? 0), 0)
+                                    umbralFase1 = ptsSessio1 * (f1.multiplicador ?? 1) * (f1.n_sessions ?? 1)
+                                }
+                            }
+
+                            if (fase === 3) {
+                                const { data: f2 } = await supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutina.id_fase_2).single()
+                                if (f2) {
+                                    const ids2 = [f2.exercici_1, f2.exercici_2, f2.exercici_3].filter(Boolean)
+                                    const { data: ex2 } = await supabase.from('exercicis').select('id_exercici, punts').in('id_exercici', ids2)
+                                    const p2 = Object.fromEntries((ex2 || []).map(e => [e.id_exercici, e.punts]))
+                                    const ptsSessio2 = ids2.reduce((acc, id) => acc + (p2[id] ?? 0), 0)
+                                    umbralFase2 = ptsSessio2 * (f2.multiplicador ?? 1) * (f2.n_sessions ?? 1)
+                                }
+                            }
+
+                            // Restem l'umbral de la fase 1 (si estem a la fase 2) o de la fase 1 i 2 (si estem a la fase 3)
+                            if (fase === 1) {
+                                ptsFetsEnAquestaFase = puntsTotalsUsuari
+                            } else if (fase === 2) {
+                                ptsFetsEnAquestaFase = Math.max(0, puntsTotalsUsuari - umbralFase1)
+                            } else if (fase === 3) {
+                                ptsFetsEnAquestaFase = Math.max(0, puntsTotalsUsuari - umbralFase1 - umbralFase2)
+                            }
+                        }
+
+                        // Calcular sessions restants amb els punts que li falten per arribar a l'umbral d'aquesta fase
+                        const puntsRestantsFase = Math.max(0, umbralFase - ptsFetsEnAquestaFase)
+                        const sessionsRestants = Math.ceil(puntsRestantsFase / ptsPorSessio)
+
+                        // El total override és el que ja ha fet + el que li falta
+                        n_sessions_override = sessionsFetes + sessionsRestants
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        console.error('Error calculant n_sessions_override:', err)
+    }
+
+    // ── Desar a Supabase ─────────────────────────────────────
     const { error } = await supabase
         .from('rutina_personalitzada_pacient')
         .upsert(
@@ -455,14 +585,24 @@ export async function guardarPersonalitzacio(dniFisio, {
                 repeticions,
                 punts,
                 multiplicador,
+                n_sessions_override,
                 modificat_per: dniFisio,
                 data_modificacio: new Date().toISOString(),
             },
             { onConflict: 'id_diagnostic,fase,slot_exercici' }
         )
 
-    if (error) {
-        return { ok: false, missatge: error.message }
+    if (error) return { ok: false, missatge: error.message }
+
+    // Sincronitzar n_sessions_override a tots els slots de la mateixa fase
+    if (n_sessions_override !== null) {
+        await supabase
+            .from('rutina_personalitzada_pacient')
+            .update({ n_sessions_override })
+            .eq('id_diagnostic', id_diagnostic)
+            .eq('fase', fase)
+            .neq('slot_exercici', slot_exercici)
     }
+
     return { ok: true }
 }

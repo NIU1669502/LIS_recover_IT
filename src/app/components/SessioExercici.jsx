@@ -115,7 +115,7 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
                         clearInterval(intervalRef.current)
                         setCronometreActiu(false)
                         setCronometreFinalitzat(true)
-                        setPuntsFlash(exercici.punts * fase)
+                        setPuntsFlash(exercici.punts * (exercici.multiplicador ?? 1))
                         setMostrarPuntsFlash(true)
                         setTimeout(() => setMostrarPuntsFlash(false), 2000)
                         return 0
@@ -153,7 +153,7 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
         setCronometreActiu(false)
         setCronometreFinalitzat(true)
         setTempsRestant(0)
-        setPuntsFlash(exercici.punts * fase)
+        setPuntsFlash(exercici.punts * (exercici.multiplicador ?? 1))
         setMostrarPuntsFlash(true)
         setTimeout(() => setMostrarPuntsFlash(false), 2000)
     }
@@ -185,7 +185,7 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
     // Guarda dolor a la BD i completa la sessió
     const handleDolorFinal = async (valor) => {
         setMostrarModalDolorFinal(false)
-        const puntsGuanyats = exercicis.reduce((acc, ex) => acc + ((ex.punts || 0) * fase), 0)
+        const puntsGuanyats = exercicis.reduce((acc, ex) => acc + ((ex.punts || 0) * (ex.multiplicador ?? 1)), 0)
         const { data: { session } } = await supabase.auth.getSession()
         const userDni = session?.user?.user_metadata?.dni
         const resultat = await completarSessio(
@@ -356,7 +356,7 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
             </div>
 
             <div className={styles.puntsInfo}>
-                {exercici.punts * fase} punts en completar
+                {exercici.punts * (exercici.multiplicador ?? 1)} punts en completar
             </div>
 
             <button

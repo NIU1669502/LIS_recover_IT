@@ -158,6 +158,19 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
             .eq('id_fase', idFase)
             .single()
         if (faseInfo?.n_sessions) nSessionsRequerides = faseInfo.n_sessions
+
+        // Comprovar si el fisio ha definit un n_sessions_override per a aquest pacient i fase
+        const { data: persoOverride } = await supabase
+            .from('rutina_personalitzada_pacient')
+            .select('n_sessions_override')
+            .eq('id_diagnostic', diagnostic.id_diagnostic)
+            .eq('fase', diagnostic.fase_actual)
+            .not('n_sessions_override', 'is', null)
+            .limit(1)
+            .maybeSingle()
+        if (persoOverride?.n_sessions_override != null) {
+            nSessionsRequerides = persoOverride.n_sessions_override
+        }
     }
 
     const numSessionsActualitzat = (diagnostic.num_sessions || 0) + 1
@@ -179,7 +192,37 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
         }
     }
 
-    const nousPuntsRecuperacio = (diagnostic.punts_recuperacio || 0) + puntsGuanyats
+    // Calcular punts: si la fase avança o es completa, cap a l'umbral exacte (els punts en excés s'ignoren)
+    let nousPuntsRecuperacio = (diagnostic.punts_recuperacio || 0) + puntsGuanyats
+
+    if ((faseAvançada || completada) && rutina) {
+        try {
+            const [{ data: f1 }, { data: f2 }, { data: f3 }] = await Promise.all([
+                supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutina.id_fase_1).single(),
+                supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutina.id_fase_2).single(),
+                supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutina.id_fase_3).single(),
+            ])
+            const allIds = [...new Set([
+                f1?.exercici_1, f1?.exercici_2, f1?.exercici_3,
+                f2?.exercici_1, f2?.exercici_2, f2?.exercici_3,
+                f3?.exercici_1, f3?.exercici_2, f3?.exercici_3,
+            ].filter(Boolean))]
+            const { data: exs } = await supabase.from('exercicis').select('id_exercici, punts').in('id_exercici', allIds)
+            const puntsPer = Object.fromEntries((exs || []).map(e => [e.id_exercici, e.punts]))
+            const calcUmbral = (fi) => {
+                if (!fi) return 0
+                return [fi.exercici_1, fi.exercici_2, fi.exercici_3].filter(Boolean)
+                    .reduce((acc, id) => acc + (puntsPer[id] ?? 0), 0) * (fi.multiplicador ?? 1) * (fi.n_sessions ?? 1)
+            }
+            const u1 = calcUmbral(f1), u2 = calcUmbral(f2), u3 = calcUmbral(f3)
+            // Punts exactes acumulats fins al final de la fase completada (sense excés)
+            if (diagnostic.fase_actual === 1) nousPuntsRecuperacio = u1
+            else if (diagnostic.fase_actual === 2) nousPuntsRecuperacio = u1 + u2
+            else nousPuntsRecuperacio = u1 + u2 + u3
+        } catch (err) {
+            console.error('Error capant punts de fase:', err)
+        }
+    }
 
     const actualitzacio = {
         fase_actual: novaFase,
@@ -345,6 +388,21 @@ export async function getResumSessions(diagnostic) {
     if (diagnostic.fase_actual === 1) totals = req1
     else if (diagnostic.fase_actual === 2) totals = req2
     else if (diagnostic.fase_actual === 3) totals = req3
+
+    // Aplicar n_sessions_override si el fisio l'ha definit per a aquest pacient i fase
+    if (diagnostic.id_diagnostic) {
+        const { data: persoOverride } = await supabase
+            .from('rutina_personalitzada_pacient')
+            .select('n_sessions_override')
+            .eq('id_diagnostic', diagnostic.id_diagnostic)
+            .eq('fase', diagnostic.fase_actual)
+            .not('n_sessions_override', 'is', null)
+            .limit(1)
+            .maybeSingle()
+        if (persoOverride?.n_sessions_override != null) {
+            totals = persoOverride.n_sessions_override
+        }
+    }
 
     return { fetes: diagnostic.num_sessions || 0, totals }
 }

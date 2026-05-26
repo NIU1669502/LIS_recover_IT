@@ -129,7 +129,21 @@ export async function avancarFasePacient(idDiagnostic) {
             .single()
 
         if (faseInfo) {
-            const sessionsRestants = Math.max(0, (faseInfo.n_sessions ?? 0) - (diagnostic.num_sessions ?? 0))
+            // Usem n_sessions_override si el fisio l'ha definit
+            let nSessionsFase = faseInfo.n_sessions ?? 0
+            const { data: persoOverride } = await supabase
+                .from('rutina_personalitzada_pacient')
+                .select('n_sessions_override')
+                .eq('id_diagnostic', idDiagnostic)
+                .eq('fase', diagnostic.fase_actual)
+                .not('n_sessions_override', 'is', null)
+                .limit(1)
+                .maybeSingle()
+            if (persoOverride?.n_sessions_override != null) {
+                nSessionsFase = persoOverride.n_sessions_override
+            }
+
+            const sessionsRestants = Math.max(0, nSessionsFase - (diagnostic.num_sessions ?? 0))
 
             // Buscar personalitzacions per a aquesta fase
             const { data: personalitzacions } = await supabase
@@ -173,7 +187,41 @@ export async function avancarFasePacient(idDiagnostic) {
     }
 
     // 3. Avançar fase o completar
-    const nousPunts = (diagnostic.punts_recuperacio ?? 0) + puntsAAfegir
+    // Cap a l'umbral exacte de la fase completada (els punts en excés s'ignoren)
+    let nousPunts = (diagnostic.punts_recuperacio ?? 0) + puntsAAfegir
+    try {
+        const { data: rutinesAll } = await supabase
+            .from('rutines_lesio')
+            .select('id_fase_1, id_fase_2, id_fase_3')
+            .eq('id_muscul', diagnostic.part_cos)
+            .eq('id_lesio', diagnostic.id_lesio)
+            .single()
+        if (rutinesAll) {
+            const [{ data: fa1 }, { data: fa2 }, { data: fa3 }] = await Promise.all([
+                supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutinesAll.id_fase_1).single(),
+                supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutinesAll.id_fase_2).single(),
+                supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutinesAll.id_fase_3).single(),
+            ])
+            const allIds = [...new Set([
+                fa1?.exercici_1, fa1?.exercici_2, fa1?.exercici_3,
+                fa2?.exercici_1, fa2?.exercici_2, fa2?.exercici_3,
+                fa3?.exercici_1, fa3?.exercici_2, fa3?.exercici_3,
+            ].filter(Boolean))]
+            const { data: exs } = await supabase.from('exercicis').select('id_exercici, punts').in('id_exercici', allIds)
+            const pp = Object.fromEntries((exs || []).map(e => [e.id_exercici, e.punts]))
+            const calcU = (fi) => {
+                if (!fi) return 0
+                return [fi.exercici_1, fi.exercici_2, fi.exercici_3].filter(Boolean)
+                    .reduce((acc, id) => acc + (pp[id] ?? 0), 0) * (fi.multiplicador ?? 1) * (fi.n_sessions ?? 1)
+            }
+            const u1 = calcU(fa1), u2 = calcU(fa2), u3 = calcU(fa3)
+            if (diagnostic.fase_actual === 1) nousPunts = u1
+            else if (diagnostic.fase_actual === 2) nousPunts = u1 + u2
+            else nousPunts = u1 + u2 + u3
+        }
+    } catch (err) {
+        console.error('Error capant punts en avançar fase:', err)
+    }
 
     if (diagnostic.fase_actual >= 3) {
         await supabase

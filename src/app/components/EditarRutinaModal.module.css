@@ -701,3 +701,47 @@ select.formInput {
     background: #f1f5f9;
     color: #0f172a;
 }
+
+/* ── Preview sessions en temps real ────────────────────── */
+
+.previewSessions {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: 6px;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 0.78rem;
+    color: #0369a1;
+    line-height: 1.5;
+}
+
+.previewLabel {
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.previewPositiu {
+    color: #15803d;
+    font-weight: 600;
+}
+
+.previewNegatiu {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.previewNeutral {
+    color: #94a3b8;
+}
+
+/* ── Sessions originals al tab de fase ──────────────────── */
+
+.faseSessionsOrig {
+    opacity: 0.6;
+    font-size: 0.68rem;
+    text-decoration: line-through;
+}
