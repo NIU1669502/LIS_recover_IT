@@ -6,7 +6,7 @@ import { getDiagnosticsActius } from '../utils/lesions'
 import GraficaRecuperacio from './GraficaRecuperacio'
 import styles from './historialDiagnostics.module.css'
 
-export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureHistorialSessions,onPreseleccionarDiagnostic, onEsborrarDiagnostic, refreshNonce }) {
+export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureHistorialSessions, onPreseleccionarDiagnostic, onEsborrarDiagnostic, refreshNonce }) {
     const [actives, setActives] = useState([])
     const [finalitzades, setFinalitzades] = useState([])
     const [carregant, setCarregant] = useState(true)
@@ -17,7 +17,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
     const [esborrantId, setEsborrantId] = useState(null)
 
     const canalRef = useRef(null)
-
+    
     useEffect(() => {
         const carregarDades = async () => {
             if (!perfilUsuari?.dni) {

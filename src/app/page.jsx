@@ -18,6 +18,8 @@ import HistorialDiagnostics from './components/HistorialDiagnostics'
 import HistorialSessions from './components/HistorialSessions'
 import XatPacient from './components/XatPacient'
 import imatgeAnatomica from './data/Imatge_anatomica.png'
+import { getPenalitzacio } from './utils/penalitzacio'
+import { supabase } from '../utils/supabase'
 
 // Vistes del fisio
 import PanellFisio from './components/PanellFisio'
@@ -123,6 +125,25 @@ export default function Page() {
     return () => { isSubscribed = false }
   }, [vistaActual, perfilUsuari])
 
+  // ── Penalització diària ─────────────────────────
+  useEffect(() => {
+    if (vistaActual === 'inici' && perfilUsuari?.dni && !esFisio) {
+      const avui = new Date().toDateString()
+      const ultimaVegada = perfilUsuari.ultima_penalitzacio
+        ? new Date(perfilUsuari.ultima_penalitzacio).toDateString()
+        : null
+
+      if (ultimaVegada === avui) return
+
+      getPenalitzacio(perfilUsuari.dni)
+
+      supabase
+        .from('usuaris')
+        .update({ ultima_penalitzacio: new Date().toISOString() })
+        .eq('dni', perfilUsuari.dni)
+    }
+  }, [vistaActual, perfilUsuari])
+
   const esFisio = perfilUsuari?.es_fisioterapeuta === true
   const dniPacient = !esFisio ? perfilUsuari?.dni : null
   const { teFisio, relacio, carregant: carregantRelacioFisio } = useRelacioFisioConfirmada(dniPacient)
@@ -164,8 +185,6 @@ export default function Page() {
 
         <main key={vistaActual} className={`${esPantallaAuth ? styles.mainFull : styles.main} ${styles.pageEnter}`}>
 
-          {/* ── Vistes comunes ─────────────────────────── */}
-
           {vistaActual === 'login' && (
             <LoginForm
               loginForm={loginForm}
@@ -193,8 +212,6 @@ export default function Page() {
             />
           )}
 
-          {/* ── Vistes del fisioterapeuta ───────────────── */}
-
           {vistaActual === 'inici-fisio' && (
             <PanellFisio
               perfilUsuari={perfilUsuari}
@@ -211,8 +228,6 @@ export default function Page() {
           {vistaActual === 'xat-fisio' && (
             <XatFisio perfilUsuari={perfilUsuari} />
           )}
-
-          {/* ── Vistes del pacient ──────────────────────── */}
 
           {vistaActual === 'test' && (
             <section className={styles.testSection}>
@@ -316,7 +331,6 @@ export default function Page() {
                           Iniciar Sessió
                         </button>
                       </div>
-
                       <div className={styles.secondaryActionBox}>
                         <p className={styles.actionHint}>Vols veure com funciona abans?</p>
                         <button
@@ -329,7 +343,6 @@ export default function Page() {
                       </div>
                     </div>
                   </div>
-
                   <div className={styles.homeVisual}>
                     <div className={styles.imageBox}>
                       <img
@@ -353,9 +366,7 @@ export default function Page() {
                       </p>
                     </div>
                   </div>
-
                   <div className={styles.dashboardGrid}>
-                    {/* ── Imatge anatòmica amb overlay de diagnòstics ── */}
                     <div className={styles.anatomyCard}>
                       <img
                         src={imatgeAnatomica.src}
@@ -366,7 +377,6 @@ export default function Page() {
                         <OverlayAnatomic perfilUsuari={perfilUsuari} />
                       )}
                     </div>
-
                     <div className={styles.widgetsColumn}>
                       <div className={styles.actionCardPrimary}>
                         {carregantRutina ? (
@@ -399,7 +409,6 @@ export default function Page() {
                           </>
                         )}
                       </div>
-
                       <div className={styles.actionCardSecondary}>
                         <div className={styles.actionCardIcon}>📋</div>
                         <div className={styles.actionCardContent}>
