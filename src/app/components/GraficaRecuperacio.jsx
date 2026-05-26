@@ -14,14 +14,35 @@ function formatShortDate(iso) {
     } catch { return '' }
 }
 
-export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0 }) {
+export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0, puntsActuals }) {
     const [tooltip, setTooltip] = useState(null)
 
-    const puntsAcumulats = []
+    const agrupats = {}
     let acc = 0
     for (const s of sessions) {
-        acc += s.punts_obtinguts ?? 0
-        puntsAcumulats.push({ data: s.data_realitzacio, punts: acc })
+        if (!s.penalitzat) {
+            acc += s.punts_obtinguts ?? 0
+        }
+        if (s.data_realitzacio) {
+            const dia = s.data_realitzacio.split('T')[0]
+            agrupats[dia] = { data: s.data_realitzacio, punts: acc }
+        }
+    }
+
+    const puntsAcumulats = Object.values(agrupats).sort((a, b) => a.data.localeCompare(b.data))
+
+    // Sincronitzar amb la realitat: ajustem el darrer punt si no quadra (fase cap o penalització)
+    if (puntsActuals !== undefined && acc !== puntsActuals) {
+        const avui = new Date().toISOString()
+        const diaAvui = avui.split('T')[0]
+        const last = puntsAcumulats[puntsAcumulats.length - 1]
+
+        if (last && last.data.split('T')[0] === diaAvui) {
+            last.punts = puntsActuals
+        } else {
+            puntsAcumulats.push({ data: avui, punts: puntsActuals })
+        }
+        acc = puntsActuals
     }
 
     const totalPunts = puntsFinals > 0 ? puntsFinals : (acc > 0 ? acc : 1)

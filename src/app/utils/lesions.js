@@ -2,6 +2,7 @@ import { supabase } from '../../utils/supabase'
 import { TEST_STEPS } from '../data/testSteps.js'
 import { showToast } from '../utils/toast'
 import { recuperarSessioPenalitzada } from '../utils/penalitzacio'
+import { completarObjectiu } from '../utils/objectius'
 
 export function determinarLesio(respostes) {
     const onset = respostes[1]
@@ -247,6 +248,16 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
         console.error('No s\'ha pogut recuperar la sessió penalitzada', err)
     }
 
+    // Marcar objectius completats
+    try {
+        await completarObjectiu(userDni, 'primera_sessio')
+        if (completada) {
+            await completarObjectiu(userDni, 'primera_cura')
+        }
+    } catch (err) {
+        console.error('[Objectius] Error marcant objectiu:', err)
+    }
+
     return { completada, novaFase: completada ? null : novaFase, faseAvançada, nSessionsRestants: nSessionsRequerides - nouNumSessions }
 }
 
@@ -326,6 +337,14 @@ export async function processarTestDiagnostic(resultat, navegarA) {
         }
 
         showToast('Diagnòstic completat i guardat amb èxit!', 'success')
+
+        // Marcar objectiu: primer test diagnòstic
+        try {
+            await completarObjectiu(userDni, 'primer_diagnostic')
+        } catch (err) {
+            console.error('[Objectius] Error marcant objectiu primer_diagnostic:', err)
+        }
+
         navegarA('exercicis-en-curs')
 
     } catch (err) {

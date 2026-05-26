@@ -60,7 +60,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
                 const ids = activesData.map((d) => d.id_diagnostic)
                 const { data: sess } = await supabase
                     .from('historial_sessions')
-                    .select('data_realitzacio, punts_obtinguts')
+                    .select('data_realitzacio, punts_obtinguts, penalitzat')
                     .eq('dni_pacient', perfilUsuari.dni)
                     .in('id_diagnostic', ids)
                     .order('data_realitzacio', { ascending: true })
@@ -94,6 +94,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
     }
 
     const puntsFinalsTotals = actives.reduce((acc, d) => acc + (d.puntsFinals ?? 0), 0)
+    const puntsActualsTotals = actives.reduce((acc, d) => acc + (d.punts_recuperacio ?? 0), 0)
 
     return (
         <section className={styles.container}>
@@ -250,6 +251,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
                         <GraficaRecuperacio
                             sessions={sessionsActives}
                             puntsFinals={puntsFinalsTotals}
+                            puntsActuals={puntsActualsTotals}
                         />
                     ) : (
                         <div className={styles.emptyState}>

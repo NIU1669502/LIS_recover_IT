@@ -17,6 +17,7 @@ import ExercicisEnCurs from './components/ExercicisEnCurs'
 import HistorialDiagnostics from './components/HistorialDiagnostics'
 import HistorialSessions from './components/HistorialSessions'
 import XatPacient from './components/XatPacient'
+import ObjectiusPacient from './components/ObjectiusPacient'
 import imatgeAnatomica from './data/Imatge_anatomica.png'
 
 import PanellFisio from './components/PanellFisio'
@@ -408,6 +409,11 @@ export default function Page() {
                           </button>
                         </div>
                       </div>
+
+                      {/* Objectius del pacient */}
+                      {!esFisio && perfilUsuari?.dni && (
+                        <ObjectiusPacient dniPacient={perfilUsuari.dni} />
+                      )}
                     </div>
                   </div>
                 </section>
