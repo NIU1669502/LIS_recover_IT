@@ -1,5 +1,3 @@
-/* ── CSS original conservat íntegrament ── */
-
 .contenidor {
     padding: 40px 48px;
     max-width: 960px;
@@ -150,7 +148,6 @@
     color: var(--text-secondary);
 }
 
-/* ── Nou: badge de pla en confirmació (taronja) ── */
 .badgePendent {
     background: #fff7ed;
     color: #ea580c;
@@ -183,7 +180,6 @@
     margin: 8px 0 0;
 }
 
-/* ── Nous estils: estat pendent ── */
 .pendentText {
     font-size: 0.82rem;
     color: #ea580c;
@@ -449,8 +445,6 @@
 .afegirPlaBtn:active {
     transform: scale(0.98);
 }
-
-/* ── Afegir al final de LlistaPacients.module.css ── */
 
 .filtresContainer {
     display: flex;

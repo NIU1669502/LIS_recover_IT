@@ -164,7 +164,7 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
             {perfilUsuari && (
                 <div className={styles.card}>
 
-                    {/* ── Capçalera ── */}
+                    
                     <div className={styles.header}>
                         <div className={styles.avatar}>
                             {perfilUsuari.nom?.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()}
@@ -189,7 +189,7 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
                         </div>
                     </div>
 
-                    {/* ── Informació personal ── */}
+                    
                     <p className={styles.sectionTitle}>Informació personal</p>
 
                     <div className={styles.fieldRow}>
@@ -237,7 +237,7 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
                         <span className={styles.badge}>{esFisio ? 'Fisioterapeuta' : 'Pacient'}</span>
                     </div>
 
-                    {/* ── Recuperació — només pacients ── */}
+                    
                     {!esFisio && (
                         <>
                             <div className={styles.sectionDivider} />
@@ -265,7 +265,7 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
                         </>
                     )}
 
-                    {/* ── Fisioterapeuta — només pacients ── */}
+                    
                     {!esFisio && (
                         <>
                             <div className={styles.sectionDivider} />
@@ -339,7 +339,7 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
                         </>
                     )}
 
-                    {/* ── Seguretat ── */}
+                    
                     <div className={styles.sectionDivider} />
                     <p className={styles.sectionTitle}>Seguretat</p>
 

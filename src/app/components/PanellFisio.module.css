@@ -1,5 +1,3 @@
-/* ── CSS original conservat íntegrament ── */
-
 .panell {
     padding: 40px 48px;
     max-width: 960px;
@@ -62,7 +60,6 @@
     margin-bottom: 40px;
 }
 
-/* ── Nova variant amb 4 targetes ── */
 .statsGrid4 {
     grid-template-columns: repeat(4, 1fr);
 }

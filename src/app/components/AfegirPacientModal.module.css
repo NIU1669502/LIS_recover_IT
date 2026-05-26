@@ -1,5 +1,3 @@
-/* ── CSS original conservat íntegrament ── */
-
 .overlay {
     position: fixed;
     inset: 0;
@@ -173,8 +171,6 @@
     cursor: not-allowed;
 }
 
-/* ── Nous estils: indicador de passos ── */
-
 .stepIndicator {
     display: flex;
     align-items: center;
@@ -209,8 +205,6 @@
     border-radius: 2px;
 }
 
-/* ── Nous estils: textarea ── */
-
 .textarea {
     resize: vertical;
     min-height: 80px;
@@ -218,8 +212,6 @@
     line-height: 1.5;
     font-family: inherit;
 }
-
-/* ── Nous estils: pantalla del codi (pas 3) ── */
 
 .codiContainer {
     display: flex;

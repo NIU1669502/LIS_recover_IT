@@ -5,9 +5,6 @@ import { supabase } from '../../utils/supabase'
 import { completarSessio } from '../utils/lesions'
 import styles from './sessioExercici.module.css'
 
-// ============================================================
-// Modal de valoració del dolor (1-10)
-// ============================================================
 function ModalDolor({ titol, subtitol, onConfirmar, variant = 'blanc' }) {
     const [valor, setValor] = useState(null)
 
@@ -69,9 +66,6 @@ function ModalDolor({ titol, subtitol, onConfirmar, variant = 'blanc' }) {
     )
 }
 
-// ============================================================
-// Component principal: SessioExercici
-// ============================================================
 export default function SessioExercici({ exercicis = [], indexInicial = 0, fase = 1, onCompletarSessio, musculActual, idDiagnostic = null }) {
     const [index, setIndex] = useState(indexInicial)
     const [repActual, setRepActual] = useState(1)
@@ -84,7 +78,6 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
     const [mostrarPuntsFlash, setMostrarPuntsFlash] = useState(false)
     const [puntsFlash, setPuntsFlash] = useState(0)
 
-    // Dolor
     const [mostrarModalDolor, setMostrarModalDolor] = useState(false)
     const [mostrarModalDolorFinal, setMostrarModalDolorFinal] = useState(false)
     const [valoracionsExercici, setValoracionsExercici] = useState([])
@@ -95,7 +88,6 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
     const esUltimExercici = index === exercicis.length - 1
     const totalReps = exercici?.Repeticions
 
-    // Reset quan canvia d'exercici
     useEffect(() => {
         if (exercici) {
             setTempsRestant(exercici.duracio_segons)
@@ -106,7 +98,6 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
         return () => clearInterval(intervalRef.current)
     }, [index])
 
-    // Cronòmetre
     useEffect(() => {
         if (cronometreActiu && tempsRestant > 0) {
             intervalRef.current = setInterval(() => {
@@ -127,7 +118,6 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
         return () => clearInterval(intervalRef.current)
     }, [cronometreActiu])
 
-    // Carregar vídeos
     useEffect(() => {
         const carregarUrls = async () => {
             const ids = exercicis.map(e => e.id_exercici)
@@ -182,7 +172,6 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
         }
     }
 
-    // Guarda dolor a la BD i completa la sessió
     const handleDolorFinal = async (valor) => {
         setMostrarModalDolorFinal(false)
         const puntsGuanyats = exercicis.reduce((acc, ex) => acc + ((ex.punts || 0) * (ex.multiplicador ?? 1)), 0)
@@ -220,7 +209,6 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
         return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&showinfo=0&loop=1&playlist=${videoId}&enablejsapi=0`
     }
 
-    // ── Pantalla completada ─────────────────────────────────
     if (mostrarCompletada && resultCompletada) {
         const programaAcabat = resultCompletada.completada === true
         const faseAvançada = resultCompletada.faseAvançada === true

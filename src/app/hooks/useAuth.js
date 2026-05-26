@@ -11,7 +11,6 @@ export function useAuth(navegarA) {
     const [registreForm, setRegistreForm] = useState({ nom: '', dni: '', email: '', password: '' })
     const [loginForm, setLoginForm] = useState({ email: '', password: '' })
 
-    // ── Determina on navegar segons el tipus d'usuari ────────
     const navegarSegunsTipus = async (user, perfilData) => {
         const esFisio = perfilData?.es_fisioterapeuta === true
 
@@ -20,7 +19,6 @@ export function useAuth(navegarA) {
             return
         }
 
-        // Pacient: comprovar si té diagnòstic actiu
         const { data: diagnostic } = await supabase
             .from('diagnostic')
             .select('dni_pacient')
@@ -32,7 +30,6 @@ export function useAuth(navegarA) {
         navegarA(diagnostic ? 'inici' : 'test')
     }
 
-    // ── RF-AUTH-09 — Obtenir perfil ──────────────────────────
     const obtenirPerfil = async (userParam) => {
         const user = userParam || usuariSessio
         const dni = user?.user_metadata?.dni
@@ -52,7 +49,6 @@ export function useAuth(navegarA) {
             return null
         }
 
-        // Punts de recuperació: suma de tots els diagnòstics actius (no només un)
         const { data: diagnosticsActius } = await supabase
             .from('diagnostic')
             .select('punts_recuperacio, puntsFinals')
@@ -68,8 +64,6 @@ export function useAuth(navegarA) {
             0
         )
 
-        // ✅ Spread per evitar mutar l'objecte original
-        // ✅ ?? en lloc de || per no sobreescriure el valor 0
         const perfil = data ? {
             ...data,
             punts_recuperacio: puntsRecuperacioTotal,
@@ -80,7 +74,6 @@ export function useAuth(navegarA) {
         return perfil
     }
 
-    // ── RF-AUTH-05 — Mantenir sessió ─────────────────────────
     const comprovarSessio = async () => {
         const { data, error } = await supabase.auth.getSession()
         if (error) return
@@ -114,9 +107,7 @@ export function useAuth(navegarA) {
         }
     }, [])
 
-    // ── Realtime: refrescar el perfil quan canvia el diagnòstic de l'usuari ──
-    // Separat de l'efecte principal per garantir que el cleanup és síncron
-    // i evitar el error "cannot add callbacks after subscribe()".
+    // Canal de perfil apart per no petar el subscribe de Supabase
     useEffect(() => {
         const dni = usuariSessio?.user_metadata?.dni
         if (!dni) return
@@ -133,7 +124,6 @@ export function useAuth(navegarA) {
         }
     }, [usuariSessio?.user_metadata?.dni])
 
-    // ── RF-AUTH-01 — Registre ────────────────────────────────
     const registrarUsuari = async () => {
         const nom = registreForm.nom.trim()
         const dni = registreForm.dni.trim()
@@ -188,7 +178,6 @@ export function useAuth(navegarA) {
                     .eq('dni', user.user_metadata.dni)
                     .maybeSingle()
 
-                // Nou usuari sense diagnòstics actius encara
                 const perfil = perfilData ? { ...perfilData, punts_recuperacio: 0, puntsFinals: 0 } : null
 
                 navegarA('test', () => {
@@ -206,7 +195,6 @@ export function useAuth(navegarA) {
         }
     }
 
-    // ── RF-AUTH-02 — Inici de sessió ─────────────────────────
     const iniciarSessio = async () => {
         const email = loginForm.email.trim()
         const password = loginForm.password
@@ -224,7 +212,6 @@ export function useAuth(navegarA) {
 
             const user = data.user
 
-            // ✅ obtenirPerfil ja fa totes les consultes necessàries (punts inclosos)
             const perfil = await obtenirPerfil(user)
 
             const esFisio = perfil?.es_fisioterapeuta === true
@@ -235,7 +222,6 @@ export function useAuth(navegarA) {
                     showToast(`Benvingut/da, Dr./Dra. ${perfil?.nom || ''}`, 'success')
                 })
             } else {
-                // ✅ Consulta lleugera només per saber a quina vista anar
                 const { data: diagnostic } = await supabase
                     .from('diagnostic')
                     .select('id_diagnostic')
@@ -256,7 +242,6 @@ export function useAuth(navegarA) {
         }
     }
 
-    // ── RF-AUTH-03 — Tancar sessió ───────────────────────────
     const tancarSessio = async () => {
         await supabase.auth.signOut()
         const nomUsuari = perfilUsuari?.nom || ''
@@ -268,7 +253,6 @@ export function useAuth(navegarA) {
         })
     }
 
-    // ── RF-AUTH-10 — Editar perfil ───────────────────────────
     const editarPerfil = async (nomEditat) => {
         if (!perfilUsuari?.dni || !nomEditat?.trim()) return
 

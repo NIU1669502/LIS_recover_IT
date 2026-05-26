@@ -3,9 +3,6 @@ import { TEST_STEPS } from '../data/testSteps.js'
 import { showToast } from '../utils/toast'
 import { recuperarSessioPenalitzada } from '../utils/penalitzacio'
 
-// ============================================================
-// Determina el tipus de lesió a partir de les respostes del test
-// ============================================================
 export function determinarLesio(respostes) {
     const onset = respostes[1]
     const dolor = respostes[2]
@@ -21,9 +18,6 @@ export function determinarLesio(respostes) {
     return { tipus: 'Distensió', id_lesio: 2, emoji: '😖', temps: '2-4 setmanes', sessions: '8-10', fase: 'Fase 1 - Inicial' }
 }
 
-// ============================================================
-// Obté el diagnòstic actiu de l'usuari
-// ============================================================
 export async function getDiagnosticActiu(userDni) {
     const { data: diagnostic, error } = await supabase
         .from('diagnostic')
@@ -74,14 +68,12 @@ export async function getExercicisDelaFase(diagnostic) {
 
     if (faseError || !fase) return []
 
-    // Carregar tots els exercicis disponibles
     const { data: exercicis } = await supabase
         .from('exercicis')
         .select('*')
 
     const exMap = Object.fromEntries((exercicis || []).map(e => [e.id_exercici, e]))
 
-    // Carregar personalitzacions del fisio per aquest diagnòstic i fase
     const { data: personalitzacions } = await supabase
         .from('rutina_personalitzada_pacient')
         .select('*')
@@ -91,7 +83,6 @@ export async function getExercicisDelaFase(diagnostic) {
     const getPerso = (slot) =>
         (personalitzacions || []).find(p => p.slot_exercici === slot) || null
 
-    // Construir la llista aplicant overrides
     const slots = [
         { slot: 1, idBase: fase.exercici_1 },
         { slot: 2, idBase: fase.exercici_2 },
@@ -107,7 +98,6 @@ export async function getExercicisDelaFase(diagnostic) {
 
             return {
                 ...exFinal,
-                // Aplicar overrides camp a camp
                 duracio_segons: perso?.duracio_segons ?? exFinal.duracio_segons,
                 Repeticions: perso?.repeticions ?? exFinal.Repeticions,
                 punts: perso?.punts ?? exFinal.punts,
@@ -116,11 +106,6 @@ export async function getExercicisDelaFase(diagnostic) {
         })
 }
 
-// ============================================================
-// Avança la fase del diagnòstic i suma punts a l'usuari
-// dolorSessio: int (1-10) o null
-// dolorExercicis: [{index, nom, dolor}] o null
-// ============================================================
 export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = null, dolorSessio = null, dolorExercicis = null) {
     let diagnostic
     if (idDiagnostic != null) {
@@ -240,7 +225,6 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
         .update(actualitzacio)
         .eq('id_diagnostic', diagnostic.id_diagnostic)
 
-    // Registrem la sessió a l'historial amb les valoracions de dolor
     try {
         await supabase
             .from('historial_sessions')
@@ -257,7 +241,6 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
         console.error('No s\'ha pogut registrar la sessió a l\'historial', err)
     }
 
-    // Si hi havia una sessió penalitzada, la marquem com a recuperada
     try {
         await recuperarSessioPenalitzada(diagnostic.id_diagnostic)
     } catch (err) {
@@ -267,9 +250,6 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
     return { completada, novaFase: completada ? null : novaFase, faseAvançada, nSessionsRestants: nSessionsRequerides - nouNumSessions }
 }
 
-// ============================================================
-// RF-PAC-01 — Guarda o actualitza el diagnòstic a Supabase
-// ============================================================
 export async function processarTestDiagnostic(resultat, navegarA) {
     try {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
@@ -353,9 +333,6 @@ export async function processarTestDiagnostic(resultat, navegarA) {
     }
 }
 
-// ============================================================
-// Obté el resum global de sessions del diagnòstic
-// ============================================================
 export async function getResumSessions(diagnostic) {
     if (!diagnostic) return { fetes: 0, totals: 0 }
 
@@ -407,19 +384,12 @@ export async function getResumSessions(diagnostic) {
     return { fetes: diagnostic.num_sessions || 0, totals }
 }
 
-// ============================================================
-// Elimina (soft-delete) un diagnòstic
-// Manté les sessions fetes per l'historial però elimina
-// les penalitzacions i l'oculta de les vistes principals.
-// ============================================================
 export async function eliminarDiagnostic(idDiagnostic) {
-    // 1. Treure la penalització de totes les sessions d'aquest diagnòstic
     await supabase
         .from('historial_sessions')
         .update({ penalitzat: false })
         .eq('id_diagnostic', idDiagnostic)
 
-    // 2. Soft-delete del diagnòstic
     const { error } = await supabase
         .from('diagnostic')
         .update({ finalitzat: true, punts_recuperacio: -1 })

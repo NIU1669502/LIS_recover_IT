@@ -162,7 +162,6 @@ export default function LlistaPacients({ perfilUsuari }) {
         return coincideixCerca && coincideixFiltro(p, filtreActiu)
     })
 
-    // Comptar per cada filtre
     const comptadors = {}
     FILTRES.forEach(f => {
         comptadors[f.key] = f.key === 'tots' ? pacients.length : pacients.filter(p => coincideixFiltro(p, f.key)).length

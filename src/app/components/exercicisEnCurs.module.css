@@ -1,6 +1,4 @@
-/* ======================================
-   Premium Theme - Exercicis en curs
-   ====================================== */
+
 .container {
     max-width: 720px;
     margin: 0 auto;
@@ -391,7 +389,6 @@
     50% { opacity: 1; }
 }
 
-/* ── Banner de penalització per inactivitat ──────────────── */
 .penalitzacioBanner {
     display: flex;
     align-items: flex-start;

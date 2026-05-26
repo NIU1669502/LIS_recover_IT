@@ -12,7 +12,6 @@ export default function BibliotecaExercicis({ onTornar }) {
 
   useEffect(() => {
     const carregar = async () => {
-      // Exercicis amb els seus musculs via JOIN
       const { data: exData } = await supabase
         .from('exercicis')
         .select(`
@@ -22,7 +21,6 @@ export default function BibliotecaExercicis({ onTornar }) {
           )
         `)
 
-      // Musculs per als filtres
       const { data: musData } = await supabase
         .from('musculs')
         .select('id_cos, nom')
@@ -51,7 +49,7 @@ export default function BibliotecaExercicis({ onTornar }) {
         <p className={styles.filterLabel}>Filtrar per múscul</p>
 
         <div className={styles.filterButtons}>
-          {/* Botó "Tots" */}
+          
           <button
             onClick={() => setFiltreActiu('Tots')}
             className={`${styles.filterButton} ${filtreActiu === 'Tots' ? styles.activeFilter : ''}`}
@@ -59,7 +57,7 @@ export default function BibliotecaExercicis({ onTornar }) {
             Tots
           </button>
 
-          {/* Botons dinàmics de la DB */}
+          
           {musculs.map(m => (
             <button
               key={m.id_cos}

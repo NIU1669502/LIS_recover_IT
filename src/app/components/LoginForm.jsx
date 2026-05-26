@@ -4,9 +4,6 @@ import { useState } from 'react'
 import { supabase } from '../../utils/supabase'
 import styles from './loginForm.module.css'
 
-// ============================================================
-// Component: LoginForm — RF-AUTH-02, RF-AUTH-06
-// ============================================================
 
 export default function LoginForm({ loginForm, setLoginForm, onSubmit, errorAuth, carregantAuth }) {
     const [focusedField, setFocusedField] = useState(null)
@@ -32,7 +29,6 @@ export default function LoginForm({ loginForm, setLoginForm, onSubmit, errorAuth
         }
     }
 
-    // ── Pantalla de recuperar contrasenya ───────────────────
     if (mostrarRecuperar) {
         return (
             <div className={styles.wrapper}>
@@ -99,7 +95,6 @@ export default function LoginForm({ loginForm, setLoginForm, onSubmit, errorAuth
         )
     }
 
-    // ── Pantalla de login normal ────────────────────────────
     return (
         <div className={styles.wrapper}>
             <div className={`${styles.orb} ${styles.orb1}`} />

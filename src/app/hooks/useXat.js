@@ -11,9 +11,6 @@ function eliminarCanalPerNom(channelName) {
     }
 }
 
-// ============================================================
-// Hook: missatges d'una conversa + realtime
-// ============================================================
 export function useXat({ dniFisio, dniPacient, dniUsuari, actiu = true }) {
     const [missatges, setMissatges] = useState([])
     const [carregant, setCarregant] = useState(true)

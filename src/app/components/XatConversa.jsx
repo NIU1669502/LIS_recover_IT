@@ -16,9 +16,6 @@ function formatHora(iso) {
     }
 }
 
-// ============================================================
-// UI compartida: llista de missatges + input d'enviament
-// ============================================================
 export default function XatConversa({
     dniFisio,
     dniPacient,

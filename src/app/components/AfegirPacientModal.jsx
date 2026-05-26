@@ -6,12 +6,6 @@ import { vincularPacient, afegirDiagnosticAPacient } from '../utils/fisio'
 import { showToast } from '../utils/toast'
 import styles from './AfegirPacientModal.module.css'
 
-// ============================================================
-// Component: AfegirPacientModal — Flux de 3 passos:
-//   1. Selecció del diagnòstic (múscul, lesió, descripció)
-//   2. DNI del pacient + generar codi
-//   3. Mostrar el codi generat
-// ============================================================
 const lesions_per_muscul = {
                 1: [1, 2, 3],
                 2: [1, 2, 3],
@@ -22,10 +16,8 @@ const lesions_per_muscul = {
                 7: [2, 3],
             }
 export default function AfegirPacientModal({ dniFisio, infoPacientInicial, onTancar, onPacientAfegit }) {
-    // ── Pas actual del flux (1, 2 o 3) ──────────────────────
     const [pas, setPas] = useState(1)
 
-    // ── Pas 1: dades del diagnòstic ──────────────────────────
     const [musculs, setMusculs] = useState([])
     const [lesions, setLesions] = useState([])
     const [partCosSelec, setPartCosSelec] = useState('')
@@ -33,16 +25,13 @@ export default function AfegirPacientModal({ dniFisio, infoPacientInicial, onTan
     const [descripcio, setDescripcio] = useState('')
     const [dni, setDni] = useState('')  
 
-    // ── Pas 2: DNI del pacient ───────────────────────────────
 
     const [carregant, setCarregant] = useState(false)
     const [error, setError] = useState('')
 
-    // ── Pas 3: codi generat ──────────────────────────────────
     const [codiGenerat, setCodiGenerat] = useState('')
     const [nomPacient, setNomPacient] = useState('')
 
-    // ── Carregar músculs i lesions en muntar ─────────────────
     useEffect(() => {
         const carregarOpcions = async () => {
             const [{ data: musculsDB }, { data: lesionsDB }] = await Promise.all([
@@ -59,7 +48,6 @@ export default function AfegirPacientModal({ dniFisio, infoPacientInicial, onTan
     const lesionsFiltrades = partCosSelec
         ? lesions.filter(l => (lesions_per_muscul[partCosSelec] ?? []).includes(l.id_lesio))
         : []
-    // ── Validació i avanç del pas 1 al pas 2 ────────────────
     const handleSeguent = () => {
         if (!partCosSelec || !idLesioSelec) {
             setError('Selecciona el múscul i el tipus de lesió.')
@@ -73,7 +61,6 @@ export default function AfegirPacientModal({ dniFisio, infoPacientInicial, onTan
         }
     }
 
-    // ── Generar codi: vincular pacient a la BD ───────────────
    const handleGenerar = async () => {
     const dniAUtilitzar = infoPacientInicial?.dniPacient || dni
     if (!dniAUtilitzar.trim()) {
@@ -86,7 +73,6 @@ export default function AfegirPacientModal({ dniFisio, infoPacientInicial, onTan
         let resultat
 
         if (infoPacientInicial?.dniPacient) {
-            // Pacient ja vinculat → crear diagnòstic directament
             resultat = await afegirDiagnosticAPacient(
                 dniFisio,
                 infoPacientInicial.dniPacient,
@@ -102,7 +88,6 @@ export default function AfegirPacientModal({ dniFisio, infoPacientInicial, onTan
                 setError(resultat.missatge)
             }
         } else {
-            // Pacient nou → vincular i generar codi
             const { data: relacio } = await supabase
                 .from('relacio_fisio_pacient')
                 .select('dni_fisio')
@@ -141,12 +126,11 @@ export default function AfegirPacientModal({ dniFisio, infoPacientInicial, onTan
     }
 }
 
-    // ── Renderitzat ──────────────────────────────────────────
     return (
         <div className={styles.overlay} onClick={onTancar}>
             <div className={styles.modal} onClick={e => e.stopPropagation()}>
 
-                {/* ── Capçalera comuna ──────────────────────── */}
+                
                 <div className={styles.header}>
                     <h2 className={styles.title}>
                         {pas === 1 && 'Nou diagnòstic'}
@@ -158,7 +142,7 @@ export default function AfegirPacientModal({ dniFisio, infoPacientInicial, onTan
                     )}
                 </div>
 
-                {/* ── Indicador de pas ──────────────────────── */}
+                
                 {pas !== 3 && !infoPacientInicial?.dniPacient && (
                     <div className={styles.stepIndicator}>
                         <span className={`${styles.step} ${pas >= 1 ? styles.stepActive : ''}`}>1</span>
@@ -167,9 +151,7 @@ export default function AfegirPacientModal({ dniFisio, infoPacientInicial, onTan
                     </div>
                 )}
 
-                {/* ══════════════════════════════════════════
-                    PAS 1 — Selecció del diagnòstic
-                ══════════════════════════════════════════ */}
+                
                 {pas === 1 && (
                     <>
                         <p className={styles.desc}>
@@ -179,7 +161,7 @@ export default function AfegirPacientModal({ dniFisio, infoPacientInicial, onTan
                             }
                         </p>
 
-                        {/* Múscul */}
+                        
                         <div className={styles.inputGroup}>
                             <label className={styles.label}>Múscul afectat</label>
                             <select
@@ -194,7 +176,7 @@ export default function AfegirPacientModal({ dniFisio, infoPacientInicial, onTan
                             </select>
                         </div>
 
-                        {/* Tipus de lesió */}
+                        
                         <div className={styles.inputGroup}>
                             <label className={styles.label}>Tipus de lesió</label>
                             <select
@@ -209,7 +191,7 @@ export default function AfegirPacientModal({ dniFisio, infoPacientInicial, onTan
                             </select>
                         </div>
 
-                        {/* Descripció opcional */}
+                        
                         <div className={styles.inputGroup}>
                             <label className={styles.label}>Descripció (opcional)</label>
                             <textarea
@@ -234,9 +216,7 @@ export default function AfegirPacientModal({ dniFisio, infoPacientInicial, onTan
                     </>
                 )}
 
-                {/* ══════════════════════════════════════════
-                    PAS 2 — DNI del pacient
-                ══════════════════════════════════════════ */}
+                
                 {pas === 2 && (
                     <>
                         <p className={styles.desc}>
@@ -277,9 +257,7 @@ export default function AfegirPacientModal({ dniFisio, infoPacientInicial, onTan
                         </div>
                     </>
                 )}
-                {/* ══════════════════════════════════════════
-                    PAS 3 — Codi generat
-                ══════════════════════════════════════════ */}
+                
                 {pas === 3 && (
                     <div className={styles.codiContainer}>
                         <p className={styles.codiLabel}>

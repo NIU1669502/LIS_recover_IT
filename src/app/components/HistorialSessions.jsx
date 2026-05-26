@@ -3,11 +3,6 @@
 import styles from './historialSessions.module.css'
 import { useHistorial } from '../hooks/useHistorial'
 
-// ============================================================
-// Component: HistorialSessions
-// Mostra una entrada per cada sessió d'exercicis completada
-// indicant: data, fase i lesió associada.
-// ============================================================
 export default function HistorialSessions({ perfilUsuari, idDiagnosticFiltre = null, onClearFiltreHistorial }) {
     const dni = perfilUsuari?.dni
     const teFiltre = idDiagnosticFiltre != null && idDiagnosticFiltre !== ''

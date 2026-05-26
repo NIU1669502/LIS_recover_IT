@@ -5,7 +5,6 @@
   animation: fadeIn 0.4s ease-out;
 }
 
-/* ── Layout dues columnes ── */
 .layoutDuoColumnes {
   display: grid;
   grid-template-columns: 1fr 1fr;

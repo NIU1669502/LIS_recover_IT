@@ -1,4 +1,3 @@
--- Migration: add_penalitzacio_to_historial_sessions
 -- Afegeix la columna booleana `penalitzacio` a historial_sessions
 -- per marcar les sessions que han estat penalitzades per inactivitat (>72h).
 -- També afegeix una política UPDATE perquè el client pugui marcar/desmarcar

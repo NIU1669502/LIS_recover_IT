@@ -1,5 +1,3 @@
-/* ── Overlay i panel ────────────────────────────────────── */
-
 .overlay {
     position: fixed;
     inset: 0;
@@ -23,8 +21,6 @@
     display: flex;
     flex-direction: column;
 }
-
-/* ── Capçalera ──────────────────────────────────────────── */
 
 .header {
     display: flex;
@@ -90,16 +86,12 @@
     color: #333;
 }
 
-/* ── Contingut ──────────────────────────────────────────── */
-
 .cos {
     padding: 24px 28px 32px;
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
-
-/* ── Tabs de fase ───────────────────────────────────────── */
 
 .faseTabs {
     display: flex;
@@ -144,8 +136,6 @@
     opacity: 0.7;
 }
 
-/* ── Nota informativa ───────────────────────────────────── */
-
 .nota {
     display: flex;
     align-items: flex-start;
@@ -164,8 +154,6 @@
     font-size: 0.95rem;
     margin-top: 1px;
 }
-
-/* ── Slots ──────────────────────────────────────────────── */
 
 .slotsList {
     display: flex;
@@ -276,8 +264,6 @@
     font-style: italic;
 }
 
-/* ── Formulari d'edició ─────────────────────────────────── */
-
 .formEdicio {
     padding: 0 16px 16px;
     display: flex;
@@ -384,8 +370,6 @@ select.formInput {
     cursor: not-allowed;
 }
 
-/* ── Loading ────────────────────────────────────────────── */
-
 .carregant {
     display: flex;
     flex-direction: column;
@@ -412,8 +396,6 @@ select.formInput {
     }
 }
 
-/* ── Responsive ─────────────────────────────────────────── */
-
 @media (max-width: 640px) {
     .overlay {
         padding: 0;
@@ -438,8 +420,6 @@ select.formInput {
         padding: 20px 20px 16px;
     }
 }
-
-/* ── Afegir al final de EditarRutinaModal.module.css ── */
 
 .faseTabActual {
     position: relative;
@@ -556,8 +536,6 @@ select.formInput {
     background: #f1f5f9;
     color: #0f172a;
 }
-
-/* ── Afegir al final de EditarRutinaModal.module.css ── */
 
 .faseTabActual {
     position: relative;

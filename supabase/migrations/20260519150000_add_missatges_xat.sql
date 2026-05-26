@@ -1,5 +1,3 @@
--- Migration: missatges_xat — xat en directe pacient ↔ fisioterapeuta
--- Només té sentit quan existeix relacio_fisio_pacient confirmada (validat a l'app).
 
 create table if not exists public.missatges_xat (
     id_missatge   bigserial primary key,

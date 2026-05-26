@@ -3,9 +3,6 @@
 import XatConversa from './XatConversa'
 import styles from './xat.module.css'
 
-// ============================================================
-// Xat del pacient amb el seu fisioterapeuta assignat
-// ============================================================
 export default function XatPacient({ perfilUsuari, relacio, carregantRelacio }) {
     if (carregantRelacio) {
         return (
