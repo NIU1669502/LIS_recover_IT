@@ -1,6 +1,47 @@
 import { supabase } from '../../utils/supabase'
 import { showToast } from '../utils/toast'
 
+// ============================================================
+// Helper: calcula els umbrals de punts de les 3 fases
+// Retorna { u1, u2, u3 } o null si no es pot calcular
+// ============================================================
+async function calcularUmbrals(idLesio, partCos) {
+    const { data: rutina } = await supabase
+        .from('rutines_lesio')
+        .select('id_fase_1, id_fase_2, id_fase_3')
+        .eq('id_muscul', partCos)
+        .eq('id_lesio', idLesio)
+        .single()
+
+    if (!rutina) return null
+
+    const [{ data: fa1 }, { data: fa2 }, { data: fa3 }] = await Promise.all([
+        supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutina.id_fase_1).single(),
+        supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutina.id_fase_2).single(),
+        supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutina.id_fase_3).single(),
+    ])
+
+    const allIds = [...new Set([
+        fa1?.exercici_1, fa1?.exercici_2, fa1?.exercici_3,
+        fa2?.exercici_1, fa2?.exercici_2, fa2?.exercici_3,
+        fa3?.exercici_1, fa3?.exercici_2, fa3?.exercici_3,
+    ].filter(Boolean))]
+
+    const { data: exs } = await supabase.from('exercicis').select('id_exercici, punts').in('id_exercici', allIds)
+    const pp = Object.fromEntries((exs || []).map(e => [e.id_exercici, e.punts]))
+
+    const calcU = (fi) => {
+        if (!fi) return 0
+        return [fi.exercici_1, fi.exercici_2, fi.exercici_3].filter(Boolean)
+            .reduce((acc, id) => acc + (pp[id] ?? 0), 0) * (fi.multiplicador ?? 1) * (fi.n_sessions ?? 1)
+    }
+
+    return { u1: calcU(fa1), u2: calcU(fa2), u3: calcU(fa3) }
+}
+
+// ============================================================
+// Confirmar codi del fisioterapeuta i crear diagnòstic
+// ============================================================
 export async function confirmarCodiFisio(dniPacient, codiIntroduit) {
     const codiNet = codiIntroduit.trim().toUpperCase()
 
@@ -88,127 +129,30 @@ export async function confirmarCodiFisio(dniPacient, codiIntroduit) {
     return { ok: true }
 }
 
+// ============================================================
+// RF-FISIO-07 — Avançar fase manualment
+// Posa els punts exactament a l'umbral de la fase completada
+// ============================================================
 export async function avancarFasePacient(idDiagnostic) {
     const { data: diagnostic, error } = await supabase
         .from('diagnostic')
-        .select('fase_actual, finalitzat, num_sessions, punts_recuperacio, id_lesio, part_cos')
+        .select('fase_actual, finalitzat, id_lesio, part_cos')
         .eq('id_diagnostic', idDiagnostic)
         .maybeSingle()
 
     if (error || !diagnostic) return { ok: false, missatge: 'No s\'ha trobat el diagnòstic.' }
     if (diagnostic.finalitzat) return { ok: false, missatge: 'Aquest diagnòstic ja està finalitzat.' }
 
-    const { data: rutina } = await supabase
-        .from('rutines_lesio')
-        .select('id_fase_1, id_fase_2, id_fase_3')
-        .eq('id_muscul', diagnostic.part_cos)
-        .eq('id_lesio', diagnostic.id_lesio)
-        .single()
+    const umbrals = await calcularUmbrals(diagnostic.id_lesio, diagnostic.part_cos)
+    if (!umbrals) return { ok: false, missatge: 'No s\'ha pogut calcular els umbrals.' }
 
-    let puntsAAfegir = 0
+    const { u1, u2, u3 } = umbrals
 
-    if (rutina) {
-        const idFase = diagnostic.fase_actual === 1 ? rutina.id_fase_1
-            : diagnostic.fase_actual === 2 ? rutina.id_fase_2
-                : rutina.id_fase_3
-
-        const { data: faseInfo } = await supabase
-            .from('fases')
-            .select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions')
-            .eq('id_fase', idFase)
-            .single()
-
-        if (faseInfo) {
-            // Usem n_sessions_override si el fisio l'ha definit
-            let nSessionsFase = faseInfo.n_sessions ?? 0
-            const { data: persoOverride } = await supabase
-                .from('rutina_personalitzada_pacient')
-                .select('n_sessions_override')
-                .eq('id_diagnostic', idDiagnostic)
-                .eq('fase', diagnostic.fase_actual)
-                .not('n_sessions_override', 'is', null)
-                .limit(1)
-                .maybeSingle()
-            if (persoOverride?.n_sessions_override != null) {
-                nSessionsFase = persoOverride.n_sessions_override
-            }
-
-            const sessionsRestants = Math.max(0, nSessionsFase - (diagnostic.num_sessions ?? 0))
-
-            const { data: personalitzacions } = await supabase
-                .from('rutina_personalitzada_pacient')
-                .select('slot_exercici, id_exercici, punts, multiplicador')
-                .eq('id_diagnostic', idDiagnostic)
-                .eq('fase', diagnostic.fase_actual)
-
-            const persoMap = Object.fromEntries(
-                (personalitzacions || []).map(p => [p.slot_exercici, p])
-            )
-
-            const idsBase = [faseInfo.exercici_1, faseInfo.exercici_2, faseInfo.exercici_3].filter(Boolean)
-            const idsPersonalitzats = (personalitzacions || []).map(p => p.id_exercici).filter(Boolean)
-            const idsTotal = [...new Set([...idsBase, ...idsPersonalitzats])]
-
-            const { data: exercicisInfo } = await supabase
-                .from('exercicis')
-                .select('id_exercici, punts')
-                .in('id_exercici', idsTotal)
-
-            const puntsPer = Object.fromEntries((exercicisInfo || []).map(e => [e.id_exercici, e.punts]))
-
-            const slots = [
-                { slot: 1, id_exercici: faseInfo.exercici_1 },
-                { slot: 2, id_exercici: faseInfo.exercici_2 },
-                { slot: 3, id_exercici: faseInfo.exercici_3 },
-            ]
-
-            const puntsSessio = slots.reduce((acc, s) => {
-                const perso = persoMap[s.slot]
-                const punts = perso?.punts ?? puntsPer[s.id_exercici] ?? 0
-                const mult = perso?.multiplicador ?? faseInfo.multiplicador ?? 1
-                return acc + (punts * mult)
-            }, 0)
-
-            puntsAAfegir = puntsSessio * sessionsRestants
-        }
-    }
-
-    // 3. Avançar fase o completar
-    // Cap a l'umbral exacte de la fase completada (els punts en excés s'ignoren)
-    let nousPunts = (diagnostic.punts_recuperacio ?? 0) + puntsAAfegir
-    try {
-        const { data: rutinesAll } = await supabase
-            .from('rutines_lesio')
-            .select('id_fase_1, id_fase_2, id_fase_3')
-            .eq('id_muscul', diagnostic.part_cos)
-            .eq('id_lesio', diagnostic.id_lesio)
-            .single()
-        if (rutinesAll) {
-            const [{ data: fa1 }, { data: fa2 }, { data: fa3 }] = await Promise.all([
-                supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutinesAll.id_fase_1).single(),
-                supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutinesAll.id_fase_2).single(),
-                supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutinesAll.id_fase_3).single(),
-            ])
-            const allIds = [...new Set([
-                fa1?.exercici_1, fa1?.exercici_2, fa1?.exercici_3,
-                fa2?.exercici_1, fa2?.exercici_2, fa2?.exercici_3,
-                fa3?.exercici_1, fa3?.exercici_2, fa3?.exercici_3,
-            ].filter(Boolean))]
-            const { data: exs } = await supabase.from('exercicis').select('id_exercici, punts').in('id_exercici', allIds)
-            const pp = Object.fromEntries((exs || []).map(e => [e.id_exercici, e.punts]))
-            const calcU = (fi) => {
-                if (!fi) return 0
-                return [fi.exercici_1, fi.exercici_2, fi.exercici_3].filter(Boolean)
-                    .reduce((acc, id) => acc + (pp[id] ?? 0), 0) * (fi.multiplicador ?? 1) * (fi.n_sessions ?? 1)
-            }
-            const u1 = calcU(fa1), u2 = calcU(fa2), u3 = calcU(fa3)
-            if (diagnostic.fase_actual === 1) nousPunts = u1
-            else if (diagnostic.fase_actual === 2) nousPunts = u1 + u2
-            else nousPunts = u1 + u2 + u3
-        }
-    } catch (err) {
-        console.error('Error capant punts en avançar fase:', err)
-    }
+    // Punts exactes al final de la fase actual
+    let nousPunts
+    if (diagnostic.fase_actual === 1) nousPunts = u1
+    else if (diagnostic.fase_actual === 2) nousPunts = u1 + u2
+    else nousPunts = u1 + u2 + u3
 
     if (diagnostic.fase_actual >= 3) {
         await supabase
@@ -219,88 +163,42 @@ export async function avancarFasePacient(idDiagnostic) {
     }
 
     const novaFase = diagnostic.fase_actual + 1
-    await supabase
+    const { error: updateError } = await supabase
         .from('diagnostic')
         .update({ fase_actual: novaFase, num_sessions: 0, punts_recuperacio: nousPunts })
         .eq('id_diagnostic', idDiagnostic)
 
+    if (updateError) return { ok: false, missatge: updateError.message }
     return { ok: true, completada: false, novaFase }
 }
 
+// ============================================================
+// RF-FISIO-07 — Recular fase manualment
+// Posa els punts exactament a l'umbral d'inici de la fase anterior
+// ============================================================
 export async function recullarFasePacient(idDiagnostic) {
     const { data: diagnostic, error } = await supabase
         .from('diagnostic')
-        .select('fase_actual, finalitzat, num_sessions, punts_recuperacio, id_lesio, part_cos')
+        .select('fase_actual, finalitzat, id_lesio, part_cos')
         .eq('id_diagnostic', idDiagnostic)
         .maybeSingle()
 
     if (error || !diagnostic) return { ok: false, missatge: 'No s\'ha trobat el diagnòstic.' }
     if (diagnostic.fase_actual <= 1) return { ok: false, missatge: 'El pacient ja és a la Fase 1.' }
 
-    const { data: rutina } = await supabase
-        .from('rutines_lesio')
-        .select('id_fase_1, id_fase_2, id_fase_3')
-        .eq('id_muscul', diagnostic.part_cos)
-        .eq('id_lesio', diagnostic.id_lesio)
-        .single()
+    const umbrals = await calcularUmbrals(diagnostic.id_lesio, diagnostic.part_cos)
+    if (!umbrals) return { ok: false, missatge: 'No s\'ha pogut calcular els umbrals.' }
 
-    let puntsARestar = 0
+    const { u1 } = umbrals
 
-    if (rutina) {
-        const idFase = diagnostic.fase_actual === 1 ? rutina.id_fase_1
-            : diagnostic.fase_actual === 2 ? rutina.id_fase_2
-                : rutina.id_fase_3
-
-        const { data: faseInfo } = await supabase
-            .from('fases')
-            .select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions')
-            .eq('id_fase', idFase)
-            .single()
-
-        if (faseInfo) {
-            const sessionsFetes = diagnostic.num_sessions ?? 0
-
-            const { data: personalitzacions } = await supabase
-                .from('rutina_personalitzada_pacient')
-                .select('slot_exercici, id_exercici, punts, multiplicador')
-                .eq('id_diagnostic', idDiagnostic)
-                .eq('fase', diagnostic.fase_actual)
-
-            const persoMap = Object.fromEntries(
-                (personalitzacions || []).map(p => [p.slot_exercici, p])
-            )
-
-            const idsBase = [faseInfo.exercici_1, faseInfo.exercici_2, faseInfo.exercici_3].filter(Boolean)
-            const idsPersonalitzats = (personalitzacions || []).map(p => p.id_exercici).filter(Boolean)
-            const idsTotal = [...new Set([...idsBase, ...idsPersonalitzats])]
-
-            const { data: exercicisInfo } = await supabase
-                .from('exercicis')
-                .select('id_exercici, punts')
-                .in('id_exercici', idsTotal)
-
-            const puntsPer = Object.fromEntries((exercicisInfo || []).map(e => [e.id_exercici, e.punts]))
-
-            const slots = [
-                { slot: 1, id_exercici: faseInfo.exercici_1 },
-                { slot: 2, id_exercici: faseInfo.exercici_2 },
-                { slot: 3, id_exercici: faseInfo.exercici_3 },
-            ]
-
-            const puntsSessio = slots.reduce((acc, s) => {
-                const perso = persoMap[s.slot]
-                const punts = perso?.punts ?? puntsPer[s.id_exercici] ?? 0
-                const mult = perso?.multiplicador ?? faseInfo.multiplicador ?? 1
-                return acc + (punts * mult)
-            }, 0)
-
-            puntsARestar = puntsSessio * sessionsFetes
-        }
-    }
+    // Punts exactes a l'inici de la fase anterior
+    // Fase 2 → recular a fase 1 → punts = 0 (inici de fase 1)
+    // Fase 3 → recular a fase 2 → punts = u1 (inici de fase 2)
+    let nousPunts
+    if (diagnostic.fase_actual === 2) nousPunts = 0
+    else nousPunts = u1
 
     const faseAnterior = diagnostic.fase_actual - 1
-    const nousPunts = Math.max(0, (diagnostic.punts_recuperacio ?? 0) - puntsARestar)
-
     const { error: updateError } = await supabase
         .from('diagnostic')
         .update({ fase_actual: faseAnterior, num_sessions: 0, punts_recuperacio: nousPunts })
@@ -310,6 +208,9 @@ export async function recullarFasePacient(idDiagnostic) {
     return { ok: true, faseAnterior }
 }
 
+// ============================================================
+// Desassignar el fisioterapeuta d'un pacient
+// ============================================================
 export async function desassignarFisio(dniPacient) {
     console.log('Desassignar fisio:', dniPacient)
     const { data: relacio, error: errorRelacio } = await supabase
