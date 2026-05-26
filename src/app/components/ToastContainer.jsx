@@ -3,6 +3,15 @@
 import { useState, useEffect, useCallback } from 'react'
 import styles from './toastContainer.module.css'
 
+
+// Component: ToastContainer
+// Sistema de notificacions emergents (toasts) global:
+//   - Escolta l'event 'app-toast' del window
+//   - Mostra notificacions de tipus success, error, warning i info
+//   - Es tanquen automàticament als 5 segons o manualment
+//   - Animació d'entrada i sortida
+
+
 const ICONS = {
     success: '✅',
     error: '❌',

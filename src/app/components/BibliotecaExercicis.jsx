@@ -4,6 +4,14 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../utils/supabase'
 import styles from './bibliotecaExercicis.module.css'
 
+
+// Component: BibliotecaExercicis
+// Catàleg d'exercicis disponibles a la plataforma:
+//   - Filtre per múscul
+//   - Mostra nom, descripció i duració de cada exercici
+//   - Dades carregades des de Supabase amb relació exercici_muscul
+
+
 export default function BibliotecaExercicis({ onTornar }) {
   const [exercicis, setExercicis] = useState([])
   const [musculs, setMusculs] = useState([])
@@ -49,7 +57,7 @@ export default function BibliotecaExercicis({ onTornar }) {
         <p className={styles.filterLabel}>Filtrar per múscul</p>
 
         <div className={styles.filterButtons}>
-          
+
           <button
             onClick={() => setFiltreActiu('Tots')}
             className={`${styles.filterButton} ${filtreActiu === 'Tots' ? styles.activeFilter : ''}`}
@@ -57,7 +65,7 @@ export default function BibliotecaExercicis({ onTornar }) {
             Tots
           </button>
 
-          
+
           {musculs.map(m => (
             <button
               key={m.id_cos}

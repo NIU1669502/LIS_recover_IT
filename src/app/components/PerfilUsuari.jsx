@@ -7,6 +7,15 @@ import { showToast } from '../utils/toast'
 import { useTheme } from '../context/ThemeContext'
 import styles from './perfilUsuari.module.css'
 
+
+// Pantalla de perfil de l'usuari (pacient i fisioterapeuta):
+//   - Editar nom
+//   - Canviar contrasenya
+//   - Mostrar progrés de recuperació (només pacient)
+//   - Vincular/desassignar fisioterapeuta mitjançant codi (només pacient)
+//   - Toggle de tema clar/fosc
+
+
 export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
     const { tema, canviarTema } = useTheme()
     const [editant, setEditant] = useState(false)
@@ -164,7 +173,7 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
             {perfilUsuari && (
                 <div className={styles.card}>
 
-                    
+
                     <div className={styles.header}>
                         <div className={styles.avatar}>
                             {perfilUsuari.nom?.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()}
@@ -189,7 +198,7 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
                         </div>
                     </div>
 
-                    
+
                     <p className={styles.sectionTitle}>Informació personal</p>
 
                     <div className={styles.fieldRow}>
@@ -237,7 +246,7 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
                         <span className={styles.badge}>{esFisio ? 'Fisioterapeuta' : 'Pacient'}</span>
                     </div>
 
-                    
+
                     {!esFisio && (
                         <>
                             <div className={styles.sectionDivider} />
@@ -265,7 +274,7 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
                         </>
                     )}
 
-                    
+
                     {!esFisio && (
                         <>
                             <div className={styles.sectionDivider} />
@@ -339,7 +348,7 @@ export default function PerfilUsuari({ perfilUsuari, onEditarPerfil }) {
                         </>
                     )}
 
-                    
+
                     <div className={styles.sectionDivider} />
                     <p className={styles.sectionTitle}>Seguretat</p>
 

@@ -8,6 +8,16 @@ import AfegirPacientModal from './AfegirPacientModal'
 import DetallsPacientModal from './DetallsPacientModal'
 import styles from './LlistaPacients.module.css'
 
+// ============================================================
+// Component: LlistaPacients — RF-FISIO-02, RF-FISIO-03, RF-FISIO-04
+// Llistat complet de pacients del fisioterapeuta:
+//   - Filtres per fase (1, 2, 3), estat (completat, pendent, sense pla)
+//   - Buscador per nom o DNI
+//   - Targeta per pacient amb progrés, lesió i accions
+//   - Veure detalls, afegir diagnòstic, desvincular
+//   - Actualització en temps real via Supabase Realtime
+// ============================================================
+
 const FILTRES = [
     { key: 'tots', label: 'Tots' },
     { key: 'fase1', label: 'Fase 1' },

@@ -3,6 +3,15 @@
 import styles from './historialSessions.module.css'
 import { useHistorial } from '../hooks/useHistorial'
 
+
+// Component: HistorialSessions — RF-PAC-06
+// Taula amb l'historial de sessions completades del pacient:
+//   - Mostra data, hora, lesió, múscul, fase i punts de cada sessió
+//   - Indica visualment les sessions penalitzades per inactivitat
+//   - Suporta filtre per diagnòstic específic (des de HistorialDiagnostics)
+//   - Les dades es carreguen via el hook useHistorial
+
+
 export default function HistorialSessions({ perfilUsuari, idDiagnosticFiltre = null, onClearFiltreHistorial }) {
     const dni = perfilUsuari?.dni
     const teFiltre = idDiagnosticFiltre != null && idDiagnosticFiltre !== ''

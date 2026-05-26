@@ -5,6 +5,15 @@ import { TEST_STEPS } from '../data/testSteps.js'
 import { determinarLesio } from '../utils/lesions'
 import styles from './testDiagnostic.module.css'
 
+
+
+// Qüestionari de diagnòstic per determinar la lesió del pacient:
+//   - Flux de preguntes pas a pas
+//   - Comprova si existeix rutina disponible a la BD abans de mostrar el resultat
+//   - Mostra pantalla d'error si no hi ha rutina per la combinació múscul+lesió
+//   - En confirmar, crida onGuardar amb el resultat per crear el diagnòstic
+
+
 export default function TestDiagnostic({ onGuardar, onCancel }) {
     const [pas, setPas] = useState(0)
     const [respostes, setRespostes] = useState({})

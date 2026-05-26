@@ -1,6 +1,17 @@
 import { supabase } from '../../utils/supabase'
 import { showToast } from '../utils/toast'
 
+// Utils: Gestió de pacients pel fisioterapeuta
+// Conté la lògica de relació fisio-pacient i rutines:
+//   - getPacientsDeFisio: obté tots els pacients vinculats amb diagnòstics
+//   - getProgresTotal: calcula el progrés global d'un pacient (0-100%)
+//   - vincularPacient: crea una vinculació fisio-pacient amb codi de validació
+//   - getEstadistiquesFisio: retorna resum d'activitat del panell del fisio
+//   - afegirDiagnosticAPacient: crea un diagnòstic directe sense codi
+//   - getRutinaAmbPersonalitzacio: obté la rutina base + overrides del fisio
+//   - guardarPersonalitzacio: desa canvis d'un slot i recalcula n_sessions_override
+
+
 function generarCodiValidacio(longitud = 8) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
     let resultat = ''

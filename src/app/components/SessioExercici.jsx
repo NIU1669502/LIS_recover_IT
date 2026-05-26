@@ -5,6 +5,14 @@ import { supabase } from '../../utils/supabase'
 import { completarSessio } from '../utils/lesions'
 import styles from './sessioExercici.module.css'
 
+
+// Component: SessioExercici
+// Gestiona el flux d'una sessió d'exercicis:
+//   - Cronòmetre decreixent per cada exercici
+//   - Reproducció de vídeo demostratiu
+//   - Modal de valoració del dolor per exercici i per sessió
+//   - Pantalla de sessió completada amb punts guanyats
+
 function ModalDolor({ titol, subtitol, onConfirmar, variant = 'blanc' }) {
     const [valor, setValor] = useState(null)
 

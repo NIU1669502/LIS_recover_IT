@@ -3,6 +3,16 @@
 import { useState } from 'react'
 import styles from './graficaRecuperacio.module.css'
 
+
+// Component: GraficaRecuperacio
+// Gràfica SVG interactiva que mostra l'evolució dels punts
+// acumulats al llarg de les sessions de recuperació:
+//   - Línia de progrés acumulat per sessió
+//   - Línia objectiu (puntsFinals)
+//   - Tooltip interactiu en passar el ratolí
+//   - Percentatge de completat
+
+
 const PAD = { top: 24, right: 24, bottom: 48, left: 52 }
 const W = 520
 const H = 260
@@ -120,7 +130,7 @@ export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0, pun
                             </linearGradient>
                         </defs>
 
-                        
+
                         {yTicks.map((t, i) => (
                             <g key={i}>
                                 <line
@@ -139,7 +149,7 @@ export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0, pun
                             </g>
                         ))}
 
-                        
+
                         <line
                             x1={PAD.left} y1={PAD.top}
                             x2={W - PAD.right} y2={PAD.top}
@@ -153,12 +163,12 @@ export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0, pun
                             Meta
                         </text>
 
-                        
+
                         {areaPath && (
                             <path d={areaPath} fill="url(#areaGrad)" />
                         )}
 
-                        
+
                         <path
                             d={linePath}
                             fill="none"
@@ -168,7 +178,7 @@ export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0, pun
                             strokeLinejoin="round"
                         />
 
-                        
+
                         {xTicks.map((t, i) => (
                             <text
                                 key={i}
@@ -180,7 +190,7 @@ export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0, pun
                             </text>
                         ))}
 
-                        
+
                         {puntsAcumulats.map((p, i) => {
                             const x = xPos(i)
                             const y = yPos(p.punts)
@@ -201,7 +211,7 @@ export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0, pun
                             )
                         })}
 
-                        
+
                         {tooltip && (() => {
                             const tx = Math.min(tooltip.x, W - 110)
                             const ty = Math.max(tooltip.y - 52, PAD.top)
@@ -227,7 +237,7 @@ export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0, pun
                 </div>
             )}
 
-            
+
             <div className={styles.llegenda}>
                 <div className={styles.llegendaItem}>
                     <span className={styles.llegendaLiniaBlava} />

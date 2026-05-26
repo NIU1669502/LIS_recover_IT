@@ -7,6 +7,17 @@ import GraficaRecuperacio from './GraficaRecuperacio'
 import styles from './detallsPacientModal.module.css'
 import EditarRutinaModal from './EditarRutinaModal'
 
+
+// Component: DetallsPacientModal
+// Modal que mostra la fitxa completa d'un pacient al fisioterapeuta:
+//   - Informació personal
+//   - Diagnòstics pendents de confirmació
+//   - Diagnòstics actius amb progrés i botó d'editar rutina
+//   - Historial de sessions amb valoracions de dolor expandibles
+//   - Historial de lesions
+//   - Gràfica d'evolució de la recuperació
+
+
 function dolorColor(valor) {
     if (valor == null) return '#94a3b8'
     if (valor <= 3) return '#22c55e'
@@ -46,7 +57,7 @@ function FilaSessio({ sessio }) {
                 <div className={styles.sessioLesio}>{sessio.diagnostic?.musculs?.nom || '—'}</div>
                 <div className={styles.sessioPunts}>+{sessio.punts_obtinguts ?? 0} pts</div>
 
-                
+
                 {sessio.dolor_sessio != null ? (
                     <div
                         className={styles.dolorBadge}
@@ -228,7 +239,7 @@ export default function DetallsPacientModal({ dniPacient, nomPacient, dniFisio, 
                 ) : (
                     <div className={styles.cos}>
 
-                        
+
                         <section className={styles.seccio}>
                             <p className={styles.seccioTitol}><span className={styles.seccioIcon}>👤</span>Informació personal</p>
                             <div className={styles.infoGrid}>
@@ -245,7 +256,7 @@ export default function DetallsPacientModal({ dniPacient, nomPacient, dniFisio, 
 
                         <div className={styles.divider} />
 
-                        
+
                         {dades?.diagnosticsPendents?.length > 0 && (
                             <>
                                 <section className={styles.seccio}>
@@ -273,7 +284,7 @@ export default function DetallsPacientModal({ dniPacient, nomPacient, dniFisio, 
                             </>
                         )}
 
-                        
+
                         <section className={styles.seccio}>
                             <p className={styles.seccioTitol}><span className={styles.seccioIcon}>🩺</span>Diagnòstics actius<span className={styles.comptador}>{dades?.diagnosticsActius?.length ?? 0}</span></p>
                             {dades?.diagnosticsActius?.length > 0 ? (
@@ -317,7 +328,7 @@ export default function DetallsPacientModal({ dniPacient, nomPacient, dniFisio, 
 
                         <div className={styles.divider} />
 
-                        
+
                         <section className={styles.seccio}>
                             <p className={styles.seccioTitol}>
                                 <span className={styles.seccioIcon}>📋</span>
@@ -339,7 +350,7 @@ export default function DetallsPacientModal({ dniPacient, nomPacient, dniFisio, 
 
                         <div className={styles.divider} />
 
-                        
+
                         <section className={styles.seccio}>
                             <p className={styles.seccioTitol}><span className={styles.seccioIcon}>🦴</span>Historial de lesions<span className={styles.comptador}>{dades?.historialLesions?.length ?? 0}</span></p>
                             {dades?.historialLesions?.length > 0 ? (
@@ -364,7 +375,7 @@ export default function DetallsPacientModal({ dniPacient, nomPacient, dniFisio, 
 
                         <div className={styles.divider} />
 
-                        
+
                         <section className={styles.seccio}>
                             <p className={styles.seccioTitol}><span className={styles.seccioIcon}>📈</span>Gràfica de recuperació</p>
                             <GraficaRecuperacio sessions={dades?.sessionsGraficaAsc || []} puntsFinals={dades?.puntsFinalsTotals ?? 0} />

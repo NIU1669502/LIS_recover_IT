@@ -6,6 +6,15 @@ import { getDiagnosticsActius, getExercicisDelaFase, getResumSessions } from '..
 import { comprovarIAplicarPenalitzacio } from '../utils/penalitzacio'
 import styles from './exercicisEnCurs.module.css'
 
+
+// Component: ExercicisEnCurs
+// Mostra els exercicis actius del pacient:
+//   - Suport per múltiples diagnòstics actius simultanis
+//   - Informació de fase, progrés i sessions
+//   - Gestió de penalitzacions per inactivitat
+//   - Inicia la sessió d'exercicis passant les dades a SessioExercici
+
+
 const storageKeyDiagnostic = (dni) => `recoverit_exercicis_diagnostic_${dni}`
 
 function deriveSelectedId(list, currentId, userDni) {
@@ -22,7 +31,7 @@ function deriveSelectedId(list, currentId, userDni) {
     return list[0]?.id_diagnostic ?? null
 }
 
-export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsuari,idDiagnosticInicial }) {
+export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsuari, idDiagnosticInicial }) {
     const [diagnosticsOpcions, setDiagnosticsOpcions] = useState([])
     const [idDiagnosticSeleccionat, setIdDiagnosticSeleccionat] = useState(null)
     const [diagnostic, setDiagnostic] = useState(null)

@@ -4,6 +4,18 @@ import { showToast } from '../utils/toast'
 import { recuperarSessioPenalitzada } from '../utils/penalitzacio'
 import { completarObjectiu } from '../utils/objectius'
 
+
+// Utils: Lesions i Sessions
+// Conté la lògica principal de diagnòstic i recuperació:
+//   - determinarLesio: determina el tipus de lesió a partir del test
+//   - getDiagnosticActiu / getDiagnosticsActius: obté els diagnòstics actius del pacient
+//   - getExercicisDelaFase: obté els exercicis de la fase actual (amb personalitzacions del fisio)
+//   - completarSessio: registra una sessió completada, actualitza punts i fase
+//   - processarTestDiagnostic: guarda el resultat del test i crea el diagnòstic
+//   - getResumSessions: retorna les sessions fetes i requerides de la fase actual
+//   - eliminarDiagnostic: soft-delete d'un diagnòstic
+
+
 export function determinarLesio(respostes) {
     const onset = respostes[1]
     const dolor = respostes[2]

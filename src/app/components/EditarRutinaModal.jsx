@@ -8,6 +8,15 @@ import { avancarFasePacient, recullarFasePacient } from '../utils/diagFisio'
 import { showToast } from '../utils/toast'
 import styles from './EditarRutinaModal.module.css'
 
+
+// Component: EditarRutinaModal
+// Modal per al fisioterapeuta per gestionar la rutina d'un pacient:
+//   - Visualitza els 3 slots d'exercicis per fase
+//   - Permet editar exercici, duració, repeticions, punts i multiplicador
+//   - Permet avançar o recular la fase del pacient manualment
+//   - Els canvis s'apliquen només a aquest pacient via rutina_personalitzada_pacient
+
+
 export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic, idLesio, partCos, dniFisio, onTancar }) {
     const [rutina, setRutina] = useState(null)
     const [carregant, setCarregant] = useState(true)
@@ -36,14 +45,14 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
             const diagVal = diag || {}
             let umbralFase1 = 0
             let umbralFase2 = 0
-            
+
             if (rutinaData) {
                 // Calcular umbral fase 1
-                const p1 = [rutinaData.fase1?.[0]?.punts_base, rutinaData.fase1?.[1]?.punts_base, rutinaData.fase1?.[2]?.punts_base].reduce((a,b)=>a+(b||0),0)
+                const p1 = [rutinaData.fase1?.[0]?.punts_base, rutinaData.fase1?.[1]?.punts_base, rutinaData.fase1?.[2]?.punts_base].reduce((a, b) => a + (b || 0), 0)
                 umbralFase1 = p1 * (rutinaData.fase1?.[0]?.multiplicador_base || 1) * (rutinaData.nSessions[1] || 1)
-                
+
                 // Calcular umbral fase 2
-                const p2 = [rutinaData.fase2?.[0]?.punts_base, rutinaData.fase2?.[1]?.punts_base, rutinaData.fase2?.[2]?.punts_base].reduce((a,b)=>a+(b||0),0)
+                const p2 = [rutinaData.fase2?.[0]?.punts_base, rutinaData.fase2?.[1]?.punts_base, rutinaData.fase2?.[2]?.punts_base].reduce((a, b) => a + (b || 0), 0)
                 umbralFase2 = p2 * (rutinaData.fase2?.[0]?.multiplicador_base || 1) * (rutinaData.nSessions[2] || 1)
             }
 
@@ -58,7 +67,7 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
             } else if (diagVal.fase_actual === 3) {
                 ptsFetsFaseActual = Math.max(0, puntsTotalsUsuari - umbralFase1 - umbralFase2)
             }
-            
+
             const rutinaAmbProgres = {
                 ...rutinaData,
                 ptsFetsFaseActual,
@@ -163,7 +172,7 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
         <div className={styles.overlay} onClick={() => { if (!editant) onTancar() }}>
             <div className={styles.panel} onClick={e => e.stopPropagation()}>
 
-                
+
                 <div className={styles.header}>
                     <div className={styles.headerLeft}>
                         <div className={styles.avatar}>{nomPacient?.charAt(0).toUpperCase() || '?'}</div>
@@ -182,7 +191,7 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
                 ) : (
                     <div className={styles.cos}>
 
-                        
+
                         <div className={styles.faseTabs}>
                             {[1, 2, 3].map(f => (
                                 <button
@@ -202,7 +211,7 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
                             ))}
                         </div>
 
-                        
+
                         {faseActualDiag != null && (
                             <div className={styles.avancarFaseBox}>
                                 <div className={styles.avancarFaseInfo}>
@@ -215,7 +224,7 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
                                 </div>
 
                                 <div className={styles.faseAccions}>
-                                    
+
                                     {faseActualDiag > 1 && !avancat && (
                                         !reculat ? (
                                             <button className={styles.recullarBtn} onClick={handleRecullarFase}>
@@ -236,7 +245,7 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
                                         )
                                     )}
 
-                                    
+
                                     {faseActualDiag <= 3 && !reculat && (
                                         !avancat ? (
                                             <button className={styles.avancarBtn} onClick={handleAvancarFase}>
@@ -260,13 +269,13 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
                             </div>
                         )}
 
-                        
+
                         <div className={styles.nota}>
                             <span className={styles.notaIcon}>ℹ️</span>
                             Els canvis s'apliquen <strong>només a aquest pacient</strong>. La resta de pacients mantindran la rutina original.
                         </div>
 
-                        
+
                         <div className={styles.slotsList}>
                             {slotsActuals.map((slot) => {
                                 const estaEditant = editant?.fase === slot.fase && editant?.slot === slot.slot
@@ -339,12 +348,12 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
                                                                 ptsFetsEnAquestaFase = rutina.ptsFetsFaseActual || 0
                                                                 sessionsFetes = rutina.sessionsFetesFaseActual || 0
                                                             }
-                                                        console.log("faseActualDiag", faseActualDiag)
-                                                        console.log("sessionsFetes", sessionsFetes)
-                                                        console.log("faseActiva", faseActiva)
+                                                            console.log("faseActualDiag", faseActualDiag)
+                                                            console.log("sessionsFetes", sessionsFetes)
+                                                            console.log("faseActiva", faseActiva)
                                                             const puntsRestantsFase = Math.max(0, umbralFase - ptsFetsEnAquestaFase)
                                                             const novasSessions = Math.ceil(puntsRestantsFase / ptsPorSessio)
-                                                            
+
 
                                                             const diff = nSessionsOriginal - (novasSessions + sessionsFetes)
                                                             return (

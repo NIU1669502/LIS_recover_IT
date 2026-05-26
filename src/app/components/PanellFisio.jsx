@@ -6,6 +6,14 @@ import { getEstadistiquesFisio, getProgresTotal } from '../utils/fisio'
 import AfegirPacientModal from './AfegirPacientModal'
 import styles from './PanellFisio.module.css'
 
+
+// Panell principal del fisioterapeuta:
+//   - Targetes d'estadístiques (actius, en recuperació, finalitzats, pendents)
+//   - Llistat dels 5 pacients més recents amb progrés
+//   - Accés ràpid a afegir un nou pacient
+//   - Actualització en temps real via Supabase Realtime
+
+
 function TarjetaEstat({ icon, valor, label, color }) {
     return (
         <div className={styles.statCard}>
@@ -117,7 +125,7 @@ export default function PanellFisio({ perfilUsuari, onNavegar }) {
                 </div>
             ) : (
                 <>
-                    
+
                     <div className={`${styles.statsGrid} ${styles.statsGrid4}`}>
                         <TarjetaEstat
                             icon="👥"
@@ -137,7 +145,7 @@ export default function PanellFisio({ perfilUsuari, onNavegar }) {
                             label="Pacients finalitzats"
                             color="#16a34a"
                         />
-                        
+
                         <TarjetaEstat
                             icon="⏳"
                             valor={estadistiques?.pendents ?? 0}

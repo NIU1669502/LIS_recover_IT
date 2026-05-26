@@ -6,6 +6,15 @@ import { getDiagnosticsActius } from '../utils/lesions'
 import GraficaRecuperacio from './GraficaRecuperacio'
 import styles from './historialDiagnostics.module.css'
 
+
+// Pantalla de progrés i historial del pacient:
+//   - Llistat de lesions actives amb progrés, fase i accions
+//   - Historial de lesions curades
+//   - Gràfica d'evolució de la recuperació combinada
+//   - Permet navegar a exercicis en curs o veure historial de sessions
+//   - Actualització en temps real via Supabase Realtime
+
+
 export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureHistorialSessions, onPreseleccionarDiagnostic, onEsborrarDiagnostic, refreshNonce }) {
     const [actives, setActives] = useState([])
     const [finalitzades, setFinalitzades] = useState([])
@@ -16,7 +25,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
     const [esborrantId, setEsborrantId] = useState(null)
 
     const canalRef = useRef(null)
-    
+
     useEffect(() => {
         const carregarDades = async () => {
             if (!perfilUsuari?.dni) {
@@ -102,10 +111,10 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
 
             <div className={styles.layoutDuoColumnes}>
 
-                
+
                 <div className={styles.columnaEsquerra}>
 
-                    
+
                     <div className={styles.section}>
                         <h2 className={styles.sectionTitle}>🔄 Lesions Actives</h2>
 
@@ -158,8 +167,10 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
 
                                             <button
                                                 className={styles.actionButton}
-                                                onClick={() => {onPreseleccionarDiagnostic(diag.id_diagnostic)
-                                                    onNavegar('exercicis-en-curs')}
+                                                onClick={() => {
+                                                    onPreseleccionarDiagnostic(diag.id_diagnostic)
+                                                    onNavegar('exercicis-en-curs')
+                                                }
                                                 }
                                             >
                                                 Continuar exercicis
@@ -192,7 +203,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
                         )}
                     </div>
 
-                    
+
                     <div className={styles.section}>
                         <h2 className={styles.sectionTitle}>✅ Historial de Lesions Curades</h2>
 
@@ -243,7 +254,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
 
                 </div>
 
-                
+
                 <div className={styles.columnaDreta}>
                     <h2 className={styles.sectionTitle}>📈 Evolució de la recuperació</h2>
 

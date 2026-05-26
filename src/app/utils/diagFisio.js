@@ -1,10 +1,13 @@
 import { supabase } from '../../utils/supabase'
 import { showToast } from '../utils/toast'
 
-// ============================================================
-// Helper: calcula els umbrals de punts de les 3 fases
-// Retorna { u1, u2, u3 } o null si no es pot calcular
-// ============================================================
+// Utils: Gestió de fase pel fisioterapeuta
+// Conté les funcions que el fisioterapeuta pot executar manualment:
+//   - confirmarCodiFisio: confirma la vinculació pacient-fisio i crea el diagnòstic
+//   - avancarFasePacient: avança manualment la fase d'un pacient i ajusta els punts
+//   - recullarFasePacient: recula manualment la fase d'un pacient i ajusta els punts
+//   - desassignarFisio: elimina la vinculació entre fisio i pacient
+
 async function calcularUmbrals(idLesio, partCos) {
     const { data: rutina } = await supabase
         .from('rutines_lesio')
@@ -39,9 +42,6 @@ async function calcularUmbrals(idLesio, partCos) {
     return { u1: calcU(fa1), u2: calcU(fa2), u3: calcU(fa3) }
 }
 
-// ============================================================
-// Confirmar codi del fisioterapeuta i crear diagnòstic
-// ============================================================
 export async function confirmarCodiFisio(dniPacient, codiIntroduit) {
     const codiNet = codiIntroduit.trim().toUpperCase()
 
@@ -129,10 +129,6 @@ export async function confirmarCodiFisio(dniPacient, codiIntroduit) {
     return { ok: true }
 }
 
-// ============================================================
-// RF-FISIO-07 — Avançar fase manualment
-// Posa els punts exactament a l'umbral de la fase completada
-// ============================================================
 export async function avancarFasePacient(idDiagnostic) {
     const { data: diagnostic, error } = await supabase
         .from('diagnostic')
@@ -148,7 +144,7 @@ export async function avancarFasePacient(idDiagnostic) {
 
     const { u1, u2, u3 } = umbrals
 
-    // Punts exactes al final de la fase actual
+
     let nousPunts
     if (diagnostic.fase_actual === 1) nousPunts = u1
     else if (diagnostic.fase_actual === 2) nousPunts = u1 + u2
@@ -172,10 +168,7 @@ export async function avancarFasePacient(idDiagnostic) {
     return { ok: true, completada: false, novaFase }
 }
 
-// ============================================================
-// RF-FISIO-07 — Recular fase manualment
-// Posa els punts exactament a l'umbral d'inici de la fase anterior
-// ============================================================
+
 export async function recullarFasePacient(idDiagnostic) {
     const { data: diagnostic, error } = await supabase
         .from('diagnostic')
@@ -191,9 +184,6 @@ export async function recullarFasePacient(idDiagnostic) {
 
     const { u1 } = umbrals
 
-    // Punts exactes a l'inici de la fase anterior
-    // Fase 2 → recular a fase 1 → punts = 0 (inici de fase 1)
-    // Fase 3 → recular a fase 2 → punts = u1 (inici de fase 2)
     let nousPunts
     if (diagnostic.fase_actual === 2) nousPunts = 0
     else nousPunts = u1
@@ -208,9 +198,6 @@ export async function recullarFasePacient(idDiagnostic) {
     return { ok: true, faseAnterior }
 }
 
-// ============================================================
-// Desassignar el fisioterapeuta d'un pacient
-// ============================================================
 export async function desassignarFisio(dniPacient) {
     console.log('Desassignar fisio:', dniPacient)
     const { data: relacio, error: errorRelacio } = await supabase
