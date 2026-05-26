@@ -236,8 +236,15 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
                     </>
                 )}
                 <div className={styles.puntsBadge}>
-                    +{resultCompletada.puntsGuanyats ?? 0} punts guanyats
+                    +{resultCompletada.puntsRealsGuardats ?? resultCompletada.puntsGuanyats ?? 0} punts guanyats
                 </div>
+                {resultCompletada.puntsRealsGuardats != null &&
+                    resultCompletada.puntsGuanyats != null &&
+                    resultCompletada.puntsRealsGuardats < resultCompletada.puntsGuanyats && (
+                        <p className={styles.puntsCappedText}>
+                            Has aconseguit {resultCompletada.puntsGuanyats} punts, però només s&apos;han guardat {resultCompletada.puntsRealsGuardats} per no superar l&apos;objectiu.
+                        </p>
+                    )}
                 <button type="button" className={styles.primaryButton} onClick={onCompletarSessio}>
                     Tornar a exercicis en curs
                 </button>

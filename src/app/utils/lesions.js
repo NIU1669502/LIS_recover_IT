@@ -45,7 +45,7 @@ export async function getDiagnosticsActius(userDni) {
 }
 
 export async function getExercicisDelaFase(diagnostic) {
-    const { part_cos, id_lesio, fase_actual, id_diagnostic, dni_pacient } = diagnostic
+    const { part_cos, id_lesio, fase_actual, id_diagnostic } = diagnostic
 
     const { data: rutina, error: rutinaError } = await supabase
         .from('rutines_lesio')
@@ -58,7 +58,7 @@ export async function getExercicisDelaFase(diagnostic) {
 
     const idFase = fase_actual === 1 ? rutina.id_fase_1
         : fase_actual === 2 ? rutina.id_fase_2
-        : rutina.id_fase_3
+            : rutina.id_fase_3
 
     const { data: fase, error: faseError } = await supabase
         .from('fases')
@@ -123,6 +123,8 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
     }
     if (!diagnostic) return { completada: false }
 
+    const puntsAbans = diagnostic.punts_recuperacio || 0
+
     const { data: rutina } = await supabase
         .from('rutines_lesio')
         .select('id_fase_1, id_fase_2, id_fase_3')
@@ -144,7 +146,6 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
             .single()
         if (faseInfo?.n_sessions) nSessionsRequerides = faseInfo.n_sessions
 
-        // Comprovar si el fisio ha definit un n_sessions_override per a aquest pacient i fase
         const { data: persoOverride } = await supabase
             .from('rutina_personalitzada_pacient')
             .select('n_sessions_override')
@@ -177,8 +178,9 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
         }
     }
 
-    // Calcular punts: si la fase avança o es completa, cap a l'umbral exacte (els punts en excés s'ignoren)
-    let nousPuntsRecuperacio = (diagnostic.punts_recuperacio || 0) + puntsGuanyats
+    // Calcular punts finals — si avança/completa fase, cap a l'umbral exacte
+    let nousPuntsRecuperacio = puntsAbans + puntsGuanyats
+    let umbralFase = null
 
     if ((faseAvançada || completada) && rutina) {
         try {
@@ -194,25 +196,31 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
             ].filter(Boolean))]
             const { data: exs } = await supabase.from('exercicis').select('id_exercici, punts').in('id_exercici', allIds)
             const puntsPer = Object.fromEntries((exs || []).map(e => [e.id_exercici, e.punts]))
-            const calcUmbral = (fi) => {
+            const calcU = (fi) => {
                 if (!fi) return 0
                 return [fi.exercici_1, fi.exercici_2, fi.exercici_3].filter(Boolean)
                     .reduce((acc, id) => acc + (puntsPer[id] ?? 0), 0) * (fi.multiplicador ?? 1) * (fi.n_sessions ?? 1)
             }
-            const u1 = calcUmbral(f1), u2 = calcUmbral(f2), u3 = calcUmbral(f3)
-            // Punts exactes acumulats fins al final de la fase completada (sense excés)
-            if (diagnostic.fase_actual === 1) nousPuntsRecuperacio = u1
-            else if (diagnostic.fase_actual === 2) nousPuntsRecuperacio = u1 + u2
-            else nousPuntsRecuperacio = u1 + u2 + u3
+            const u1 = calcU(f1), u2 = calcU(f2), u3 = calcU(f3)
+            if (diagnostic.fase_actual === 1) umbralFase = u1
+            else if (diagnostic.fase_actual === 2) umbralFase = u1 + u2
+            else umbralFase = u1 + u2 + u3
+
+            nousPuntsRecuperacio = umbralFase
         } catch (err) {
             console.error('Error capant punts de fase:', err)
         }
     }
 
+    // Punts reals guardats a l'historial (mai més del necessari per acabar la fase)
+    const puntsRealsGuardats = umbralFase != null
+        ? Math.min(puntsGuanyats, umbralFase - puntsAbans)
+        : puntsGuanyats
+
     const actualitzacio = {
         fase_actual: novaFase,
         num_sessions: nouNumSessions,
-        punts_recuperacio: nousPuntsRecuperacio
+        punts_recuperacio: diagnostic.puntsFinals != null ? Math.min(nousPuntsRecuperacio, diagnostic.puntsFinals) : nousPuntsRecuperacio
     }
 
     if (completada) {
@@ -233,7 +241,7 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
                 id_diagnostic: diagnostic.id_diagnostic,
                 id_lesio: diagnostic.id_lesio,
                 fase: diagnostic.fase_actual,
-                punts_obtinguts: puntsGuanyats || 0,
+                punts_obtinguts: puntsRealsGuardats,  // ← punts reals, mai en excés
                 dolor_sessio: dolorSessio ?? null,
                 dolor_exercicis: dolorExercicis ? JSON.stringify(dolorExercicis) : null,
             }])
@@ -247,7 +255,14 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
         console.error('No s\'ha pogut recuperar la sessió penalitzada', err)
     }
 
-    return { completada, novaFase: completada ? null : novaFase, faseAvançada, nSessionsRestants: nSessionsRequerides - nouNumSessions }
+    return {
+        completada,
+        novaFase: completada ? null : novaFase,
+        faseAvançada,
+        nSessionsRestants: nSessionsRequerides - nouNumSessions,
+        puntsGuanyats,          // ← punts calculats (poden ser excessius)
+        puntsRealsGuardats,     // ← punts reals guardats a la BD
+    }
 }
 
 export async function processarTestDiagnostic(resultat, navegarA) {
@@ -269,6 +284,11 @@ export async function processarTestDiagnostic(resultat, navegarA) {
             .eq('id_muscul', idCos)
             .eq('id_lesio', resultat.id_lesio)
             .single()
+
+        if (!idFases) {
+            showToast('No hi ha rutina disponible per a aquesta combinació.', 'error')
+            return
+        }
 
         const [
             { data: multifase1 }, { data: multifase2 }, { data: multifase3 },
@@ -366,7 +386,6 @@ export async function getResumSessions(diagnostic) {
     else if (diagnostic.fase_actual === 2) totals = req2
     else if (diagnostic.fase_actual === 3) totals = req3
 
-    // Aplicar n_sessions_override si el fisio l'ha definit per a aquest pacient i fase
     if (diagnostic.id_diagnostic) {
         const { data: persoOverride } = await supabase
             .from('rutina_personalitzada_pacient')
