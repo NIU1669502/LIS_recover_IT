@@ -13,9 +13,6 @@ function previewText(missatge, dniFisio) {
     return prefix + (txt.length > 48 ? `${txt.slice(0, 48)}…` : txt)
 }
 
-// ============================================================
-// Xat del fisioterapeuta: totes les converses amb pacients
-// ============================================================
 export default function XatFisio({ perfilUsuari }) {
     const [converses, setConverses] = useState([])
     const [carregant, setCarregant] = useState(true)

@@ -17,12 +17,10 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
     const [form, setForm] = useState({})
     const [desant, setDesant] = useState(false)
 
-    // Avançar fase
     const [avancat, setAvancat] = useState(false)
     const [avançant, setAvançant] = useState(false)
     const [faseActualDiag, setFaseActualDiag] = useState(null)
 
-    // Recular fase
     const [reculat, setReculat] = useState(false)
     const [reculant, setReculant] = useState(false)
 
@@ -132,7 +130,7 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
         <div className={styles.overlay} onClick={() => { if (!editant) onTancar() }}>
             <div className={styles.panel} onClick={e => e.stopPropagation()}>
 
-                {/* ── Capçalera ── */}
+                
                 <div className={styles.header}>
                     <div className={styles.headerLeft}>
                         <div className={styles.avatar}>{nomPacient?.charAt(0).toUpperCase() || '?'}</div>
@@ -151,7 +149,7 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
                 ) : (
                     <div className={styles.cos}>
 
-                        {/* ── Selector de fase ── */}
+                        
                         <div className={styles.faseTabs}>
                             {[1, 2, 3].map(f => (
                                 <button
@@ -166,7 +164,7 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
                             ))}
                         </div>
 
-                        {/* ── Botons avançar / recular fase ── */}
+                        
                         {faseActualDiag != null && (
                             <div className={styles.avancarFaseBox}>
                                 <div className={styles.avancarFaseInfo}>
@@ -179,7 +177,7 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
                                 </div>
 
                                 <div className={styles.faseAccions}>
-                                    {/* Botó recular */}
+                                    
                                     {faseActualDiag > 1 && !avancat && (
                                         !reculat ? (
                                             <button className={styles.recullarBtn} onClick={handleRecullarFase}>
@@ -200,7 +198,7 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
                                         )
                                     )}
 
-                                    {/* Botó avançar */}
+                                    
                                     {faseActualDiag <= 3 && !reculat && (
                                         !avancat ? (
                                             <button className={styles.avancarBtn} onClick={handleAvancarFase}>
@@ -224,13 +222,13 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
                             </div>
                         )}
 
-                        {/* ── Nota informativa ── */}
+                        
                         <div className={styles.nota}>
                             <span className={styles.notaIcon}>ℹ️</span>
                             Els canvis s'apliquen <strong>només a aquest pacient</strong>. La resta de pacients mantindran la rutina original.
                         </div>
 
-                        {/* ── Llista de slots ── */}
+                        
                         <div className={styles.slotsList}>
                             {slotsActuals.map((slot) => {
                                 const estaEditant = editant?.fase === slot.fase && editant?.slot === slot.slot

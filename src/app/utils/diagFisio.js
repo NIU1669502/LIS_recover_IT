@@ -1,9 +1,6 @@
 import { supabase } from '../../utils/supabase'
 import { showToast } from '../utils/toast'
 
-// ============================================================
-// Confirmar codi del fisioterapeuta i crear diagnòstic
-// ============================================================
 export async function confirmarCodiFisio(dniPacient, codiIntroduit) {
     const codiNet = codiIntroduit.trim().toUpperCase()
 
@@ -91,13 +88,7 @@ export async function confirmarCodiFisio(dniPacient, codiIntroduit) {
     return { ok: true }
 }
 
-// ============================================================
-// RF-FISIO-07 — Avançar fase d'un pacient manualment
-// Suma els punts de les sessions restants de la fase actual
-// Retorna { ok, novaFase, completada, missatge }
-// ============================================================
 export async function avancarFasePacient(idDiagnostic) {
-    // 1. Agafar el diagnòstic actual
     const { data: diagnostic, error } = await supabase
         .from('diagnostic')
         .select('fase_actual, finalitzat, num_sessions, punts_recuperacio, id_lesio, part_cos')
@@ -107,7 +98,6 @@ export async function avancarFasePacient(idDiagnostic) {
     if (error || !diagnostic) return { ok: false, missatge: 'No s\'ha trobat el diagnòstic.' }
     if (diagnostic.finalitzat) return { ok: false, missatge: 'Aquest diagnòstic ja està finalitzat.' }
 
-    // 2. Obtenir la rutina de la fase actual per calcular punts restants
     const { data: rutina } = await supabase
         .from('rutines_lesio')
         .select('id_fase_1, id_fase_2, id_fase_3')
@@ -131,7 +121,6 @@ export async function avancarFasePacient(idDiagnostic) {
         if (faseInfo) {
             const sessionsRestants = Math.max(0, (faseInfo.n_sessions ?? 0) - (diagnostic.num_sessions ?? 0))
 
-            // Buscar personalitzacions per a aquesta fase
             const { data: personalitzacions } = await supabase
                 .from('rutina_personalitzada_pacient')
                 .select('slot_exercici, id_exercici, punts, multiplicador')
@@ -142,7 +131,6 @@ export async function avancarFasePacient(idDiagnostic) {
                 (personalitzacions || []).map(p => [p.slot_exercici, p])
             )
 
-            // Obtenir punts base dels 3 exercicis
             const idsBase = [faseInfo.exercici_1, faseInfo.exercici_2, faseInfo.exercici_3].filter(Boolean)
             const idsPersonalitzats = (personalitzacions || []).map(p => p.id_exercici).filter(Boolean)
             const idsTotal = [...new Set([...idsBase, ...idsPersonalitzats])]
@@ -154,7 +142,6 @@ export async function avancarFasePacient(idDiagnostic) {
 
             const puntsPer = Object.fromEntries((exercicisInfo || []).map(e => [e.id_exercici, e.punts]))
 
-            // Calcular punts per sessió (respectant personalitzacions)
             const slots = [
                 { slot: 1, id_exercici: faseInfo.exercici_1 },
                 { slot: 2, id_exercici: faseInfo.exercici_2 },
@@ -172,7 +159,6 @@ export async function avancarFasePacient(idDiagnostic) {
         }
     }
 
-    // 3. Avançar fase o completar
     const nousPunts = (diagnostic.punts_recuperacio ?? 0) + puntsAAfegir
 
     if (diagnostic.fase_actual >= 3) {
@@ -192,12 +178,7 @@ export async function avancarFasePacient(idDiagnostic) {
     return { ok: true, completada: false, novaFase }
 }
 
-// ============================================================
-// RF-FISIO-07 — Recular fase d'un pacient manualment
-// Resta els punts guanyats a la fase actual i torna a la fase anterior
-// ============================================================
 export async function recullarFasePacient(idDiagnostic) {
-    // 1. Agafar el diagnòstic actual
     const { data: diagnostic, error } = await supabase
         .from('diagnostic')
         .select('fase_actual, finalitzat, num_sessions, punts_recuperacio, id_lesio, part_cos')
@@ -207,7 +188,6 @@ export async function recullarFasePacient(idDiagnostic) {
     if (error || !diagnostic) return { ok: false, missatge: 'No s\'ha trobat el diagnòstic.' }
     if (diagnostic.fase_actual <= 1) return { ok: false, missatge: 'El pacient ja és a la Fase 1.' }
 
-    // 2. Calcular punts guanyats a la fase actual (sessions fetes × punts per sessió)
     const { data: rutina } = await supabase
         .from('rutines_lesio')
         .select('id_fase_1, id_fase_2, id_fase_3')
@@ -269,7 +249,6 @@ export async function recullarFasePacient(idDiagnostic) {
         }
     }
 
-    // 3. Recular fase i reiniciar sessions
     const faseAnterior = diagnostic.fase_actual - 1
     const nousPunts = Math.max(0, (diagnostic.punts_recuperacio ?? 0) - puntsARestar)
 
@@ -282,9 +261,6 @@ export async function recullarFasePacient(idDiagnostic) {
     return { ok: true, faseAnterior }
 }
 
-// ============================================================
-// Desassignar el fisioterapeuta d'un pacient
-// ============================================================
 export async function desassignarFisio(dniPacient) {
     console.log('Desassignar fisio:', dniPacient)
     const { data: relacio, error: errorRelacio } = await supabase

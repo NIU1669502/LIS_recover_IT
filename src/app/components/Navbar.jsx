@@ -2,9 +2,6 @@
 
 import styles from './navbar.module.css'
 
-// ============================================================
-// Component: Navbar
-// ============================================================
 
 export default function Navbar({ vistaActual, usuariSessio, onTornar, onTancarSessio, onNavegar }) {
     return (

@@ -1,26 +1,9 @@
 import { supabase } from '../../utils/supabase'
 
-// ============================================================
-// Sistema de penalització progressiva per inactivitat (> 72 hores)
-//
-// Flux:
-//  1. comprovarIAplicarPenalitzacio  → crida quan s'obre "Exercicis en curs"
-//  2. recuperarSessioPenalitzada     → crida dins completarSessio (lesions.js)
-//  3. obtenirSessiosPenalitzades     → helper per llegir l'estat actual
-// ============================================================
-
 const HORES_PENALITZACIO = 72
 const MS_PENALITZACIO = HORES_PENALITZACIO * 60 * 60 * 1000
 
-// ------------------------------------------------------------
-// comprovarIAplicarPenalitzacio
-//
-// Calcula quants dies han passat des de l'última sessió absoluta
-// i penalitza progressivament (3 dies = 1, 4 dies = 2, etc).
-// També s'encarrega de fer retrocedir la fase si num_sessions < 0.
-// ------------------------------------------------------------
 export async function comprovarIAplicarPenalitzacio(userDni, idDiagnostic) {
-    // 1. Obtenir TOTES les sessions del diagnòstic, ordenades per data
     const { data: sessions, error } = await supabase
         .from('historial_sessions')
         .select('id_sessio, punts_obtinguts, data_realitzacio, penalitzat')
@@ -32,15 +15,12 @@ export async function comprovarIAplicarPenalitzacio(userDni, idDiagnostic) {
         return { penalitzat: false }
     }
 
-    // 2. Calcular dies passats des de la sessió més recent
     const ultimaSessio = sessions[0]
     const ara = new Date()
     const dataUltimaSessio = new Date(ultimaSessio.data_realitzacio)
     
-    // Diferència en dies complets passats
     const diesPassats = Math.floor((ara - dataUltimaSessio) / (1000 * 60 * 60 * 24))
 
-    // 3. Quantes sessions s'haurien d'estar penalitzant ara mateix?
     let esperades = Math.max(0, diesPassats - 2)
     esperades = Math.min(esperades, sessions.length) // no penalitzar més de les que existeixen
 
@@ -48,7 +28,6 @@ export async function comprovarIAplicarPenalitzacio(userDni, idDiagnostic) {
         return { penalitzat: false }
     }
 
-    // 4. Analitzar les primeres N sessions per veure quines falten per penalitzar
     let sessionsAPenalitzarAra = []
     let puntsTotalsARestar = 0
     let puntsTotalsPenalitzats = 0 // Per mostrar a la UI
@@ -62,7 +41,6 @@ export async function comprovarIAplicarPenalitzacio(userDni, idDiagnostic) {
         }
     }
 
-    // Ja estan totes penalitzades i no cal fer canvis a la BD, només avisar la UI
     if (sessionsAPenalitzarAra.length === 0) {
         return {
             penalitzat: true,
@@ -71,15 +49,10 @@ export async function comprovarIAplicarPenalitzacio(userDni, idDiagnostic) {
         }
     }
 
-    // 5. Aplicar els canvis de la nova penalització massiva a la BD
     return await _aplicarPenalitzacioMassiva(idDiagnostic, sessionsAPenalitzarAra, puntsTotalsARestar, puntsTotalsPenalitzats)
 }
 
-// ------------------------------------------------------------
-// _aplicarPenalitzacioMassiva (funció interna)
-// ------------------------------------------------------------
 async function _aplicarPenalitzacioMassiva(idDiagnostic, arrIdSessions, puntsTotalsARestar, puntsTotalsPenalitzats) {
-    // Obtenir l'estat actual del diagnòstic
     const { data: diagnostic, error: diagError } = await supabase
         .from('diagnostic')
         .select('punts_recuperacio, num_sessions, fase_actual, id_lesio, part_cos')
@@ -89,10 +62,8 @@ async function _aplicarPenalitzacioMassiva(idDiagnostic, arrIdSessions, puntsTot
 
     if (diagError || !diagnostic) return { penalitzat: false }
 
-    // Nou càlcul de punts (mai pot ser negatiu)
     const nousPunts = Math.max(0, (diagnostic.punts_recuperacio || 0) - puntsTotalsARestar)
 
-    // Càlcul de sessions i regressió de fase
     let novaNumSessions = (diagnostic.num_sessions || 0) - arrIdSessions.length
     let novaFase = diagnostic.fase_actual
 
@@ -118,10 +89,8 @@ async function _aplicarPenalitzacioMassiva(idDiagnostic, arrIdSessions, puntsTot
                 .eq('id_fase', idFase)
                 .single()
             
-            // Si estem a -1 i la fase demana 6 sessions, tindrem 5 sessions superades a la fase anterior
             novaNumSessions = (faseData?.n_sessions || 0) + novaNumSessions
         } else {
-            // Si no es troba la fase per algun motiu, tallem el bucle
             novaNumSessions = 0
             break
         }
@@ -129,7 +98,6 @@ async function _aplicarPenalitzacioMassiva(idDiagnostic, arrIdSessions, puntsTot
 
     if (novaNumSessions < 0) novaNumSessions = 0
 
-    // Actualitzar diagnòstic
     const { error: updateDiagError } = await supabase
         .from('diagnostic')
         .update({
@@ -144,7 +112,6 @@ async function _aplicarPenalitzacioMassiva(idDiagnostic, arrIdSessions, puntsTot
         return { penalitzat: false }
     }
 
-    // Marcar les sessions com a penalitzades massivament
     const { error: updateSessioError } = await supabase
         .from('historial_sessions')
         .update({ penalitzat: true })
@@ -163,12 +130,6 @@ async function _aplicarPenalitzacioMassiva(idDiagnostic, arrIdSessions, puntsTot
     }
 }
 
-// ------------------------------------------------------------
-// recuperarSessioPenalitzada
-//
-// Recupera les sessions d'1 en 1 ordenades des de la més antiga
-// (per recuperar la penalització més vella primer).
-// ------------------------------------------------------------
 export async function recuperarSessioPenalitzada(idDiagnostic) {
     const { data: sessioPenalitzada, error } = await supabase
         .from('historial_sessions')
@@ -195,9 +156,6 @@ export async function recuperarSessioPenalitzada(idDiagnostic) {
     return true
 }
 
-// ------------------------------------------------------------
-// obtenirSessiosPenalitzades
-// ------------------------------------------------------------
 export async function obtenirSessiosPenalitzades(userDni, idDiagnostic) {
     const { data, error } = await supabase
         .from('historial_sessions')

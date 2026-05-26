@@ -1,12 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../utils/supabase'
 
-// ============================================================
-// Hook: useHistorial
-// Obté l'historial de SESSIONS (dia + fase + lesió) i, per
-// compatibilitat, també retorna l'historial d'exercicis agrupats
-// per dia per components que encara el facin servir.
-// ============================================================
 export function useHistorial(dni, idDiagnosticFiltre = null) {
     const [sessions, setSessions] = useState([])
     const [historial, setHistorial] = useState({})
@@ -28,13 +22,11 @@ export function useHistorial(dni, idDiagnosticFiltre = null) {
     const calcularRacha = (sessionsArr) => {
         if (!sessionsArr || sessionsArr.length === 0) return 0;
         
-        // Obtenir dates úniques (només la part de la data YYYY-MM-DD en hora local)
         const datesUniques = [...new Set(sessionsArr.map(s => {
             const d = new Date(s.data_realitzacio);
             return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }))];
         
-        // Ordenar dates descendentment
         datesUniques.sort((a, b) => b.localeCompare(a));
 
         const avui = new Date();
@@ -44,7 +36,6 @@ export function useHistorial(dni, idDiagnosticFiltre = null) {
         ahir.setDate(ahir.getDate() - 1);
         const strAhir = `${ahir.getFullYear()}-${String(ahir.getMonth() + 1).padStart(2, '0')}-${String(ahir.getDate()).padStart(2, '0')}`;
 
-        // Si l'última sessió no és ni d'avui ni d'ahir, s'ha trencat la racha
         if (datesUniques[0] !== strAvui && datesUniques[0] !== strAhir) {
             return 0;
         }
@@ -52,7 +43,6 @@ export function useHistorial(dni, idDiagnosticFiltre = null) {
         let rachaActual = 1;
         let dataActualStr = datesUniques[0];
 
-        // Comprovar dies consecutius cap enrere
         for (let i = 1; i < datesUniques.length; i++) {
             const prevDateObj = new Date(dataActualStr);
             prevDateObj.setDate(prevDateObj.getDate() - 1);
@@ -135,7 +125,6 @@ export function useHistorial(dni, idDiagnosticFiltre = null) {
 
         carregar()
 
-        // ── Realtime: actualitzar quan s'insereix una nova sessió ──
         const channelName = `historial-sessions-${dni}-${Math.random().toString(36).substring(2, 9)}`
         const canal = supabase
             .channel(channelName)

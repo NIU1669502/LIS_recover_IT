@@ -3,9 +3,6 @@
 import { useState } from 'react'
 import styles from './registreForm.module.css'
 
-// ============================================================
-// Component: RegistreForm — pantalla pública (sin sidebar)
-// ============================================================
 
 export default function RegistreForm({
     registreForm,
@@ -22,14 +19,14 @@ export default function RegistreForm({
     return (
         <div className={styles.wrapper}>
 
-            {/* ORBS */}
+            
             <div className={`${styles.orb} ${styles.orb1}`} />
             <div className={`${styles.orb} ${styles.orb2}`} />
             <div className={`${styles.orb} ${styles.orb3}`} />
 
             <div className={styles.card}>
 
-                {/* HEADER */}
+                
                 <div className={`${styles.header} ${styles.anim} ${styles.anim1}`}>
                     <div className={styles.logo}>
                         Recover<span>IT</span>

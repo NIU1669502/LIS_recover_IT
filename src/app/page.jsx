@@ -19,12 +19,10 @@ import HistorialSessions from './components/HistorialSessions'
 import XatPacient from './components/XatPacient'
 import imatgeAnatomica from './data/Imatge_anatomica.png'
 
-// Vistes del fisio
 import PanellFisio from './components/PanellFisio'
 import LlistaPacients from './components/LlistaPacients'
 import XatFisio from './components/XatFisio'
 
-// Overlay de diagnòstics sobre la imatge anatòmica
 import OverlayAnatomic from './components/OverlayAnatomic'
 import { useRelacioFisioConfirmada } from './hooks/useRelacioFisio'
 
@@ -164,7 +162,7 @@ export default function Page() {
 
         <main key={vistaActual} className={`${esPantallaAuth ? styles.mainFull : styles.main} ${styles.pageEnter}`}>
 
-          {/* ── Vistes comunes ─────────────────────────── */}
+          
 
           {vistaActual === 'login' && (
             <LoginForm
@@ -193,7 +191,7 @@ export default function Page() {
             />
           )}
 
-          {/* ── Vistes del fisioterapeuta ───────────────── */}
+          
 
           {vistaActual === 'inici-fisio' && (
             <PanellFisio
@@ -212,7 +210,7 @@ export default function Page() {
             <XatFisio perfilUsuari={perfilUsuari} />
           )}
 
-          {/* ── Vistes del pacient ──────────────────────── */}
+          
 
           {vistaActual === 'test' && (
             <section className={styles.testSection}>
@@ -355,7 +353,7 @@ export default function Page() {
                   </div>
 
                   <div className={styles.dashboardGrid}>
-                    {/* ── Imatge anatòmica amb overlay de diagnòstics ── */}
+                    
                     <div className={styles.anatomyCard}>
                       <img
                         src={imatgeAnatomica.src}

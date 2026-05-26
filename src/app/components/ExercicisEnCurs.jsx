@@ -33,9 +33,7 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
     const [sessionsTotals, setSessionsTotals] = useState(0)
     const [carregant, setCarregant] = useState(true)
     const [refreshNonce, setRefreshNonce] = useState(0)
-    /** Informació de penalització activa per al diagnòstic seleccionat */
     const [infoPenalitzacio, setInfoPenalitzacio] = useState(null)
-    /** Amb diverses lesions: false = només llistat; true = resum de sessió (exercicis, iniciar…). */
     const [mostrarResumSessio, setMostrarResumSessio] = useState(false)
 
     const canalRef = useRef(null)
@@ -130,7 +128,6 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
                 return
             }
 
-            // ── Comprovació de penalització per inactivitat (>72h) ──────────
             let infoPen = { penalitzat: false }
             try {
                 infoPen = await comprovarIAplicarPenalitzacio(userDni, seleccionat)
@@ -140,8 +137,6 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
             if (cancelat) return
             setInfoPenalitzacio(infoPen)
 
-            // Si s'acaba d'aplicar una penalització, tornem a llegir el diagnòstic
-            // de la BD per tenir num_sessions i punts_recuperacio actualitzats
             let diagActualitzat = diag
             if (infoPen.penalitzat && !infoPen.jaPenalitzat) {
                 const { data: freshDiag } = await supabase
@@ -152,7 +147,6 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
                 if (freshDiag) diagActualitzat = { ...diag, ...freshDiag }
             }
             if (cancelat) return
-            // ────────────────────────────────────────────────────────────────
 
             const [{ data: muscul }, { data: lesio }, exs, { fetes, totals }] = await Promise.all([
                 supabase.from('musculs').select('id_cos, nom').eq('id_cos', diagActualitzat.part_cos).single(),

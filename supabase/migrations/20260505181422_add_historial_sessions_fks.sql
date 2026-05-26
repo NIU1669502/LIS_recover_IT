@@ -1,5 +1,3 @@
--- Migration: add_historial_sessions_fks
--- Adds explicit relations so PostgREST/Supabase can join historial_sessions
 -- with lesions and diagnostic in schema cache.
 
 do $$

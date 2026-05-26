@@ -4,15 +4,6 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../utils/supabase'
 import styles from './overlayAnatomic.module.css'
 
-// ============================================================
-// Component: OverlayAnatomic
-// Mostra punts de pulsació sobre la imatge anatòmica per cada
-// diagnòstic actiu del pacient.
-//
-// Props:
-//   perfilUsuari — objecte amb dni del pacient
-// ============================================================
-
 export default function OverlayAnatomic({ perfilUsuari }) {
     const [punts, setPunts] = useState([])
     const [tooltipActiu, setTooltipActiu] = useState(null)
@@ -21,7 +12,6 @@ export default function OverlayAnatomic({ perfilUsuari }) {
         if (!perfilUsuari?.dni) return
 
         const carregar = async () => {
-            // 1. Diagnòstics actius del pacient
             const { data: diagnostics } = await supabase
                 .from('diagnostic')
                 .select('id_diagnostic, fase_actual, part_cos, id_lesio, punts_recuperacio, puntsFinals')
@@ -36,7 +26,6 @@ export default function OverlayAnatomic({ perfilUsuari }) {
             const partIds = [...new Set(diagnostics.map(d => d.part_cos).filter(Boolean))]
             const lesioIds = [...new Set(diagnostics.map(d => d.id_lesio).filter(Boolean))]
 
-            // 2. Músculs amb coordenades + lesions en paral·lel
             const [{ data: musculs }, { data: lesions }] = await Promise.all([
                 supabase
                     .from('musculs')
@@ -51,7 +40,6 @@ export default function OverlayAnatomic({ perfilUsuari }) {
             const musculsMap = Object.fromEntries((musculs ?? []).map(m => [m.id_cos, m]))
             const lesionsMap = Object.fromEntries((lesions ?? []).map(l => [l.id_lesio, l]))
 
-            // 3. Construir array de punts (filtrant els que no tinguin coordenades)
             const resultats = diagnostics
                 .map(d => {
                     const muscul = musculsMap[d.part_cos]
@@ -77,7 +65,6 @@ export default function OverlayAnatomic({ perfilUsuari }) {
 
         carregar()
 
-        // Realtime: actualitzar quan canvien els diagnòstics
         const canal = supabase
             .channel(`overlay-anatomic-${perfilUsuari.dni}`)
             .on('postgres_changes', {
@@ -105,12 +92,12 @@ export default function OverlayAnatomic({ perfilUsuari }) {
                     onClick={() => setTooltipActiu(tooltipActiu === punt.id ? null : punt.id)}
                     aria-label={`Lesió activa: ${punt.nomLesio} al ${punt.nomMuscul}`}
                 >
-                    {/* Anell exterior pulsant */}
+                    
                     <span className={styles.dotRing} aria-hidden="true" />
-                    {/* Cercle interior sòlid */}
+                    
                     <span className={styles.dotCore} aria-hidden="true" />
 
-                    {/* Tooltip */}
+                    
                     {tooltipActiu === punt.id && (
                         <div className={styles.tooltip} role="tooltip">
                             <p className={styles.tooltipMuscul}>{punt.nomMuscul}</p>

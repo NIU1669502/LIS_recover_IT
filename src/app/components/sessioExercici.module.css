@@ -1,6 +1,4 @@
-/* ======================================
-   Premium Theme - Sessió d'Exercici
-   ====================================== */
+
 .container {
     width: 100%;
     max-width: 560px;
@@ -388,7 +386,6 @@
     box-shadow: 0 12px 25px -8px rgba(37, 99, 235, 0.6);
 }
 
-/* ── Cronòmetre pulsant quan està actiu ── */
 @keyframes pulsarCronometre {
 
     0%,
@@ -405,7 +402,6 @@
     animation: pulsarCronometre 1s ease-in-out infinite;
 }
 
-/* ── Canvi de color quan queda poc temps ── */
 .progressCircleWarning {
     stroke: #f59e0b !important;
     transition: stroke 0.5s ease;
@@ -436,7 +432,6 @@
     }
 }
 
-/* ── Badge de punts guanyats ── */
 @keyframes entradaPunts {
     0% {
         opacity: 0;
@@ -470,7 +465,6 @@
         brillarPunts 1.5s ease-in-out 0.7s infinite;
 }
 
-/* ── Pantalla completada ── */
 @keyframes entradaCompletada {
     0% {
         opacity: 0;
@@ -549,8 +543,6 @@
         transform: translate(-50%, -80%) scale(0.9);
     }
 }
-
-/* ── Afegir al final de sessioExercici.module.css ── */
 
 /* Modal overlay */
 .modalOverlay {

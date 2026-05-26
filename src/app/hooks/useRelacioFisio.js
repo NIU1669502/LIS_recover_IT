@@ -11,10 +11,7 @@ function eliminarCanalPerNom(channelName) {
     }
 }
 
-// ============================================================
-// Hook: relació confirmada pacient ↔ fisioterapeuta (per sidebar xat)
-// Una sola subscripció per instància (cridar des de page.jsx).
-// ============================================================
+// Només des de page.jsx
 export function useRelacioFisioConfirmada(dniPacient) {
     const [relacio, setRelacio] = useState(null)
     const [carregant, setCarregant] = useState(true)

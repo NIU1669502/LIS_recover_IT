@@ -12,7 +12,6 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
     const [carregant, setCarregant] = useState(true)
     const [nomsLesions, setNomsLesions] = useState({})
     const [nomsMusculs, setNomsMusculs] = useState({})
-    // Sessions de TOTS els diagnòstics actius (per a la gràfica)
     const [sessionsActives, setSessionsActives] = useState([])
     const [esborrantId, setEsborrantId] = useState(null)
 
@@ -25,7 +24,6 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
                 return
             }
 
-            // 1. Cargar nombres y diagnósticos
             const { data: catLesions } = await supabase.from('lesions').select('id_lesio, nom')
             const mapaNoms = {}
             if (catLesions) catLesions.forEach((l) => { mapaNoms[l.id_lesio] = l.nom })
@@ -46,7 +44,6 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
             setActives(activesData)
             setFinalitzades(realsFinalitzats)
 
-            // 2. Cargar nombres de músculos
             const tots = [...activesData, ...realsFinalitzats]
             const partIds = [...new Set(tots.map((d) => d.part_cos).filter(Boolean))]
             if (partIds.length > 0) {
@@ -59,14 +56,13 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
                 setNomsMusculs(mapaMusculs)
             }
 
-            // 3. Cargar sesiones de TODOS los diagnósticos activos para la gráfica
             if (activesData.length > 0) {
                 const ids = activesData.map((d) => d.id_diagnostic)
                 const { data: sess } = await supabase
                     .from('historial_sessions')
                     .select('data_realitzacio, punts_obtinguts')
                     .eq('dni_pacient', perfilUsuari.dni)
-                    .in('id_diagnostic', ids) // <-- todos los activos
+                    .in('id_diagnostic', ids)
                     .order('data_realitzacio', { ascending: true })
                 setSessionsActives(sess || [])
             } else {
@@ -78,7 +74,6 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
 
         carregarDades()
 
-        // Realtime
         if (perfilUsuari?.dni) {
             if (canalRef.current) supabase.removeChannel(canalRef.current)
             const channelName = `historial-diag-${perfilUsuari.dni}-${Math.random().toString(36).substring(2, 9)}`
@@ -98,7 +93,6 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
         return <div className={styles.container}><p>Carregant l&apos;historial de lesions...</p></div>
     }
 
-    // Punts objectiu = suma de tots els diagnòstics actius
     const puntsFinalsTotals = actives.reduce((acc, d) => acc + (d.puntsFinals ?? 0), 0)
 
     return (
@@ -107,10 +101,10 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
 
             <div className={styles.layoutDuoColumnes}>
 
-                {/* Columna esquerra */}
+                
                 <div className={styles.columnaEsquerra}>
 
-                    {/* SECCIÓ 1: Lesions Actives */}
+                    
                     <div className={styles.section}>
                         <h2 className={styles.sectionTitle}>🔄 Lesions Actives</h2>
 
@@ -197,7 +191,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
                         )}
                     </div>
 
-                    {/* SECCIÓ 2: Historial de Lesions Curades */}
+                    
                     <div className={styles.section}>
                         <h2 className={styles.sectionTitle}>✅ Historial de Lesions Curades</h2>
 
@@ -248,7 +242,7 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
 
                 </div>
 
-                {/* Columna dreta: gràfica */}
+                
                 <div className={styles.columnaDreta}>
                     <h2 className={styles.sectionTitle}>📈 Evolució de la recuperació</h2>
 

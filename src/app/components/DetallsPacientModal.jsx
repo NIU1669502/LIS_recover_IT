@@ -7,7 +7,6 @@ import GraficaRecuperacio from './GraficaRecuperacio'
 import styles from './detallsPacientModal.module.css'
 import EditarRutinaModal from './EditarRutinaModal'
 
-// ── Helper: color i etiqueta segons nivell de dolor ─────────
 function dolorColor(valor) {
     if (valor == null) return '#94a3b8'
     if (valor <= 3) return '#22c55e'
@@ -22,7 +21,6 @@ function dolorEtiqueta(valor) {
     return 'Alt'
 }
 
-// ── Fila de sessió expandible ────────────────────────────────
 function FilaSessio({ sessio }) {
     const [expandit, setExpandit] = useState(false)
 
@@ -48,7 +46,7 @@ function FilaSessio({ sessio }) {
                 <div className={styles.sessioLesio}>{sessio.diagnostic?.musculs?.nom || '—'}</div>
                 <div className={styles.sessioPunts}>+{sessio.punts_obtinguts ?? 0} pts</div>
 
-                {/* Indicador dolor sessió */}
+                
                 {sessio.dolor_sessio != null ? (
                     <div
                         className={styles.dolorBadge}
@@ -90,7 +88,6 @@ function FilaSessio({ sessio }) {
     )
 }
 
-// ── Helpers ──────────────────────────────────────────────────
 async function getDetallsPacient(dniPacient) {
     const { data: usuari } = await supabase
         .from('usuaris')
@@ -104,16 +101,13 @@ async function getDetallsPacient(dniPacient) {
         .eq('dni_pacient', dniPacient)
         .order('id_diagnostic', { ascending: false })
 
-    // Filtrem els esborrats (soft-delete)
     const diagnosticsReals = (diagnostics || []).filter(d => d.punts_recuperacio !== -1)
 
-    // ── 3. Relacions fisio-pacient per saber quins estan confirmats ──
     const { data: relacions } = await supabase
         .from('relacio_fisio_pacient')
         .select('id_lesio, part_cos, confirmat, descripcio, codi_validacio')
         .eq('dni_pacient', dniPacient)
 
-    // Enriquir cada diagnòstic amb noms de lesió i múscul
     let diagnosticsEnriquits = []
     let diagnosticsPendents = []
 
@@ -158,7 +152,6 @@ async function getDetallsPacient(dniPacient) {
     const diagnosticsActius = diagnosticsEnriquits.filter(d => !d.finalitzat)
     const diagnostic = diagnosticsActius[0] || diagnosticsEnriquits[0] || null
 
-    // Sessions amb dolor
     const { data: sessions } = await supabase
         .from('historial_sessions')
         .select(`
@@ -199,7 +192,6 @@ const formatDia = (iso) => {
     catch { return iso }
 }
 
-// ── Component principal ──────────────────────────────────────
 export default function DetallsPacientModal({ dniPacient, nomPacient, dniFisio, onTancar }) {
     const [dades, setDades] = useState(null)
     const [carregant, setCarregant] = useState(true)
@@ -236,7 +228,7 @@ export default function DetallsPacientModal({ dniPacient, nomPacient, dniFisio, 
                 ) : (
                     <div className={styles.cos}>
 
-                        {/* Informació personal */}
+                        
                         <section className={styles.seccio}>
                             <p className={styles.seccioTitol}><span className={styles.seccioIcon}>👤</span>Informació personal</p>
                             <div className={styles.infoGrid}>
@@ -253,7 +245,7 @@ export default function DetallsPacientModal({ dniPacient, nomPacient, dniFisio, 
 
                         <div className={styles.divider} />
 
-                        {/* Diagnòstics pendents */}
+                        
                         {dades?.diagnosticsPendents?.length > 0 && (
                             <>
                                 <section className={styles.seccio}>
@@ -281,7 +273,7 @@ export default function DetallsPacientModal({ dniPacient, nomPacient, dniFisio, 
                             </>
                         )}
 
-                        {/* Diagnòstics actius */}
+                        
                         <section className={styles.seccio}>
                             <p className={styles.seccioTitol}><span className={styles.seccioIcon}>🩺</span>Diagnòstics actius<span className={styles.comptador}>{dades?.diagnosticsActius?.length ?? 0}</span></p>
                             {dades?.diagnosticsActius?.length > 0 ? (
@@ -325,7 +317,7 @@ export default function DetallsPacientModal({ dniPacient, nomPacient, dniFisio, 
 
                         <div className={styles.divider} />
 
-                        {/* Historial de sessions amb dolor */}
+                        
                         <section className={styles.seccio}>
                             <p className={styles.seccioTitol}>
                                 <span className={styles.seccioIcon}>📋</span>
@@ -347,7 +339,7 @@ export default function DetallsPacientModal({ dniPacient, nomPacient, dniFisio, 
 
                         <div className={styles.divider} />
 
-                        {/* Historial de lesions */}
+                        
                         <section className={styles.seccio}>
                             <p className={styles.seccioTitol}><span className={styles.seccioIcon}>🦴</span>Historial de lesions<span className={styles.comptador}>{dades?.historialLesions?.length ?? 0}</span></p>
                             {dades?.historialLesions?.length > 0 ? (
@@ -372,7 +364,7 @@ export default function DetallsPacientModal({ dniPacient, nomPacient, dniFisio, 
 
                         <div className={styles.divider} />
 
-                        {/* Gràfica */}
+                        
                         <section className={styles.seccio}>
                             <p className={styles.seccioTitol}><span className={styles.seccioIcon}>📈</span>Gràfica de recuperació</p>
                             <GraficaRecuperacio sessions={dades?.sessionsGraficaAsc || []} puntsFinals={dades?.puntsFinalsTotals ?? 0} />

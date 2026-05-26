@@ -1,9 +1,6 @@
 import { supabase } from '../../utils/supabase'
 import { showToast } from '../utils/toast'
 
-// ============================================================
-// Genera un codi aleatori (lletres + números en majúscula)
-// ============================================================
 function generarCodiValidacio(longitud = 8) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
     let resultat = ''
@@ -15,9 +12,6 @@ function generarCodiValidacio(longitud = 8) {
     return resultat
 }
 
-// ============================================================
-// Obté tots els pacients vinculats a un fisioterapeuta
-// ============================================================
 export async function getPacientsDeFisio(dniFisio) {
     const { data, error } = await supabase
         .from('relacio_fisio_pacient')
@@ -37,7 +31,6 @@ export async function getPacientsDeFisio(dniFisio) {
     const dniPacients = data.map(r => r.dni_pacient)
     if (dniPacients.length === 0) return []
 
-    // Obtenir dades bàsiques dels pacients
     const { data: usuaris, error: usuarisError } = await supabase
         .from('usuaris')
         .select('dni, nom')
@@ -45,7 +38,6 @@ export async function getPacientsDeFisio(dniFisio) {
 
     if (usuarisError || !usuaris) return []
 
-    // Obtenir diagnòstics actius de cada pacient
     const { data: diagnostics } = await supabase
         .from('diagnostic')
         .select(`
@@ -61,7 +53,6 @@ export async function getPacientsDeFisio(dniFisio) {
         .eq('finalitzat', false)
         .order('id_diagnostic', { ascending: false })
 
-    // IDs necessaris (diagnòstics + pendents)
     const idsLesions = [
         ...new Set([
             ...(diagnostics || []).map(d => d.id_lesio),
@@ -76,7 +67,6 @@ export async function getPacientsDeFisio(dniFisio) {
         ].filter(Boolean))
     ]
 
-    // Obtenir noms de lesions
     let nomLesions = {}
     if (idsLesions.length > 0) {
         const { data: lesions } = await supabase
@@ -89,7 +79,6 @@ export async function getPacientsDeFisio(dniFisio) {
             })
     }
 
-    // Obtenir noms de músculs
     let nomMusculs = {}
     if (idsMusculs.length > 0) {
         const { data: musculs } = await supabase
@@ -102,7 +91,6 @@ export async function getPacientsDeFisio(dniFisio) {
             })
     }
 
-    // Combinar dades
     return usuaris.map(u => {
         const vinculacio = data.find(r => r.dni_pacient === u.dni)
         const diagnostic = (diagnostics || []).find(d => d.dni_pacient === u.dni) || null
@@ -133,9 +121,6 @@ export async function getPacientsDeFisio(dniFisio) {
     })
 }
 
-// ============================================================
-// Calcula el progrés global d'un pacient (0-100)
-// ============================================================
 export async function getProgresTotal(diagnostic) {
     if (!diagnostic) return 0
 
@@ -150,9 +135,6 @@ export async function getProgresTotal(diagnostic) {
     return Math.round((punts.punts_recuperacio / punts.puntsFinals) * 100)
 }
 
-// ============================================================
-// Vincula un pacient a un fisioterapeuta amb diagnòstic pendent
-// ============================================================
 export async function vincularPacient(
     dniFisio,
     dniPacient,
@@ -162,7 +144,6 @@ export async function vincularPacient(
 ) {
     const dniNet = dniPacient.trim().toUpperCase()
 
-    // Verificar que el pacient existeix i NO és fisioterapeuta
     const { data: pacient, error: pacientError } = await supabase
         .from('usuaris')
         .select('dni, nom, es_fisioterapeuta')
@@ -177,7 +158,6 @@ export async function vincularPacient(
         return { ok: false, missatge: 'Aquest DNI correspon a un fisioterapeuta.' }
     }
 
-    // Verificar si ja existeix relació
     const { data: existent } = await supabase
         .from('relacio_fisio_pacient')
         .select('dni_pacient')
@@ -214,9 +194,6 @@ export async function vincularPacient(
     }
 }
 
-// ============================================================
-// Estadístiques globals del fisio per al panell
-// ============================================================
 export async function getEstadistiquesFisio(dniFisio) {
     const pacients = await getPacientsDeFisio(dniFisio)
 
@@ -301,7 +278,6 @@ export async function afegirDiagnosticAPacient(dniFisio, dniPacient, partCos, id
         }
     }
 
-    // 2. Insertar diagnòstic directament
     const { error } = await supabase
         .from('diagnostic')
         .insert([{
@@ -321,15 +297,7 @@ export async function afegirDiagnosticAPacient(dniFisio, dniPacient, partCos, id
 }
 
 
-// ============================================================
-// Obté la rutina base d'un diagnòstic + les personalitzacions
-// del fisio per a les 3 fases. Retorna un objecte amb:
-//   { fase1: [slot1, slot2, slot3], fase2: [...], fase3: [...] }
-// Cada slot té: { id_exercici, nom, duracio_segons, repeticions,
-//                punts, multiplicador, slot, fase, personalitzat }
-// ============================================================
 export async function getRutinaAmbPersonalitzacio(idDiagnostic, idLesio, partCos) {
-    // 1. Rutina base: obtenir les fases per a aquesta lesió+múscul
     const { data: rutina } = await supabase
         .from('rutines_lesio')
         .select('id_fase_1, id_fase_2, id_fase_3')
@@ -339,14 +307,12 @@ export async function getRutinaAmbPersonalitzacio(idDiagnostic, idLesio, partCos
 
     if (!rutina) return null
 
-    // 2. Dades de les 3 fases (exercicis + multiplicador)
     const [{ data: fase1 }, { data: fase2 }, { data: fase3 }] = await Promise.all([
         supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutina.id_fase_1).single(),
         supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutina.id_fase_2).single(),
         supabase.from('fases').select('exercici_1, exercici_2, exercici_3, multiplicador, n_sessions').eq('id_fase', rutina.id_fase_3).single(),
     ])
 
-    // 3. Tots els exercicis referenciats
     const idsExercicis = [...new Set([
         fase1?.exercici_1, fase1?.exercici_2, fase1?.exercici_3,
         fase2?.exercici_1, fase2?.exercici_2, fase2?.exercici_3,
@@ -360,17 +326,14 @@ export async function getRutinaAmbPersonalitzacio(idDiagnostic, idLesio, partCos
 
     const exMap = Object.fromEntries((exercicis || []).map(e => [e.id_exercici, e]))
 
-    // 4. Personalitzacions existents per a aquest diagnòstic
     const { data: personalitzacions } = await supabase
         .from('rutina_personalitzada_pacient')
         .select('*')
         .eq('id_diagnostic', idDiagnostic)
 
-    // Helper: busca personalització per fase+slot
     const getPerso = (fase, slot) =>
         (personalitzacions || []).find(p => p.fase === fase && p.slot_exercici === slot) || null
 
-    // Helper: construeix un slot combinant base + override
     const buildSlot = (faseNum, slotNum, idExerciciBase, multiplicadorBase) => {
         const perso = getPerso(faseNum, slotNum)
         const exBase = exMap[idExerciciBase] || {}
@@ -380,23 +343,19 @@ export async function getRutinaAmbPersonalitzacio(idDiagnostic, idLesio, partCos
         return {
             slot: slotNum,
             fase: faseNum,
-            // Valors finals (personalitzat > base)
             id_exercici: idExerciciFinal,
             nom: exFinal.nom || '—',
             duracio_segons: perso?.duracio_segons ?? exFinal.duracio_segons ?? 0,
             repeticions: perso?.repeticions ?? exFinal.Repeticions ?? '—',
             punts: perso?.punts ?? exFinal.punts ?? 0,
             multiplicador: perso?.multiplicador ?? multiplicadorBase ?? 1,
-            // Valors originals (per mostrar al fisio si han canviat)
             id_exercici_base: idExerciciBase,
             nom_base: exBase.nom || '—',
             duracio_segons_base: exBase.duracio_segons ?? 0,
             repeticions_base: exBase.Repeticions ?? '—',
             punts_base: exBase.punts ?? 0,
             multiplicador_base: multiplicadorBase ?? 1,
-            // Indica si aquest slot té algun override actiu
             personalitzat: perso !== null,
-            // L'id de la personalització si existeix (per a futurs UPDATEs)
             id_personalitzacio: perso?.id_personalitzacio ?? null,
         }
     }
@@ -425,12 +384,6 @@ export async function getRutinaAmbPersonalitzacio(idDiagnostic, idLesio, partCos
     }
 }
 
-// ============================================================
-// Guarda (INSERT o UPDATE via upsert) una personalització
-// per a un slot concret d'un diagnòstic.
-// Si tots els camps són iguals als valors base, esborra la fila
-// per mantenir la taula neta (opcional, però elegant).
-// ============================================================
 export async function guardarPersonalitzacio(dniFisio, {
     id_diagnostic,
     dni_pacient,

@@ -1,7 +1,4 @@
--- Migration: add_historial_sessions
--- Adds a session-level history table that tracks, for every completed exercise
 -- session, the date, the phase and the lesion it was associated with.
--- Non-destructive: no existing tables are modified.
 
 create table if not exists public.historial_sessions (
     id_sessio          bigserial primary key,
@@ -19,7 +16,6 @@ create index if not exists idx_historial_sessions_dni
 create index if not exists idx_historial_sessions_diag
     on public.historial_sessions (id_diagnostic);
 
--- Match the access pattern of the existing tables (client-side reads/writes).
 alter table public.historial_sessions enable row level security;
 
 drop policy if exists "historial_sessions_select_all" on public.historial_sessions;

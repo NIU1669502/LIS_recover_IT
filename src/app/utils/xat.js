@@ -2,9 +2,6 @@ import { supabase } from '../../utils/supabase'
 
 const MAX_LEN = 2000
 
-// ============================================================
-// Relació confirmada pacient ↔ fisioterapeuta (requisit per xat)
-// ============================================================
 export async function getRelacioXatPacient(dniPacient) {
     if (!dniPacient) return null
 
@@ -30,9 +27,6 @@ export async function getRelacioXatPacient(dniPacient) {
     }
 }
 
-// ============================================================
-// Llista de converses del fisioterapeuta (pacients confirmats)
-// ============================================================
 export async function getConversesFisio(dniFisio) {
     if (!dniFisio) return []
 
@@ -79,9 +73,6 @@ export async function getConversesFisio(dniFisio) {
         })
 }
 
-// ============================================================
-// Missatges d'una conversa
-// ============================================================
 export async function fetchMissatgesXat(dniFisio, dniPacient) {
     return supabase
         .from('missatges_xat')

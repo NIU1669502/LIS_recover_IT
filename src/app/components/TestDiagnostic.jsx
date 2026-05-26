@@ -5,12 +5,6 @@ import { TEST_STEPS } from '../data/testSteps.js'
 import { determinarLesio } from '../utils/lesions'
 import styles from './testDiagnostic.module.css'
 
-// ============================================================
-// Component: TestDiagnostic — RF-PAC-01
-// Props:
-//   onGuardar(resultat) — crida quan l'usuari confirma el resultat
-//   onCancel()          — crida quan l'usuari tanca el test
-// ============================================================
 export default function TestDiagnostic({ onGuardar, onCancel }) {
     const [pas, setPas] = useState(0)
     const [respostes, setRespostes] = useState({})
@@ -38,7 +32,6 @@ export default function TestDiagnostic({ onGuardar, onCancel }) {
         setTextInput('')
     }
 
-    // ── Pantalla de resultat ────────────────────────────────
     if (resultat) {
         return (
             <div className={styles.resultContainer}>
@@ -80,7 +73,6 @@ export default function TestDiagnostic({ onGuardar, onCancel }) {
         )
     }
 
-    // ── Pantalla de preguntes ───────────────────────────────
     const step = TEST_STEPS[pas]
 
     return (
@@ -89,7 +81,7 @@ export default function TestDiagnostic({ onGuardar, onCancel }) {
                 &times;
             </button>
 
-            {/* Barra de progrés */}
+            
             <p className={styles.progressText}>
                 Pas {pas + 1} de {TEST_STEPS.length}
             </p>

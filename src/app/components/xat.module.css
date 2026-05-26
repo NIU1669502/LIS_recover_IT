@@ -39,7 +39,6 @@
     font-size: 0.9rem;
 }
 
-/* ── Layout fisio (llista + conversa) ─────────────────────── */
 .fisioLayout {
     flex: 1;
     min-height: 0;
@@ -136,7 +135,6 @@
     text-align: center;
 }
 
-/* ── Àrea de missatges ──────────────────────────────────── */
 .chatBox {
     flex: 1;
     min-height: 0;

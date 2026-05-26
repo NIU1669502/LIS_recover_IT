@@ -6,7 +6,6 @@ import { getEstadistiquesFisio, getProgresTotal } from '../utils/fisio'
 import AfegirPacientModal from './AfegirPacientModal'
 import styles from './PanellFisio.module.css'
 
-// ── Targeta d'estadística ────────────────────────────────────
 function TarjetaEstat({ icon, valor, label, color }) {
     return (
         <div className={styles.statCard}>
@@ -19,7 +18,6 @@ function TarjetaEstat({ icon, valor, label, color }) {
     )
 }
 
-// ── Fila de pacient al llistat recent ───────────────────────
 function FilaPacient({ pacient, onVeurePacient }) {
     const [progres, setProgres] = useState(null)
 
@@ -89,7 +87,6 @@ export default function PanellFisio({ perfilUsuari, onNavegar }) {
     useEffect(() => {
         carregarDades()
 
-        // ── Realtime: actualitzar quan hi ha canvis en pacients o diagnòstics ──
         if (perfilUsuari?.dni) {
             canalRef.current = supabase
                 .channel(`panell-fisio-${perfilUsuari.dni}`)
@@ -120,7 +117,7 @@ export default function PanellFisio({ perfilUsuari, onNavegar }) {
                 </div>
             ) : (
                 <>
-                    {/* ── Grid d'estadístiques (ara 4 targetes) ── */}
+                    
                     <div className={`${styles.statsGrid} ${styles.statsGrid4}`}>
                         <TarjetaEstat
                             icon="👥"
@@ -140,7 +137,7 @@ export default function PanellFisio({ perfilUsuari, onNavegar }) {
                             label="Pacients finalitzats"
                             color="#16a34a"
                         />
-                        {/* ── Nova targeta: pendents de confirmació ── */}
+                        
                         <TarjetaEstat
                             icon="⏳"
                             valor={estadistiques?.pendents ?? 0}

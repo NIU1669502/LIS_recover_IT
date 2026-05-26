@@ -1,11 +1,7 @@
-// Validació només per a **nous** registres (login i usuaris existents no es toquen).
 
 const LLETRES_DNI = 'TRWAGMYFPDXBNJZSQVHLCKE'
 
-/**
- * DNI espanyol: 8 xifres + 1 lletra, amb lletra de control vàlida.
- * @returns {{ valid: true, dniNormalitzat: string } | { valid: false, error: string }}
- */
+
 export function validarDniNouUsuari(dniBrut) {
     const senseEspais = String(dniBrut || '').trim().toUpperCase().replace(/\s+/g, '')
     if (!/^\d{8}[A-Z]$/.test(senseEspais)) {
@@ -25,10 +21,7 @@ export function validarDniNouUsuari(dniBrut) {
     return { valid: true, dniNormalitzat: senseEspais }
 }
 
-/**
- * Format de correu vàlid (suficient per a registre; no cal ser exhaustiu com RFC 5322).
- * @returns {{ valid: true, email: string } | { valid: false, error: string }}
- */
+
 export function validarEmailNouUsuari(emailBrut) {
     const email = String(emailBrut || '').trim().toLowerCase()
     if (!email) {
@@ -37,7 +30,6 @@ export function validarEmailNouUsuari(emailBrut) {
     if (email.length > 254) {
         return { valid: false, error: 'El correu electrònic és massa llarg.' }
     }
-    // Format estàndard: part local @ domini amb almenys un punt i TLD ≥ 2 caràcters
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!re.test(email)) {
         return {

@@ -3,17 +3,6 @@
 import { useState } from 'react'
 import styles from './graficaRecuperacio.module.css'
 
-// ============================================================
-// Component: GraficaRecuperacio
-// Burnup chart: mostra els punts acumulats per sessió respecte
-// al total de punts necessaris per completar la recuperació.
-//
-// Props:
-//   sessions    — array de { data_realitzacio, punts_obtinguts }
-//                 ordenats per data ASC
-//   puntsFinals — total de punts per a la recuperació completa
-// ============================================================
-
 const PAD = { top: 24, right: 24, bottom: 48, left: 52 }
 const W = 520
 const H = 260
@@ -28,7 +17,6 @@ function formatShortDate(iso) {
 export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0 }) {
     const [tooltip, setTooltip] = useState(null)
 
-    // ── Construir punts acumulats ──────────────────────────────
     const puntsAcumulats = []
     let acc = 0
     for (const s of sessions) {
@@ -39,14 +27,12 @@ export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0 }) {
     const totalPunts = puntsFinals > 0 ? puntsFinals : (acc > 0 ? acc : 1)
     const nSessions = puntsAcumulats.length
 
-    // ── Coordenades del SVG ────────────────────────────────────
     const innerW = W - PAD.left - PAD.right
     const innerH = H - PAD.top - PAD.bottom
 
     const xPos = (i) => PAD.left + (nSessions <= 1 ? innerW / 2 : (i / (nSessions - 1)) * innerW)
     const yPos = (p) => PAD.top + innerH - (Math.min(p, totalPunts) / totalPunts) * innerH
 
-    // ── Línia de progrés ──────────────────────────────────────
     const punts = [{ punts: 0, data: null }, ...puntsAcumulats]
     const linePoints = punts.map((p, i) => {
         const x = PAD.left + (nSessions === 0 ? 0 : (i / (nSessions)) * innerW)
@@ -62,13 +48,11 @@ export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0 }) {
         ? `${linePath} L ${linePoints[linePoints.length - 1].x.toFixed(1)} ${(PAD.top + innerH).toFixed(1)} L ${PAD.left} ${(PAD.top + innerH).toFixed(1)} Z`
         : ''
 
-    // ── Etiquetes eix Y (4 nivells) ───────────────────────────
     const yTicks = [0, 0.25, 0.5, 0.75, 1].map(f => ({
         y: PAD.top + innerH - f * innerH,
         label: Math.round(f * totalPunts),
     }))
 
-    // ── Etiquetes eix X (màx 5) ───────────────────────────────
     const xTicks = []
     if (nSessions > 0) {
         const step = Math.max(1, Math.ceil(nSessions / 4))
@@ -77,7 +61,6 @@ export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0 }) {
         }
     }
 
-    // ── % de progrés ──────────────────────────────────────────
     const progres = totalPunts > 0 ? Math.min(100, Math.round((acc / totalPunts) * 100)) : 0
 
     return (
@@ -116,7 +99,7 @@ export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0 }) {
                             </linearGradient>
                         </defs>
 
-                        {/* ── Grid horitzontal ── */}
+                        
                         {yTicks.map((t, i) => (
                             <g key={i}>
                                 <line
@@ -135,7 +118,7 @@ export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0 }) {
                             </g>
                         ))}
 
-                        {/* ── Línia de meta ── */}
+                        
                         <line
                             x1={PAD.left} y1={PAD.top}
                             x2={W - PAD.right} y2={PAD.top}
@@ -149,12 +132,12 @@ export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0 }) {
                             Meta
                         </text>
 
-                        {/* ── Àrea sota la corba ── */}
+                        
                         {areaPath && (
                             <path d={areaPath} fill="url(#areaGrad)" />
                         )}
 
-                        {/* ── Línia de progrés ── */}
+                        
                         <path
                             d={linePath}
                             fill="none"
@@ -164,7 +147,7 @@ export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0 }) {
                             strokeLinejoin="round"
                         />
 
-                        {/* ── Etiquetes eix X ── */}
+                        
                         {xTicks.map((t, i) => (
                             <text
                                 key={i}
@@ -176,7 +159,7 @@ export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0 }) {
                             </text>
                         ))}
 
-                        {/* ── Punts interactius ── */}
+                        
                         {puntsAcumulats.map((p, i) => {
                             const x = xPos(i)
                             const y = yPos(p.punts)
@@ -197,7 +180,7 @@ export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0 }) {
                             )
                         })}
 
-                        {/* ── Tooltip ── */}
+                        
                         {tooltip && (() => {
                             const tx = Math.min(tooltip.x, W - 110)
                             const ty = Math.max(tooltip.y - 52, PAD.top)
@@ -223,7 +206,7 @@ export default function GraficaRecuperacio({ sessions = [], puntsFinals = 0 }) {
                 </div>
             )}
 
-            {/* ── Llegenda ── */}
+            
             <div className={styles.llegenda}>
                 <div className={styles.llegendaItem}>
                     <span className={styles.llegendaLiniaBlava} />
