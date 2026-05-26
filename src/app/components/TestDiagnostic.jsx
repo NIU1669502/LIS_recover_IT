@@ -10,8 +10,10 @@ export default function TestDiagnostic({ onGuardar, onCancel }) {
     const [respostes, setRespostes] = useState({})
     const [resultat, setResultat] = useState(null)
     const [textInput, setTextInput] = useState('')
+    const [rutinaNoDisponible, setRutinaNoDisponible] = useState(false)
+    const [comprovant, setComprovant] = useState(false)
 
-    const seleccionar = (valor) => {
+    const seleccionar = async (valor) => {
         const novesRespostes = { ...respostes, [pas]: valor }
         setRespostes(novesRespostes)
         setTextInput('')
@@ -21,6 +23,24 @@ export default function TestDiagnostic({ onGuardar, onCancel }) {
         } else {
             const detall = determinarLesio(novesRespostes)
             const muscle = TEST_STEPS[0].opcions[novesRespostes[0]]
+            const idCos = TEST_STEPS[0].opcions.indexOf(muscle) + 1
+
+            // Comprovar si existeix rutina a la BD abans de mostrar resultat
+            setComprovant(true)
+            const { supabase } = await import('../../utils/supabase')
+            const { data: rutina } = await supabase
+                .from('rutines_lesio')
+                .select('id_rutina')
+                .eq('id_muscul', idCos)
+                .eq('id_lesio', detall.id_lesio)
+                .maybeSingle()
+            setComprovant(false)
+
+            if (!rutina) {
+                setRutinaNoDisponible(true)
+                return
+            }
+
             setResultat({ muscle, ...detall, descripcio: novesRespostes[4] })
         }
     }
@@ -30,8 +50,30 @@ export default function TestDiagnostic({ onGuardar, onCancel }) {
         setRespostes({})
         setResultat(null)
         setTextInput('')
+        setRutinaNoDisponible(false)
     }
 
+    // ── Pantalla: rutina no disponible ──────────────────────
+    if (rutinaNoDisponible) {
+        return (
+            <div className={styles.resultContainer}>
+                <div className={styles.emoji}>⚠️</div>
+                <h2 className={styles.resultTitle}>Rutina no disponible</h2>
+                <p className={styles.resultText}>
+                    Encara no tenim una rutina per a aquesta combinació de múscul i lesió.
+                    Contacta amb el teu fisioterapeuta per obtenir un pla personalitzat.
+                </p>
+                <button onClick={reiniciar} className={styles.secondaryButton}>
+                    ↺ Tornar a fer el test
+                </button>
+                <button onClick={onCancel} className={styles.primaryButton}>
+                    Tornar a l&apos;inici
+                </button>
+            </div>
+        )
+    }
+
+    // ── Pantalla: resultat del test ─────────────────────────
     if (resultat) {
         return (
             <div className={styles.resultContainer}>
@@ -73,6 +115,15 @@ export default function TestDiagnostic({ onGuardar, onCancel }) {
         )
     }
 
+    // ── Pantalla: preguntes ─────────────────────────────────
+    if (comprovant) {
+        return (
+            <div className={styles.resultContainer}>
+                <p className={styles.resultText}>Comprovant disponibilitat...</p>
+            </div>
+        )
+    }
+
     const step = TEST_STEPS[pas]
 
     return (
@@ -81,7 +132,6 @@ export default function TestDiagnostic({ onGuardar, onCancel }) {
                 &times;
             </button>
 
-            
             <p className={styles.progressText}>
                 Pas {pas + 1} de {TEST_STEPS.length}
             </p>
@@ -111,11 +161,9 @@ export default function TestDiagnostic({ onGuardar, onCancel }) {
                             onChange={(e) => setTextInput(e.target.value)}
                             className={styles.textarea}
                         />
-
                         <button
                             onClick={() => seleccionar(textInput)}
-                            className={`${styles.nextButton} ${styles.nextButtonEnabled
-                                }`}
+                            className={`${styles.nextButton} ${styles.nextButtonEnabled}`}
                         >
                             Següent
                         </button>
