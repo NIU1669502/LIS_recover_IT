@@ -88,10 +88,13 @@ export default function HistorialSessions({ perfilUsuari, idDiagnosticFiltre = n
 
                             <tbody>
                                 {sessions.map(s => (
-                                    <tr key={s.id_sessio}>
+                                    <tr key={s.id_sessio} className={s.penalitzat ? styles.rowPenalizada : ''}>
                                         <td>
                                             <div className={styles.exerciseName}>
                                                 📅 {formatDia(s.data_realitzacio)}
+                                                {s.penalitzat && (
+                                                    <span className={styles.badgePenalizada}>⚠️ Penalitzada</span>
+                                                )}
                                             </div>
                                             <div className={styles.exerciseDesc}>
                                                 {formatHora(s.data_realitzacio)}
@@ -107,9 +110,18 @@ export default function HistorialSessions({ perfilUsuari, idDiagnosticFiltre = n
                                             </div>
                                         </td>
 
-                                        <td>{etiquetaFase(s.fase)}</td>
+                                        <td>
+                                            {etiquetaFase(s.fase)}
+                                            {s.penalitzat && <div className={styles.penalizadaRepetirText}>S'ha de repetir</div>}
+                                        </td>
 
-                                        <td>+{s.punts_obtinguts ?? 0} pts</td>
+                                        <td>
+                                            {s.penalitzat ? (
+                                                <span className={styles.puntsPenalitzats}><s>+{s.punts_obtinguts ?? 0} pts</s></span>
+                                            ) : (
+                                                `+${s.punts_obtinguts ?? 0} pts`
+                                            )}
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>

@@ -83,6 +83,7 @@ export function useHistorial(dni, idDiagnosticFiltre = null) {
                         data_realitzacio,
                         fase,
                         punts_obtinguts,
+                        penalitzat,
                         id_diagnostic,
                         id_lesio,
                         diagnostic!inner (

@@ -42,11 +42,12 @@ export default function HistorialDiagnostics({ perfilUsuari, onNavegar, onVeureH
             ])
 
             const activesData = diagnosticsActius ?? []
+            const realsFinalitzats = (finalitzats ?? []).filter(d => d.punts_recuperacio !== -1)
             setActives(activesData)
-            setFinalitzades(finalitzats ?? [])
+            setFinalitzades(realsFinalitzats)
 
             // 2. Cargar nombres de músculos
-            const tots = [...activesData, ...(finalitzats ?? [])]
+            const tots = [...activesData, ...realsFinalitzats]
             const partIds = [...new Set(tots.map((d) => d.part_cos).filter(Boolean))]
             if (partIds.length > 0) {
                 const { data: musculsRows } = await supabase

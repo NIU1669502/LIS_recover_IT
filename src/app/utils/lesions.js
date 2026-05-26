@@ -1,6 +1,7 @@
 import { supabase } from '../../utils/supabase'
 import { TEST_STEPS } from '../data/testSteps.js'
 import { showToast } from '../utils/toast'
+import { recuperarSessioPenalitzada } from '../utils/penalitzacio'
 
 // ============================================================
 // Determina el tipus de lesió a partir de les respostes del test
@@ -21,7 +22,7 @@ export function determinarLesio(respostes) {
 }
 
 // ============================================================
-// Obté el diagnòstic actiu de l'usuari i els exercicis de la fase actual
+// Obté el diagnòstic actiu de l'usuari
 // ============================================================
 export async function getDiagnosticActiu(userDni) {
     const { data: diagnostic, error } = await supabase
@@ -37,7 +38,6 @@ export async function getDiagnosticActiu(userDni) {
     return diagnostic
 }
 
-/** Tots els diagnòstics no finalitzats del pacient (més recents primer). */
 export async function getDiagnosticsActius(userDni) {
     const { data, error } = await supabase
         .from('diagnostic')
@@ -51,9 +51,8 @@ export async function getDiagnosticsActius(userDni) {
 }
 
 export async function getExercicisDelaFase(diagnostic) {
-    const { part_cos, id_lesio, fase_actual } = diagnostic
+    const { part_cos, id_lesio, fase_actual, id_diagnostic, dni_pacient } = diagnostic
 
-    // 1. Buscar la rutina que coincideix amb múscul + lesió
     const { data: rutina, error: rutinaError } = await supabase
         .from('rutines_lesio')
         .select('id_fase_1, id_fase_2, id_fase_3')
@@ -61,50 +60,68 @@ export async function getExercicisDelaFase(diagnostic) {
         .eq('id_lesio', id_lesio)
         .single()
 
-    if (rutinaError || !rutina) {
-        console.error('No s\'ha trobat rutina per aquest diagnòstic', rutinaError)
-        return []
-    }
+    if (rutinaError || !rutina) return []
 
-    // 2. Agafar l'id de la fase actual
     const idFase = fase_actual === 1 ? rutina.id_fase_1
         : fase_actual === 2 ? rutina.id_fase_2
-            : rutina.id_fase_3
+        : rutina.id_fase_3
 
-    // 3. Buscar els 3 exercicis d'aquesta fase
     const { data: fase, error: faseError } = await supabase
         .from('fases')
-        .select('exercici_1, exercici_2, exercici_3')
+        .select('exercici_1, exercici_2, exercici_3, multiplicador')
         .eq('id_fase', idFase)
         .single()
 
-    if (faseError || !fase) {
-        console.error('No s\'ha trobat la fase', faseError)
-        return []
-    }
+    if (faseError || !fase) return []
 
-    // 4. Fetch dels exercicis
-    const ids = [fase.exercici_1, fase.exercici_2, fase.exercici_3].filter(Boolean)
-
-    const { data: exercicis, error: exError } = await supabase
+    // Carregar tots els exercicis disponibles
+    const { data: exercicis } = await supabase
         .from('exercicis')
         .select('*')
-        .in('id_exercici', ids)
 
-    if (exError) {
-        console.error('Error carregant exercicis', exError)
-        return []
-    }
+    const exMap = Object.fromEntries((exercicis || []).map(e => [e.id_exercici, e]))
 
-    // Mantenir l'ordre de la fase
-    return ids.map(id => exercicis.find(e => e.id_exercici === id)).filter(Boolean)
+    // Carregar personalitzacions del fisio per aquest diagnòstic i fase
+    const { data: personalitzacions } = await supabase
+        .from('rutina_personalitzada_pacient')
+        .select('*')
+        .eq('id_diagnostic', id_diagnostic)
+        .eq('fase', fase_actual)
+
+    const getPerso = (slot) =>
+        (personalitzacions || []).find(p => p.slot_exercici === slot) || null
+
+    // Construir la llista aplicant overrides
+    const slots = [
+        { slot: 1, idBase: fase.exercici_1 },
+        { slot: 2, idBase: fase.exercici_2 },
+        { slot: 3, idBase: fase.exercici_3 },
+    ]
+
+    return slots
+        .filter(s => s.idBase)
+        .map(s => {
+            const perso = getPerso(s.slot)
+            const exBase = exMap[s.idBase] || {}
+            const exFinal = perso?.id_exercici ? exMap[perso.id_exercici] : exBase
+
+            return {
+                ...exFinal,
+                // Aplicar overrides camp a camp
+                duracio_segons: perso?.duracio_segons ?? exFinal.duracio_segons,
+                Repeticions: perso?.repeticions ?? exFinal.Repeticions,
+                punts: perso?.punts ?? exFinal.punts,
+                multiplicador: perso?.multiplicador ?? fase.multiplicador ?? 1,
+            }
+        })
 }
 
 // ============================================================
 // Avança la fase del diagnòstic i suma punts a l'usuari
+// dolorSessio: int (1-10) o null
+// dolorExercicis: [{index, nom, dolor}] o null
 // ============================================================
-export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = null) {
-    // 1. Agafar diagnòstic (el de la sessió en curs, o el més recent si no s'especifica)
+export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = null, dolorSessio = null, dolorExercicis = null) {
     let diagnostic
     if (idDiagnostic != null) {
         const { data, error } = await supabase
@@ -121,7 +138,6 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
     }
     if (!diagnostic) return { completada: false }
 
-    // 2. Determinar n_sessions requerides per a la fase actual
     const { data: rutina } = await supabase
         .from('rutines_lesio')
         .select('id_fase_1, id_fase_2, id_fase_3')
@@ -129,24 +145,21 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
         .eq('id_lesio', diagnostic.id_lesio)
         .single()
 
-    let idFase;
-    if (diagnostic.fase_actual === 1) idFase = rutina?.id_fase_1;
-    else if (diagnostic.fase_actual === 2) idFase = rutina?.id_fase_2;
-    else idFase = rutina?.id_fase_3;
+    let idFase
+    if (diagnostic.fase_actual === 1) idFase = rutina?.id_fase_1
+    else if (diagnostic.fase_actual === 2) idFase = rutina?.id_fase_2
+    else idFase = rutina?.id_fase_3
 
-    let nSessionsRequerides = 1; // Per defecte
+    let nSessionsRequerides = 1
     if (idFase) {
         const { data: faseInfo } = await supabase
             .from('fases')
             .select('n_sessions')
             .eq('id_fase', idFase)
             .single()
-        if (faseInfo && faseInfo.n_sessions) {
-            nSessionsRequerides = faseInfo.n_sessions;
-        }
+        if (faseInfo?.n_sessions) nSessionsRequerides = faseInfo.n_sessions
     }
 
-    // 3. Incrementar sessions completades i avaluar si s'avança de fase
     const numSessionsActualitzat = (diagnostic.num_sessions || 0) + 1
 
     let novaFase = diagnostic.fase_actual
@@ -168,7 +181,6 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
 
     const nousPuntsRecuperacio = (diagnostic.punts_recuperacio || 0) + puntsGuanyats
 
-    // 4. Actualitzar fase, num_sessions i punts_recuperacio a la BD
     const actualitzacio = {
         fase_actual: novaFase,
         num_sessions: nouNumSessions,
@@ -185,7 +197,7 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
         .update(actualitzacio)
         .eq('id_diagnostic', diagnostic.id_diagnostic)
 
-    // Registrem la sessió a l'historial (no bloquegem el flux si falla)
+    // Registrem la sessió a l'historial amb les valoracions de dolor
     try {
         await supabase
             .from('historial_sessions')
@@ -195,9 +207,18 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
                 id_lesio: diagnostic.id_lesio,
                 fase: diagnostic.fase_actual,
                 punts_obtinguts: puntsGuanyats || 0,
+                dolor_sessio: dolorSessio ?? null,
+                dolor_exercicis: dolorExercicis ? JSON.stringify(dolorExercicis) : null,
             }])
     } catch (err) {
         console.error('No s\'ha pogut registrar la sessió a l\'historial', err)
+    }
+
+    // Si hi havia una sessió penalitzada, la marquem com a recuperada
+    try {
+        await recuperarSessioPenalitzada(diagnostic.id_diagnostic)
+    } catch (err) {
+        console.error('No s\'ha pogut recuperar la sessió penalitzada', err)
     }
 
     return { completada, novaFase: completada ? null : novaFase, faseAvançada, nSessionsRestants: nSessionsRequerides - nouNumSessions }
@@ -206,7 +227,7 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
 // ============================================================
 // RF-PAC-01 — Guarda o actualitza el diagnòstic a Supabase
 // ============================================================
-export async function processarTestDiagnostic(resultat, navegarA,) {
+export async function processarTestDiagnostic(resultat, navegarA) {
     try {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
@@ -219,7 +240,6 @@ export async function processarTestDiagnostic(resultat, navegarA,) {
         const idxCos = TEST_STEPS[0].opcions.indexOf(resultat.muscle)
         const idCos = idxCos >= 0 ? idxCos + 1 : 1
 
-        // ── Obtenir ids de fases ─────────────────────────────
         const { data: idFases } = await supabase
             .from('rutines_lesio')
             .select('id_fase_1, id_fase_2, id_fase_3')
@@ -227,14 +247,9 @@ export async function processarTestDiagnostic(resultat, navegarA,) {
             .eq('id_lesio', resultat.id_lesio)
             .single()
 
-        // ── Obtenir info de les 3 fases en paral·lel ────────
         const [
-            { data: multifase1 },
-            { data: multifase2 },
-            { data: multifase3 },
-            { data: infoFase1 },
-            { data: infoFase2 },
-            { data: infoFase3 },
+            { data: multifase1 }, { data: multifase2 }, { data: multifase3 },
+            { data: infoFase1 }, { data: infoFase2 }, { data: infoFase3 },
         ] = await Promise.all([
             supabase.from('fases').select('multiplicador').eq('id_fase', idFases.id_fase_1).single(),
             supabase.from('fases').select('multiplicador').eq('id_fase', idFases.id_fase_2).single(),
@@ -244,7 +259,6 @@ export async function processarTestDiagnostic(resultat, navegarA,) {
             supabase.from('fases').select('exercici_1, exercici_2, exercici_3, n_sessions').eq('id_fase', idFases.id_fase_3).single(),
         ])
 
-        // ── Obtenir punts de tots els exercicis ──────────────
         const idsExercicis = [...new Set([
             infoFase1.exercici_1, infoFase1.exercici_2, infoFase1.exercici_3,
             infoFase2.exercici_1, infoFase2.exercici_2, infoFase2.exercici_3,
@@ -256,21 +270,18 @@ export async function processarTestDiagnostic(resultat, navegarA,) {
             .select('id_exercici, punts')
             .in('id_exercici', idsExercicis)
 
-        const puntsPer = Object.fromEntries(
-            exercicisInfo.map(e => [e.id_exercici, e.punts])
-        )
+        const puntsPer = Object.fromEntries(exercicisInfo.map(e => [e.id_exercici, e.punts]))
 
         const calcularPuntsFase = (infoFase, multiplicador) =>
             [infoFase.exercici_1, infoFase.exercici_2, infoFase.exercici_3]
                 .filter(Boolean)
                 .reduce((acc, id) => acc + (puntsPer[id] ?? 0), 0) * (multiplicador ?? 1) * (infoFase.n_sessions ?? 1)
 
-        const puntsFase1 = calcularPuntsFase(infoFase1, multifase1?.multiplicador)
-        const puntsFase2 = calcularPuntsFase(infoFase2, multifase2?.multiplicador)
-        const puntsFase3 = calcularPuntsFase(infoFase3, multifase3?.multiplicador)
-        const puntsTotal = puntsFase1 + puntsFase2 + puntsFase3
+        const puntsTotal =
+            calcularPuntsFase(infoFase1, multifase1?.multiplicador) +
+            calcularPuntsFase(infoFase2, multifase2?.multiplicador) +
+            calcularPuntsFase(infoFase3, multifase3?.multiplicador)
 
-        // ── Guardar diagnòstic ───────────────────────────────
         const { error } = await supabase
             .from('diagnostic')
             .insert([{
@@ -299,14 +310,12 @@ export async function processarTestDiagnostic(resultat, navegarA,) {
     }
 }
 
-
 // ============================================================
-// Obté el resum global de sessions del diagnòstic (fetes i totals)
+// Obté el resum global de sessions del diagnòstic
 // ============================================================
 export async function getResumSessions(diagnostic) {
     if (!diagnostic) return { fetes: 0, totals: 0 }
 
-    // Obtenir ids de les tres fases
     const { data: rutina } = await supabase
         .from('rutines_lesio')
         .select('id_fase_1, id_fase_2, id_fase_3')
@@ -318,7 +327,6 @@ export async function getResumSessions(diagnostic) {
 
     const ids = [rutina.id_fase_1, rutina.id_fase_2, rutina.id_fase_3].filter(Boolean)
 
-    // Obtenir n_sessions de cadascuna
     const { data: fases } = await supabase
         .from('fases')
         .select('id_fase, n_sessions')
@@ -338,27 +346,32 @@ export async function getResumSessions(diagnostic) {
     else if (diagnostic.fase_actual === 2) totals = req2
     else if (diagnostic.fase_actual === 3) totals = req3
 
-    let fetes = diagnostic.num_sessions || 0
-
-    return { fetes, totals }
+    return { fetes: diagnostic.num_sessions || 0, totals }
 }
 
-
 // ============================================================
-// Elimina un diagnòstic i totes les seves sessions ( CASCADE implicit)
+// Elimina (soft-delete) un diagnòstic
+// Manté les sessions fetes per l'historial però elimina
+// les penalitzacions i l'oculta de les vistes principals.
 // ============================================================
 export async function eliminarDiagnostic(idDiagnostic) {
+    // 1. Treure la penalització de totes les sessions d'aquest diagnòstic
+    await supabase
+        .from('historial_sessions')
+        .update({ penalitzat: false })
+        .eq('id_diagnostic', idDiagnostic)
+
+    // 2. Soft-delete del diagnòstic
     const { error } = await supabase
         .from('diagnostic')
-        .delete()
+        .update({ finalitzat: true, punts_recuperacio: -1 })
         .eq('id_diagnostic', idDiagnostic)
 
     if (error) {
-        console.error('Error esborrant diagnòstic:', error)
+        console.error('Error esborrant diagnòstic (soft-delete):', error)
         showToast('No s\'ha pogut esborrar el diagnòstic', 'error')
         return false
     }
-showToast('Diagnòstic esborrat correctament', 'success')
-    // Les sessions s'esborren automàticament per la restricció CASCADE en la BD
+    showToast('Diagnòstic esborrat correctament', 'success')
     return true
 }
