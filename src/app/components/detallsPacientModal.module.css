@@ -455,6 +455,34 @@
     }
 }
 
+@media (max-width: 900px) {
+    .overlay {
+        padding: 14px;
+    }
+
+    .panel {
+        max-width: 100%;
+        border-radius: 14px;
+    }
+
+    .header {
+        padding: 16px 16px 14px;
+    }
+
+    .cos {
+        padding: 16px;
+    }
+
+    .diagCardHeader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .diagBadges {
+        justify-content: flex-start;
+    }
+}
+
 .diagCard {
     border: 1.5px solid #f0f0f0;
     border-radius: 12px;

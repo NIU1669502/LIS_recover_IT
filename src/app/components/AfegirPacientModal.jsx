@@ -14,7 +14,6 @@ import styles from './AfegirPacientModal.module.css'
 //   - Pas 3: mostrar el codi de validació generat
 // Si el pacient ja existeix (infoPacientInicial), salta al pas 1
 // i afegeix directament un nou diagnòstic sense generar codi.
-
 const lesions_per_muscul = {
     1: [1, 2, 3],
     2: [1, 2, 3],

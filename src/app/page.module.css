@@ -800,6 +800,7 @@
 @media (max-width: 1100px) {
     .withSidebar {
         padding-left: 0;
+        padding-top: 88px;
     }
 
     .main {
@@ -835,6 +836,10 @@
 }
 
 @media (max-width: 700px) {
+    .withSidebar {
+        padding-top: 76px;
+    }
+
     .main {
         padding: 1.25rem;
     }
@@ -845,6 +850,7 @@
 
     .title {
         font-size: 3.1rem;
+        line-height: 1;
     }
 
     .subtitle {
@@ -854,6 +860,7 @@
 
     .dashboardTitle {
         font-size: 2.2rem;
+        line-height: 1.15;
     }
 
     .dashboardSubtitle {
@@ -872,7 +879,7 @@
     }
 
     .imageBox {
-        max-width: 360px;
+        max-width: 100%;
         border-radius: 8px;
     }
 
@@ -902,5 +909,9 @@
 
     .testSection {
         padding: 1.25rem;
+    }
+
+    .testTitle {
+        font-size: 1.35rem;
     }
 }

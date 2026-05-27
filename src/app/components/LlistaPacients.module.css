@@ -422,6 +422,21 @@
     }
 }
 
+@media (max-width: 900px) {
+    .contenidor {
+        padding: 28px 24px;
+    }
+
+    .topBar {
+        align-items: stretch;
+    }
+
+    .afegirBtn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
 
 .afegirPlaBtn {
     margin-top: 16px;
