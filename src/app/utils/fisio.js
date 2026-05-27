@@ -454,20 +454,28 @@ export async function guardarPersonalitzacio(dniFisio, {
                     // Overrides dels altres slots de la mateixa fase
                     const { data: altresOverrides } = await supabase
                         .from('rutina_personalitzada_pacient')
-                        .select('slot_exercici, punts')
+                        .select('slot_exercici, punts, multiplicador')
                         .eq('id_diagnostic', id_diagnostic)
                         .eq('fase', fase)
                         .neq('slot_exercici', slot_exercici)
-                    const overrideMap = Object.fromEntries((altresOverrides || []).map(p => [p.slot_exercici, p.punts]))
+                    const overrideMap = Object.fromEntries((altresOverrides || []).map(p => [p.slot_exercici, p]))
 
                     // Punts per sessió amb tots els overrides actuals
-                    const ptsSessio = [1, 2, 3].reduce((acc, s) => {
+                    const ptsPorSessio = [1, 2, 3].reduce((acc, s) => {
                         const idEx = faseInfo[`exercici_${s}`]
                         if (!idEx) return acc
-                        const ptsSlot = s === slot_exercici ? punts : (overrideMap[s] ?? puntsPer[idEx] ?? 0)
-                        return acc + ptsSlot
+                        
+                        let ptsSlot, multSlot
+                        if (s === slot_exercici) {
+                            ptsSlot = punts
+                            multSlot = multiplicador ?? faseInfo.multiplicador ?? 1
+                        } else {
+                            ptsSlot = overrideMap[s]?.punts ?? puntsPer[idEx] ?? 0
+                            multSlot = overrideMap[s]?.multiplicador ?? faseInfo.multiplicador ?? 1
+                        }
+                        
+                        return acc + (ptsSlot * multSlot)
                     }, 0)
-                    const ptsPorSessio = ptsSessio * (multiplicador ?? faseInfo.multiplicador ?? 1)
 
                     // Umbral original (IMMUTABLE)
                     const ptsOriginalsPerSessio = [1, 2, 3].reduce((acc, s) => {

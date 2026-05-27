@@ -723,3 +723,40 @@ select.formInput {
     font-size: 0.68rem;
     text-decoration: line-through;
 }
+
+/* ── Alerta de penalització ─────────────────────────────── */
+
+.alertaPenalitzacio {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #fef2f2;
+    border: 1.5px solid #fecaca;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 4px;
+}
+
+.alertaPenalitzacioIcon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.alertaPenalitzacioText {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.alertaPenalitzacioText strong {
+    color: #991b1b;
+    font-size: 0.95rem;
+}
+
+.alertaPenalitzacioText p {
+    color: #b91c1c;
+    font-size: 0.85rem;
+    margin: 0;
+    line-height: 1.4;
+}

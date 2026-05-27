@@ -29,6 +29,7 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
     const [avancat, setAvancat] = useState(false)
     const [avançant, setAvançant] = useState(false)
     const [faseActualDiag, setFaseActualDiag] = useState(null)
+    const [tePenalitzacio, setTePenalitzacio] = useState(false)
 
     const [reculat, setReculat] = useState(false)
     const [reculant, setReculant] = useState(false)
@@ -36,10 +37,11 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
     useEffect(() => {
         const carregar = async () => {
             setCarregant(true)
-            const [rutinaData, { data: exs }, { data: diag }] = await Promise.all([
+            const [rutinaData, { data: exs }, { data: diag }, { data: sessioPenalitzada }] = await Promise.all([
                 getRutinaAmbPersonalitzacio(idDiagnostic, idLesio, partCos),
                 supabase.from('exercicis').select('id_exercici, nom, duracio_segons, Repeticions, punts'),
                 supabase.from('diagnostic').select('fase_actual, finalitzat, punts_recuperacio, num_sessions').eq('id_diagnostic', idDiagnostic).maybeSingle(),
+                supabase.from('historial_sessions').select('id_sessio').eq('id_diagnostic', idDiagnostic).eq('penalitzat', true).limit(1).maybeSingle()
             ])
 
             const diagVal = diag || {}
@@ -77,6 +79,7 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
             setRutina(rutinaAmbProgres)
             setExercicisDisponibles(exs || [])
             setFaseActualDiag(diag?.fase_actual ?? null)
+            setTePenalitzacio(!!sessioPenalitzada)
             setCarregant(false)
         }
         carregar()
@@ -91,6 +94,7 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
     const slotsActuals = rutina ? rutina[`fase${faseActiva}`] : []
 
     const handleEditar = (slot) => {
+        if (tePenalitzacio) return
         setForm({
             id_exercici: slot.id_exercici,
             duracio_segons: slot.duracio_segons,
@@ -211,8 +215,17 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
                             ))}
                         </div>
 
+                        {tePenalitzacio && (
+                            <div className={styles.alertaPenalitzacio}>
+                                <span className={styles.alertaPenalitzacioIcon}>⚠️</span>
+                                <div className={styles.alertaPenalitzacioText}>
+                                    <strong>Rutina bloquejada temporalment</strong>
+                                    <p>Aquest pacient té una sessió penalitzada per inactivitat pendent de recuperar. No es poden fer canvis en la rutina fins que la completi.</p>
+                                </div>
+                            </div>
+                        )}
 
-                        {faseActualDiag != null && (
+                        {faseActualDiag != null && !tePenalitzacio && (
                             <div className={styles.avancarFaseBox}>
                                 <div className={styles.avancarFaseInfo}>
                                     <span className={styles.avancarFaseLabel}>
@@ -334,8 +347,8 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
                                                             const mult = parseInt(form.multiplicador) || 1
                                                             const nSessionsOriginal = rutina.nSessions[faseActiva] ?? 0
                                                             const altresSlots = slotsActuals.filter(s2 => s2.slot !== slot.slot)
-                                                            const puntsSenseAquest = altresSlots.reduce((acc, s2) => acc + (s2.punts ?? 0), 0)
-                                                            const ptsPorSessio = (puntsSenseAquest + nousPunts) * mult
+                                                            const puntsSenseAquest = altresSlots.reduce((acc, s2) => acc + ((s2.punts ?? 0) * (s2.multiplicador ?? 1)), 0)
+                                                            const ptsPorSessio = puntsSenseAquest + (nousPunts * mult)
                                                             const ptsOriginalsPerSessio = slotsActuals.reduce((acc, s2) => acc + (s2.punts_base ?? 0), 0)
                                                             const multiplicadorBase = slot.multiplicador_base ?? 1
                                                             const umbralFase = ptsOriginalsPerSessio * multiplicadorBase * nSessionsOriginal
@@ -360,8 +373,8 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
                                                                 <div className={styles.previewSessions}>
                                                                     <span className={styles.previewLabel}>⭐ Amb aquest canvi:</span>
                                                                     <span>
-                                                                        Sessions necessàries: <strong>{novasSessions}</strong>
-                                                                        {diff > 0 && <span className={styles.previewPositiu}> · S&apos;estalvia {diff} {diff === 1 ? 'sessió' : 'sessions'}</span>}
+                                                                        Sessions necessàries a partir d'ara: <strong>{novasSessions}</strong>
+                                                                        {diff > 0 && <span className={styles.previewPositiu}> · S&apos;estalvia {diff} {diff === 1 ? 'sessió' : 'sessions'} del total</span>}
                                                                         {diff < 0 && <span className={styles.previewNegatiu}> · Necessita {Math.abs(diff)} {Math.abs(diff) === 1 ? 'sessió' : 'sessions'} més</span>}
                                                                         {diff === 0 && <span className={styles.previewNeutral}> · (sense canvis)</span>}
                                                                     </span>
