@@ -441,18 +441,13 @@
 
     .sessioRow {
         grid-template-columns: 1fr auto;
-        grid-template-rows: auto auto;
+        gap: 8px 12px;
     }
 
-    .sessioLesio {
-        grid-column: 1;
-        max-width: 100%;
-    }
-
-    .sessioPunts {
-        grid-column: 2;
-        grid-row: 1;
-    }
+    .sessioData { grid-column: 1; grid-row: 1; }
+    .sessioPunts { grid-column: 2; grid-row: 1; justify-self: end; }
+    .sessioLesio { grid-column: 1; grid-row: 2; max-width: 100%; }
+    .sessioBadge { grid-column: 2; grid-row: 2; justify-self: end; }
 }
 
 @media (max-width: 900px) {

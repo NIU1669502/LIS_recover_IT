@@ -109,9 +109,9 @@
 
 /* Rutina info tags */
 .rutinaInfo {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 1rem;
-    flex-wrap: wrap;
     margin-bottom: 2.5rem;
 }
 
@@ -151,6 +151,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
     color: var(--accent-blue);
     font-size: 1rem;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
@@ -163,6 +164,18 @@
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .rutinaInfo {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .container {
+        padding: 1.5rem 1rem;
+    }
 }
 
 /* Fase progress */

@@ -182,6 +182,12 @@
         overflow-x: auto;
         gap: 0.45rem;
         padding: 0 0.1rem;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    
+    .nav::-webkit-scrollbar {
+        display: none;
     }
 
     .navItem {

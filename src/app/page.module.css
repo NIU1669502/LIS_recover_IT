@@ -846,6 +846,7 @@
 
     .homeSection {
         padding-top: 2.4rem;
+        gap: 2rem;
     }
 
     .title {

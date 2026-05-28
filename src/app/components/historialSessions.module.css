@@ -95,13 +95,15 @@
 .tableWrapper {
     background: var(--bg-secondary);
     border-radius: 16px;
-    overflow: hidden;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     box-shadow: 0 15px 35px -5px rgba(37, 99, 235, 0.08);
     border: 1px solid var(--border-color);
 }
 
 .table {
     width: 100%;
+    min-width: 700px;
     border-collapse: collapse;
     text-align: left;
 }
@@ -180,4 +182,99 @@
 .puntsPenalitzats {
     color: #9ca3af;
     font-weight: 500;
+}
+
+@media (max-width: 700px) {
+    .container {
+        padding: 1.5rem 1rem;
+    }
+
+    .title {
+        font-size: 1.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .filtreBanner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .filtreBannerButton {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Transform table into cards */
+    .tableWrapper {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        overflow-x: visible;
+        padding-bottom: 1rem;
+    }
+    
+    .table, .table tbody, .table tr, .table td {
+        display: block;
+        width: 100%;
+        min-width: unset;
+    }
+    
+    .table thead {
+        display: none;
+    }
+    
+    .table tr {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        margin-bottom: 1rem;
+        padding: 1.25rem;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.05);
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 0.75rem;
+        box-sizing: border-box;
+    }
+
+    .table tr:hover {
+        background: var(--bg-secondary);
+    }
+
+    .table td {
+        padding: 0;
+        border: none;
+    }
+
+    /* Date and Time */
+    .table td:nth-child(1) {
+        grid-column: 1;
+        grid-row: 1;
+    }
+    
+    /* Points */
+    .table td:nth-child(4) {
+        grid-column: 2;
+        grid-row: 1;
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--accent-blue);
+        text-align: right;
+    }
+
+    /* Lesion and Muscle */
+    .table td:nth-child(2) {
+        grid-column: 1 / span 2;
+        grid-row: 2;
+        padding-top: 0.75rem;
+        border-top: 1px dashed var(--border-color);
+    }
+
+    /* Phase and Penalty text */
+    .table td:nth-child(3) {
+        grid-column: 1 / span 2;
+        grid-row: 3;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        font-weight: 600;
+    }
 }
