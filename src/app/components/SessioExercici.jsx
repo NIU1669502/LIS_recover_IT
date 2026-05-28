@@ -217,48 +217,69 @@ export default function SessioExercici({ exercicis = [], indexInicial = 0, fase 
         return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&showinfo=0&loop=1&playlist=${videoId}&enablejsapi=0`
     }
 
-    if (mostrarCompletada && resultCompletada) {
-        const programaAcabat = resultCompletada.completada === true
-        const faseAvançada = resultCompletada.faseAvançada === true
-        const novaFase = resultCompletada.novaFase
+if (mostrarCompletada && resultCompletada) {
+    const programaAcabat = resultCompletada.completada === true
+    const faseAvançada = resultCompletada.faseAvançada === true
+    const novaFase = resultCompletada.novaFase
 
-        return (
-            <div className={styles.completadaContainer}>
-                <div className={styles.completadaIcon} aria-hidden="true">
-                    {programaAcabat ? '🏆' : '✅'}
-                </div>
-                <h2 className={styles.completadaTitle}>
-                    {programaAcabat ? 'Programa completat!' : 'Sessió completada!'}
-                </h2>
-                {programaAcabat ? (
-                    <p className={styles.completadaText}>Has completat totes les fases del programa. Enhorabona!</p>
-                ) : (
-                    <>
-                        <p className={styles.completadaText}>Has completat tots els exercicis d&apos;aquesta sessió.</p>
-                        {faseAvançada && novaFase != null && (
-                            <p className={styles.completadaSubtext}>Passes a la <strong>fase {novaFase} de 3</strong>.</p>
-                        )}
-                        {!faseAvançada && (
-                            <p className={styles.completadaSubtext}>Continua amb les sessions que et quedin en aquesta fase.</p>
-                        )}
-                    </>
-                )}
-                <div className={styles.puntsBadge}>
-                    +{resultCompletada.puntsRealsGuardats ?? resultCompletada.puntsGuanyats ?? 0} punts guanyats
-                </div>
-                {resultCompletada.puntsRealsGuardats != null &&
-                    resultCompletada.puntsGuanyats != null &&
-                    resultCompletada.puntsRealsGuardats < resultCompletada.puntsGuanyats && (
-                        <p className={styles.puntsCappedText}>
-                            Has aconseguit {resultCompletada.puntsGuanyats} punts, però només s&apos;han guardat {resultCompletada.puntsRealsGuardats} per no superar l&apos;objectiu.
-                        </p>
-                    )}
-                <button type="button" className={styles.primaryButton} onClick={onCompletarSessio}>
-                    Tornar a exercicis en curs
-                </button>
+    // 1. Punts que realment s'han sumat al diagnòstic al final de tot
+    const puntsTotalsGuardats = resultCompletada.puntsRealsGuardats ?? resultCompletada.puntsGuanyats ?? 0
+    
+    // 2. Detectem si s'han retallat punts per culpa de la recuperació de penalització
+    // Això passa si els punts de la rutina actual són majors que el límit de la sessió penalitzada original
+    const teLimitPenalitzacio = resultCompletada.puntsLimitats != null && resultCompletada.puntsGuanyats > resultCompletada.puntsLimitats
+
+    return (
+        <div className={styles.completadaContainer}>
+            <div className={styles.completadaIcon} aria-hidden="true">
+                {programaAcabat ? '🏆' : '✅'}
             </div>
-        )
-    }
+            <h2 className={styles.completadaTitle}>
+                {programaAcabat ? 'Programa completat!' : 'Sessió completada!'}
+            </h2>
+            
+            {programaAcabat ? (
+                <p className={styles.completadaText}>Has completat totes les fases del programa. Enhorabona!</p>
+            ) : (
+                <>
+                    <p className={styles.completadaText}>Has completat tots els exercicis d&apos;aquesta sessió.</p>
+                    {faseAvançada && novaFase != null && (
+                        <p className={styles.completadaSubtext}>Passes a la <strong>fase {novaFase} de 3</strong>.</p>
+                    )}
+                    {!faseAvançada && (
+                        <p className={styles.completadaSubtext}>Continua amb les sessions que et quedin en aquesta fase.</p>
+                    )}
+                </>
+            )}
+
+            {/* Mostrem sempre els punts reals que s'han salvat a la base de dades */}
+            <div className={styles.puntsBadge}>
+                +{puntsTotalsGuardats} punts guanyats
+            </div>
+
+            {resultCompletada.puntsRealsGuardats != null &&
+                resultCompletada.puntsGuanyats != null &&
+                resultCompletada.puntsRealsGuardats < resultCompletada.puntsGuanyats && !teLimitPenalitzacio && (
+                    <p className={styles.puntsCappedText}>
+                        Has aconseguit {resultCompletada.puntsGuanyats} punts, però només s&apos;han guardat <strong>{resultCompletada.puntsRealsGuardats} punts</strong> ja que és el màxim de la fase actual.
+                    </p>
+                )}
+
+           
+            {teLimitPenalitzacio && (
+                <p className={styles.puntsPenalitzacioText}>
+                    Aquesta rutina actualment dona {resultCompletada.puntsGuanyats} {' '} punts, però com que estàs recuperant 
+                    una sessió antiga penalitzada, només s&apos;han restaurat <strong>{resultCompletada.puntsLimitats} punts</strong> — 
+                    els que havies guanyat originalment en el seu moment.
+                </p>
+            )}
+
+            <button type="button" className={styles.primaryButton} onClick={onCompletarSessio}>
+                Tornar a exercicis en curs
+            </button>
+        </div>
+    )
+}
 
     if (!exercici) return null
 

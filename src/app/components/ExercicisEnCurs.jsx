@@ -146,16 +146,17 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
             if (cancelat) return
             setInfoPenalitzacio(infoPen)
 
-            let diagActualitzat = diag
-            if (infoPen.penalitzat && !infoPen.jaPenalitzat) {
-                const { data: freshDiag } = await supabase
-                    .from('diagnostic')
-                    .select('*')
-                    .eq('id_diagnostic', seleccionat)
-                    .maybeSingle()
-                if (freshDiag) diagActualitzat = { ...diag, ...freshDiag }
-            }
+            // Sempre recarreguem el diagnòstic fresc de la BD per tenir la fase i punts actualitzats
+            // (tant si hi ha hagut penalització nova com si ja estava penalitzat)
+            const { data: freshDiag } = await supabase
+                .from('diagnostic')
+                .select('*')
+                .eq('id_diagnostic', seleccionat)
+                .maybeSingle()
+
             if (cancelat) return
+
+            const diagActualitzat = freshDiag ? { ...diag, ...freshDiag } : diag
 
             const [{ data: muscul }, { data: lesio }, exs, { fetes, totals }] = await Promise.all([
                 supabase.from('musculs').select('id_cos, nom').eq('id_cos', diagActualitzat.part_cos).single(),
@@ -257,7 +258,9 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
         )
     }
 
-    const estaCompletat = sessionsTotals > 0 && sessionsFetes >= sessionsTotals
+    // Usem finalitzat de la BD com a font de veritat — evita falsos positius
+    // quan num_sessions és 0 després d'una penalització
+    const estaCompletat = diagnostic.finalitzat === true
     const puntsActuals = diagnostic?.punts_recuperacio ?? 0
     const puntsObjectiu = diagnostic?.puntsFinals ?? 0
 
@@ -334,8 +337,8 @@ export default function ExercicisEnCurs({ onNavegar, onIniciarSessio, perfilUsua
                             <div className={styles.penalitzacioText}>
                                 <strong>Penalització per inactivitat</strong>
                                 <p>
-                                    Han passat més de 3 dies des de l&apos;última sessió.
-                                    S&apos;han restat <strong>{infoPenalitzacio.puntsRestats ?? 0} punts</strong> i una sessió del teu progrés.
+                                    Han passat més de 2 dies des de l&apos;última sessió.
+                                    S&apos;han restat <strong>{infoPenalitzacio.puntsRestats ?? 0} punts</strong> i una sessió o més del teu progrés.
                                     Completa la sessió avui per recuperar-los!
                                 </p>
                             </div>

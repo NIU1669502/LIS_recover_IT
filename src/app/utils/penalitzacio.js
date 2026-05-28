@@ -22,7 +22,7 @@ export async function comprovarIAplicarPenalitzacio(userDni, idDiagnostic) {
     const diesPassats = Math.floor((ara - dataUltimaSessio) / (1000 * 60 * 60 * 24))
 
     let esperades = Math.max(0, diesPassats - 2)
-    esperades = Math.min(esperades, sessions.length) // no penalitzar més de les que existeixen
+    esperades = Math.min(esperades, sessions.length)
 
     if (esperades === 0) {
         return { penalitzat: false }
@@ -30,17 +30,19 @@ export async function comprovarIAplicarPenalitzacio(userDni, idDiagnostic) {
 
     let sessionsAPenalitzarAra = []
     let puntsTotalsARestar = 0
-    let puntsTotalsPenalitzats = 0 // Per mostrar a la UI
+    let puntsTotalsPenalitzats = 0
+    let totalSessionsADescomptar = 0
 
     for (let i = 0; i < esperades; i++) {
         puntsTotalsPenalitzats += sessions[i].punts_obtinguts || 0
-        
+        totalSessionsADescomptar++
+
         if (!sessions[i].penalitzat) {
             sessionsAPenalitzarAra.push(sessions[i].id_sessio)
             puntsTotalsARestar += sessions[i].punts_obtinguts || 0
         }
     }
-
+ 
     if (sessionsAPenalitzarAra.length === 0) {
         return {
             penalitzat: true,
@@ -49,10 +51,18 @@ export async function comprovarIAplicarPenalitzacio(userDni, idDiagnostic) {
         }
     }
 
-    return await _aplicarPenalitzacioMassiva(idDiagnostic, sessionsAPenalitzarAra, puntsTotalsARestar, puntsTotalsPenalitzats)
+    return await _aplicarPenalitzacioMassiva(
+        idDiagnostic,
+        sessionsAPenalitzarAra,
+        puntsTotalsARestar,
+        puntsTotalsPenalitzats,
+        totalSessionsADescomptar
+    )
 }
 
-async function _aplicarPenalitzacioMassiva(idDiagnostic, arrIdSessions, puntsTotalsARestar, puntsTotalsPenalitzats) {
+export async function _aplicarPenalitzacioMassiva(
+    idDiagnostic, arrIdSessions, puntsTotalsARestar, puntsTotalsPenalitzats, totalSessionsADescomptar
+) {
     const { data: diagnostic, error: diagError } = await supabase
         .from('diagnostic')
         .select('punts_recuperacio, num_sessions, fase_actual, id_lesio, part_cos')
@@ -61,40 +71,52 @@ async function _aplicarPenalitzacioMassiva(idDiagnostic, arrIdSessions, puntsTot
         .maybeSingle()
 
     if (diagError || !diagnostic) return { penalitzat: false }
+    if (diagnostic.punts_recuperacio < puntsTotalsARestar) {
+        return {
+            penalitzat: true,
+            jaPenalitzat: true,
+            puntsRestats: puntsTotalsPenalitzats
+        }
+    }
 
     const nousPunts = Math.max(0, (diagnostic.punts_recuperacio || 0) - puntsTotalsARestar)
 
-    let novaNumSessions = (diagnostic.num_sessions || 0) - arrIdSessions.length
+    const { data: totesLesPenalitzades } = await supabase
+        .from('historial_sessions')
+        .select('id_sessio')
+        .eq('id_diagnostic', idDiagnostic)
+        .eq('penalitzat', true)
+
+    const idsExcloure = [
+        ...arrIdSessions,
+        ...(totesLesPenalitzades?.map(s => s.id_sessio) ?? [])
+    ]
+
+    let novaNumSessions = (diagnostic.num_sessions || 0) - totalSessionsADescomptar
     let novaFase = diagnostic.fase_actual
 
+    console.log('[DEBUG] idsExcloure:', idsExcloure)
+    console.log('[DEBUG] novaNumSessions inicial:', novaNumSessions)
+    console.log('[DEBUG] novaFase inicial:', novaFase)
+
     while (novaNumSessions < 0 && novaFase > 1) {
-        novaFase -= 1
+    novaFase -= 1
 
-        const { data: rutinaData } = await supabase
-            .from('rutines_lesio')
-            .select('id_fase_1, id_fase_2, id_fase_3')
-            .eq('id_lesio', diagnostic.id_lesio)
-            .eq('id_muscul', diagnostic.part_cos)
-            .single()
+    const { data: sessionsAnteriors } = await supabase
+        .from('historial_sessions')
+        .select('id_sessio')
+        .eq('id_diagnostic', idDiagnostic)
+        .eq('fase', novaFase)
+        .filter('id_sessio', 'not.in', `(${idsExcloure.join(',')})`)
 
-        let idFase = null
-        if (novaFase === 1) idFase = rutinaData.id_fase_1
-        else if (novaFase === 2) idFase = rutinaData.id_fase_2
-        else if (novaFase === 3) idFase = rutinaData.id_fase_3
-
-        if (idFase) {
-            const { data: faseData } = await supabase
-                .from('fases')
-                .select('n_sessions')
-                .eq('id_fase', idFase)
-                .single()
-            
-            novaNumSessions = (faseData?.n_sessions || 0) + novaNumSessions
-        } else {
-            novaNumSessions = 0
-            break
-        }
+    const sessionsAFase = sessionsAnteriors?.length ?? 0
+    
+    if (sessionsAFase > 0 || novaFase === 1) {
+        novaNumSessions = sessionsAFase
+        break
     }
+}
+
 
     if (novaNumSessions < 0) novaNumSessions = 0
 
@@ -121,12 +143,11 @@ async function _aplicarPenalitzacioMassiva(idDiagnostic, arrIdSessions, puntsTot
         console.error('[Penalització] Error marcant sessions:', updateSessioError)
     }
 
-    console.log(`[Penalització] Aplicada al diag ${idDiagnostic}: -${puntsTotalsARestar} pts, sessions afectades: ${arrIdSessions.length}. Fase: ${novaFase}`)
 
     return {
         penalitzat: true,
         jaPenalitzat: false,
-        puntsRestats: puntsTotalsPenalitzats // enviem el total per mostrar a la UI
+        puntsRestats: puntsTotalsPenalitzats
     }
 }
 
@@ -136,7 +157,7 @@ export async function recuperarSessioPenalitzada(idDiagnostic) {
         .select('id_sessio')
         .eq('id_diagnostic', idDiagnostic)
         .eq('penalitzat', true)
-        .order('data_realitzacio', { ascending: true }) // <--- Recuperem des de l'antiga
+        .order('data_realitzacio', { ascending: true })
         .limit(1)
         .maybeSingle()
 

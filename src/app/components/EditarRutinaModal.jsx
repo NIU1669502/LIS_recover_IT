@@ -373,7 +373,7 @@ export default function EditarRutinaModal({ dniPacient, nomPacient, idDiagnostic
                                                                 <div className={styles.previewSessions}>
                                                                     <span className={styles.previewLabel}>⭐ Amb aquest canvi:</span>
                                                                     <span>
-                                                                        Sessions necessàries a partir d'ara: <strong>{novasSessions}</strong>
+                                                                        Sessions necessàries a partir d'ara: <strong>{novasSessions}</strong> més.
                                                                         {diff > 0 && <span className={styles.previewPositiu}> · S&apos;estalvia {diff} {diff === 1 ? 'sessió' : 'sessions'} del total</span>}
                                                                         {diff < 0 && <span className={styles.previewNegatiu}> · Necessita {Math.abs(diff)} {Math.abs(diff) === 1 ? 'sessió' : 'sessions'} més</span>}
                                                                         {diff === 0 && <span className={styles.previewNeutral}> · (sense canvis)</span>}

@@ -1,7 +1,7 @@
 import { supabase } from '../../utils/supabase'
 import { TEST_STEPS } from '../data/testSteps.js'
 import { showToast } from '../utils/toast'
-import { recuperarSessioPenalitzada } from '../utils/penalitzacio'
+import { recuperarSessioPenalitzada, comprovarIAplicarPenalitzacio } from '../utils/penalitzacio'
 import { completarObjectiu } from '../utils/objectius'
 
 
@@ -120,6 +120,9 @@ export async function getExercicisDelaFase(diagnostic) {
 }
 
 export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = null, dolorSessio = null, dolorExercicis = null) {
+
+
+
     let diagnostic
     if (idDiagnostic != null) {
         const { data, error } = await supabase
@@ -137,6 +140,23 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
     if (!diagnostic) return { completada: false }
 
     const puntsAbans = diagnostic.punts_recuperacio || 0
+
+    const { data: sessionsPenalitzades } = await supabase
+        .from('historial_sessions')
+        .select('id_sessio, punts_obtinguts')
+        .eq('id_diagnostic', diagnostic.id_diagnostic)
+        .eq('penalitzat', true)
+        .order('data_realitzacio', { ascending: true })
+
+    let puntsAAssegurar = puntsGuanyats
+    let puntsLimitats = null
+    let sessioPenalitzadaALimpiar = null
+
+    if (sessionsPenalitzades && sessionsPenalitzades.length > 0) {
+        sessioPenalitzadaALimpiar = sessionsPenalitzades[0]
+        puntsAAssegurar = sessioPenalitzadaALimpiar.punts_obtinguts || 0
+        puntsLimitats = puntsAAssegurar
+    }
 
     const { data: rutina } = await supabase
         .from('rutines_lesio')
@@ -191,8 +211,7 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
         }
     }
 
-    // Calcular punts finals — si avança/completa fase, cap a l'umbral exacte
-    let nousPuntsRecuperacio = puntsAbans + puntsGuanyats
+    let nousPuntsRecuperacio = puntsAbans + puntsAAssegurar
     let umbralFase = null
 
     if ((faseAvançada || completada) && rutina) {
@@ -225,15 +244,16 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
         }
     }
 
-    // Punts reals guardats a l'historial (mai més del necessari per acabar la fase)
     const puntsRealsGuardats = umbralFase != null
-        ? Math.min(puntsGuanyats, umbralFase - puntsAbans)
-        : puntsGuanyats
+        ? Math.min(puntsAAssegurar, umbralFase - puntsAbans)
+        : puntsAAssegurar
 
     const actualitzacio = {
         fase_actual: novaFase,
         num_sessions: nouNumSessions,
-        punts_recuperacio: diagnostic.puntsFinals != null ? Math.min(nousPuntsRecuperacio, diagnostic.puntsFinals) : nousPuntsRecuperacio
+        punts_recuperacio: diagnostic.puntsFinals != null
+            ? Math.min(nousPuntsRecuperacio, diagnostic.puntsFinals)
+            : nousPuntsRecuperacio
     }
 
     if (completada) {
@@ -254,7 +274,7 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
                 id_diagnostic: diagnostic.id_diagnostic,
                 id_lesio: diagnostic.id_lesio,
                 fase: diagnostic.fase_actual,
-                punts_obtinguts: puntsRealsGuardats,  // ← punts reals, mai en excés
+                punts_obtinguts: puntsRealsGuardats,
                 dolor_sessio: dolorSessio ?? null,
                 dolor_exercicis: dolorExercicis ? JSON.stringify(dolorExercicis) : null,
             }])
@@ -262,13 +282,23 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
         console.error('No s\'ha pogut registrar la sessió a l\'historial', err)
     }
 
-    try {
-        await recuperarSessioPenalitzada(diagnostic.id_diagnostic)
-    } catch (err) {
-        console.error('No s\'ha pogut recuperar la sessió penalitzada', err)
+    if (sessioPenalitzadaALimpiar) {
+        try {
+            await supabase
+                .from('historial_sessions')
+                .update({ penalitzat: false })
+                .eq('id_sessio', sessioPenalitzadaALimpiar.id_sessio)
+        } catch (err) {
+            console.error('Error netejant penalització antiga:', err)
+        }
+    } else {
+        try {
+            await recuperarSessioPenalitzada(diagnostic.id_diagnostic)
+        } catch (err) {
+            console.error('No s\'ha pogut recuperar la sessió penalitzada', err)
+        }
     }
 
-    // Marcar objectius completats
     try {
         await completarObjectiu(userDni, 'primera_sessio')
         if (completada) {
@@ -283,8 +313,9 @@ export async function completarSessio(userDni, puntsGuanyats, idDiagnostic = nul
         novaFase: completada ? null : novaFase,
         faseAvançada,
         nSessionsRestants: nSessionsRequerides - nouNumSessions,
-        puntsGuanyats,          // ← punts calculats (poden ser excessius)
-        puntsRealsGuardats,     // ← punts reals guardats a la BD
+        puntsGuanyats,
+        puntsRealsGuardats,
+        puntsLimitats,
     }
 }
 
@@ -370,7 +401,6 @@ export async function processarTestDiagnostic(resultat, navegarA) {
 
         showToast('Diagnòstic completat i guardat amb èxit!', 'success')
 
-        // Marcar objectiu: primer test diagnòstic
         try {
             await completarObjectiu(userDni, 'primer_diagnostic')
         } catch (err) {
@@ -431,7 +461,7 @@ export async function getResumSessions(diagnostic) {
         }
     }
 
-    return { fetes: diagnostic.num_sessions || 0, totals }
+    return { fetes: Math.min(diagnostic.num_sessions || 0, totals), totals }
 }
 
 export async function eliminarDiagnostic(idDiagnostic) {
