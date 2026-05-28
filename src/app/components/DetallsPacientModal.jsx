@@ -53,8 +53,9 @@ function FilaSessio({ sessio }) {
             >
                 <div className={styles.sessioData}>{formatDia(sessio.data_realitzacio)}</div>
                 <div className={styles.sessioBadge}>Fase {sessio.fase}</div>
-                <div className={styles.sessioLesio}>{sessio.lesions?.nom || '—'}</div>
-                <div className={styles.sessioLesio}>{sessio.diagnostic?.musculs?.nom || '—'}</div>
+                <div className={styles.sessioLesio}>
+                    {sessio.lesions?.nom || '—'} · {sessio.diagnostic?.musculs?.nom || '—'}
+                </div>
                 <div className={styles.sessioPunts}>+{sessio.punts_obtinguts ?? 0} pts</div>
 
 

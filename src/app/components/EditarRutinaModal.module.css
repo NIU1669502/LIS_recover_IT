@@ -11,7 +11,7 @@
 }
 
 .panel {
-    background: #fff;
+    background: var(--bg-primary);
     border-radius: 20px;
     width: 100%;
     max-width: 620px;
@@ -27,10 +27,10 @@
     align-items: center;
     justify-content: space-between;
     padding: 28px 28px 20px;
-    border-bottom: 1.5px solid #f0f0f0;
+    border-bottom: 1.5px solid var(--border-color);
     position: sticky;
     top: 0;
-    background: #fff;
+    background: var(--bg-primary);
     z-index: 1;
     border-radius: 20px 20px 0 0;
 }
@@ -45,8 +45,8 @@
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: #e8f0ff;
-    color: #2563eb;
+    background: var(--accent-blue-bg);
+    color: var(--accent-blue);
     font-weight: 700;
     font-size: 1.1rem;
     display: flex;
@@ -58,14 +58,14 @@
 .titol {
     font-size: 1.15rem;
     font-weight: 800;
-    color: #111;
+    color: var(--text-primary);
     margin: 0 0 2px;
     letter-spacing: -0.01em;
 }
 
 .subtitol {
     font-size: 0.85rem;
-    color: #888;
+    color: var(--text-secondary);
     margin: 0;
 }
 
@@ -73,7 +73,7 @@
     background: none;
     border: none;
     font-size: 1.1rem;
-    color: #aaa;
+    color: var(--text-muted);
     cursor: pointer;
     padding: 4px 8px;
     border-radius: 8px;
@@ -82,8 +82,8 @@
 }
 
 .closeBtn:hover {
-    background: #f5f5f5;
-    color: #333;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .cos {
@@ -96,7 +96,7 @@
 .faseTabs {
     display: flex;
     gap: 8px;
-    background: #f5f7fa;
+    background: var(--bg-secondary);
     padding: 6px;
     border-radius: 12px;
 }
@@ -113,19 +113,19 @@
     border-radius: 8px;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #888;
+    color: var(--text-secondary);
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
 }
 
 .faseTab:hover {
-    background: #eaecf0;
-    color: #333;
+    background: var(--hover-bg);
+    color: var(--text-primary);
 }
 
 .faseTabActiva {
-    background: #fff;
-    color: #2563eb;
+    background: var(--bg-primary);
+    color: var(--accent-blue);
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
@@ -140,12 +140,12 @@
     display: flex;
     align-items: flex-start;
     gap: 8px;
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
+    background: var(--accent-blue-bg);
+    border: 1px solid var(--accent-blue-border);
     border-radius: 10px;
     padding: 12px 14px;
     font-size: 0.83rem;
-    color: #1e40af;
+    color: var(--accent-blue-dark);
     line-height: 1.5;
 }
 
@@ -162,23 +162,23 @@
 }
 
 .slotCard {
-    border: 1.5px solid #f0f0f0;
+    border: 1.5px solid var(--border-color);
     border-radius: 14px;
     overflow: hidden;
     transition: border-color 0.15s;
 }
 
 .slotCard:hover {
-    border-color: #dbeafe;
+    border-color: var(--accent-blue-hover);
 }
 
 .slotPersonalitzat {
-    border-color: #bfdbfe;
-    background: #fafcff;
+    border-color: var(--accent-blue-border);
+    background: var(--bg-tertiary);
 }
 
 .slotEditant {
-    border-color: #2563eb;
+    border-color: var(--accent-blue);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
 }
 
@@ -199,7 +199,7 @@
 .slotNum {
     font-size: 0.8rem;
     font-weight: 700;
-    color: #555;
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
@@ -207,18 +207,18 @@
 .badgeModificat {
     font-size: 0.72rem;
     font-weight: 600;
-    color: #2563eb;
-    background: #dbeafe;
+    color: var(--accent-blue);
+    background: var(--accent-blue-hover);
     padding: 2px 8px;
     border-radius: 99px;
 }
 
 .editBtn {
     padding: 6px 14px;
-    background: #f0f5ff;
-    border: 1.5px solid #e8f0ff;
+    background: var(--accent-blue-bg);
+    border: 1.5px solid var(--accent-blue-bg);
     border-radius: 8px;
-    color: #2563eb;
+    color: var(--accent-blue);
     font-size: 0.82rem;
     font-weight: 600;
     cursor: pointer;
@@ -226,8 +226,8 @@
 }
 
 .editBtn:hover {
-    background: #dbeafe;
-    border-color: #2563eb;
+    background: var(--accent-blue-hover);
+    border-color: var(--accent-blue);
 }
 
 /* Resum del slot */
@@ -238,7 +238,7 @@
 .slotNom {
     font-size: 0.97rem;
     font-weight: 600;
-    color: #111;
+    color: var(--text-primary);
     margin: 0 0 8px;
 }
 
@@ -250,8 +250,8 @@
 
 .param {
     font-size: 0.8rem;
-    color: #666;
-    background: #f5f7fa;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
     padding: 3px 10px;
     border-radius: 99px;
     font-weight: 500;
@@ -259,7 +259,7 @@
 
 .slotOriginal {
     font-size: 0.76rem;
-    color: #aaa;
+    color: var(--text-muted);
     margin: 8px 0 0;
     font-style: italic;
 }
@@ -269,7 +269,7 @@
     display: flex;
     flex-direction: column;
     gap: 14px;
-    border-top: 1px solid #f0f0f0;
+    border-top: 1px solid var(--border-color);
     padding-top: 16px;
 }
 
@@ -288,18 +288,18 @@
 .formLabel {
     font-size: 0.78rem;
     font-weight: 600;
-    color: #555;
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.03em;
 }
 
 .formInput {
     padding: 9px 12px;
-    border: 1.5px solid #e5e7eb;
+    border: 1.5px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.9rem;
-    color: #111;
-    background: #fff;
+    color: var(--text-primary);
+    background: var(--bg-primary);
     transition: border-color 0.12s;
     outline: none;
     width: 100%;
@@ -307,7 +307,7 @@
 }
 
 .formInput:focus {
-    border-color: #2563eb;
+    border-color: var(--accent-blue);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
 }
 
@@ -317,7 +317,7 @@ select.formInput {
 
 .formHint {
     font-size: 0.72rem;
-    color: #aaa;
+    color: var(--text-muted);
 }
 
 /* Botons del formulari */
@@ -331,9 +331,9 @@ select.formInput {
 .cancelBtn {
     padding: 9px 18px;
     background: none;
-    border: 1.5px solid #e5e7eb;
+    border: 1.5px solid var(--border-color);
     border-radius: 8px;
-    color: #666;
+    color: var(--text-secondary);
     font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
@@ -341,7 +341,7 @@ select.formInput {
 }
 
 .cancelBtn:hover {
-    background: #f5f5f5;
+    background: var(--bg-secondary);
 }
 
 .cancelBtn:disabled {
@@ -351,7 +351,7 @@ select.formInput {
 
 .desarBtn {
     padding: 9px 20px;
-    background: #2563eb;
+    background: var(--accent-blue);
     border: none;
     border-radius: 8px;
     color: #fff;
@@ -362,7 +362,7 @@ select.formInput {
 }
 
 .desarBtn:hover {
-    background: #1d4ed8;
+    background: var(--accent-blue-dark);
 }
 
 .desarBtn:disabled {
@@ -377,15 +377,15 @@ select.formInput {
     justify-content: center;
     gap: 14px;
     padding: 60px 28px;
-    color: #888;
+    color: var(--text-secondary);
     font-size: 0.9rem;
 }
 
 .spinner {
     width: 32px;
     height: 32px;
-    border: 3px solid #e8f0ff;
-    border-top-color: #2563eb;
+    border: 3px solid var(--accent-blue-bg);
+    border-top-color: var(--accent-blue);
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
 }
@@ -429,14 +429,14 @@ select.formInput {
     display: inline-block;
     width: 6px;
     height: 6px;
-    background: #2563eb;
+    background: var(--accent-blue);
     border-radius: 50%;
     margin-left: 4px;
     vertical-align: middle;
 }
 
 .faseTabActiva .faseActualDot {
-    background: white;
+    background: var(--bg-primary);
 }
 
 /* Caixa d'avançar fase */
@@ -445,8 +445,8 @@ select.formInput {
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    background: #f0f9ff;
-    border: 1.5px solid #bae6fd;
+    background: var(--accent-blue-bg);
+    border: 1.5px solid var(--accent-blue-border);
     border-radius: 12px;
     padding: 1rem 1.25rem;
     margin-bottom: 1rem;
@@ -461,18 +461,18 @@ select.formInput {
 
 .avancarFaseLabel {
     font-size: 0.9rem;
-    color: #0f172a;
+    color: var(--text-primary);
 }
 
 .avancarFaseHint {
     font-size: 0.78rem;
-    color: #64748b;
+    color: var(--text-secondary);
 }
 
 .avancarBtn {
     padding: 0.6rem 1.2rem;
-    background: #2563eb;
-    color: white;
+    background: var(--accent-blue);
+    color: #fff;
     border: none;
     border-radius: 8px;
     font-size: 0.875rem;
@@ -484,7 +484,7 @@ select.formInput {
 }
 
 .avancarBtn:hover {
-    background: #1d4ed8;
+    background: var(--accent-blue-dark);
 }
 
 .avancarConfirm {
@@ -496,14 +496,14 @@ select.formInput {
 
 .avancarConfirmText {
     font-size: 0.8rem;
-    color: #dc2626;
+    color: var(--danger-color);
     font-weight: 500;
 }
 
 .avancarConfirmSi {
     padding: 0.5rem 1rem;
-    background: #dc2626;
-    color: white;
+    background: var(--danger-color);
+    color: #fff;
     border: none;
     border-radius: 8px;
     font-size: 0.85rem;
@@ -513,7 +513,7 @@ select.formInput {
 }
 
 .avancarConfirmSi:hover:not(:disabled) {
-    background: #b91c1c;
+    background: var(--danger-color);
 }
 
 .avancarConfirmSi:disabled {
@@ -524,8 +524,8 @@ select.formInput {
 .avancarConfirmNo {
     padding: 0.5rem 0.9rem;
     background: transparent;
-    color: #64748b;
-    border: 1px solid #e2e8f0;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.85rem;
     cursor: pointer;
@@ -533,8 +533,8 @@ select.formInput {
 }
 
 .avancarConfirmNo:hover {
-    background: #f1f5f9;
-    color: #0f172a;
+    background: var(--hover-bg);
+    color: var(--text-primary);
 }
 
 .faseTabActual {
@@ -545,14 +545,14 @@ select.formInput {
     display: inline-block;
     width: 6px;
     height: 6px;
-    background: #2563eb;
+    background: var(--accent-blue);
     border-radius: 50%;
     margin-left: 4px;
     vertical-align: middle;
 }
 
 .faseTabActiva .faseActualDot {
-    background: white;
+    background: var(--bg-primary);
 }
 
 /* Caixa d'avançar/recular fase */
@@ -561,8 +561,8 @@ select.formInput {
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    background: #f0f9ff;
-    border: 1.5px solid #bae6fd;
+    background: var(--accent-blue-bg);
+    border: 1.5px solid var(--accent-blue-border);
     border-radius: 12px;
     padding: 1rem 1.25rem;
     margin-bottom: 1rem;
@@ -577,12 +577,12 @@ select.formInput {
 
 .avancarFaseLabel {
     font-size: 0.9rem;
-    color: #0f172a;
+    color: var(--text-primary);
 }
 
 .avancarFaseHint {
     font-size: 0.78rem;
-    color: #64748b;
+    color: var(--text-secondary);
 }
 
 .faseAccions {
@@ -594,8 +594,8 @@ select.formInput {
 
 .avancarBtn {
     padding: 0.6rem 1.2rem;
-    background: #2563eb;
-    color: white;
+    background: var(--accent-blue);
+    color: #fff;
     border: none;
     border-radius: 8px;
     font-size: 0.875rem;
@@ -607,14 +607,14 @@ select.formInput {
 }
 
 .avancarBtn:hover {
-    background: #1d4ed8;
+    background: var(--accent-blue-dark);
 }
 
 .recullarBtn {
     padding: 0.6rem 1.2rem;
     background: transparent;
-    color: #64748b;
-    border: 1.5px solid #e2e8f0;
+    color: var(--text-secondary);
+    border: 1.5px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.875rem;
     font-weight: 700;
@@ -625,9 +625,9 @@ select.formInput {
 }
 
 .recullarBtn:hover {
-    border-color: #94a3b8;
-    color: #0f172a;
-    background: #f8fafc;
+    border-color: var(--text-muted);
+    color: var(--text-primary);
+    background: var(--hover-bg);
 }
 
 .avancarConfirm {
@@ -639,14 +639,14 @@ select.formInput {
 
 .avancarConfirmText {
     font-size: 0.8rem;
-    color: #dc2626;
+    color: var(--danger-color);
     font-weight: 500;
 }
 
 .avancarConfirmSi {
     padding: 0.5rem 1rem;
-    background: #dc2626;
-    color: white;
+    background: var(--danger-color);
+    color: #fff;
     border: none;
     border-radius: 8px;
     font-size: 0.85rem;
@@ -656,7 +656,7 @@ select.formInput {
 }
 
 .avancarConfirmSi:hover:not(:disabled) {
-    background: #b91c1c;
+    background: var(--danger-color);
 }
 
 .avancarConfirmSi:disabled {
@@ -667,8 +667,8 @@ select.formInput {
 .avancarConfirmNo {
     padding: 0.5rem 0.9rem;
     background: transparent;
-    color: #64748b;
-    border: 1px solid #e2e8f0;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.85rem;
     cursor: pointer;
@@ -676,8 +676,8 @@ select.formInput {
 }
 
 .avancarConfirmNo:hover {
-    background: #f1f5f9;
-    color: #0f172a;
+    background: var(--hover-bg);
+    color: var(--text-primary);
 }
 
 /* ── Preview sessions en temps real ────────────────────── */
@@ -687,12 +687,12 @@ select.formInput {
     align-items: flex-start;
     gap: 6px;
     margin-top: 6px;
-    background: #f0f9ff;
-    border: 1px solid #bae6fd;
+    background: var(--accent-blue-bg);
+    border: 1px solid var(--accent-blue-border);
     border-radius: 8px;
     padding: 8px 10px;
     font-size: 0.78rem;
-    color: #0369a1;
+    color: var(--accent-blue);
     line-height: 1.5;
 }
 
@@ -703,17 +703,17 @@ select.formInput {
 }
 
 .previewPositiu {
-    color: #15803d;
+    color: var(--success-color);
     font-weight: 600;
 }
 
 .previewNegatiu {
-    color: #dc2626;
+    color: var(--danger-color);
     font-weight: 600;
 }
 
 .previewNeutral {
-    color: #94a3b8;
+    color: var(--text-muted);
 }
 
 /* ── Sessions originals al tab de fase ──────────────────── */
@@ -730,8 +730,8 @@ select.formInput {
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    background: #fef2f2;
-    border: 1.5px solid #fecaca;
+    background: var(--danger-bg);
+    border: 1.5px solid var(--danger-border);
     border-radius: 12px;
     padding: 14px 16px;
     margin-bottom: 4px;
@@ -750,12 +750,12 @@ select.formInput {
 }
 
 .alertaPenalitzacioText strong {
-    color: #991b1b;
+    color: var(--danger-color);
     font-size: 0.95rem;
 }
 
 .alertaPenalitzacioText p {
-    color: #b91c1c;
+    color: var(--danger-color);
     font-size: 0.85rem;
     margin: 0;
     line-height: 1.4;

@@ -238,14 +238,18 @@
     cursor: not-allowed;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1100px) {
+    .container {
+        padding: 1rem 0.75rem;
+    }
+
     .fisioLayout {
         grid-template-columns: 1fr;
         grid-template-rows: auto 1fr;
     }
 
     .llistaPanel {
-        max-height: 200px;
+        max-height: 240px;
         border-right: none;
         border-bottom: 1px solid var(--border-color);
     }

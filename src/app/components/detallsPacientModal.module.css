@@ -22,7 +22,7 @@
 }
 
 .panel {
-    background: #fff;
+    background: var(--bg-primary);
     border-radius: 20px;
     width: 100%;
     max-width: 780px;
@@ -51,7 +51,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 24px 28px 20px;
-    border-bottom: 1.5px solid #f0f0f0;
+    border-bottom: 1.5px solid var(--border-color);
     flex-shrink: 0;
 }
 
@@ -65,8 +65,8 @@
     width: 52px;
     height: 52px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-    color: #1d4ed8;
+    background: linear-gradient(135deg, var(--accent-blue-hover), var(--accent-blue-border));
+    color: var(--accent-blue-dark);
     font-weight: 800;
     font-size: 1.3rem;
     display: flex;
@@ -78,15 +78,15 @@
 .nom {
     font-size: 1.15rem;
     font-weight: 700;
-    color: #111;
+    color: var(--text-primary);
     margin: 0 0 4px;
 }
 
 .rolBadge {
     font-size: 0.72rem;
     font-weight: 600;
-    color: #2563eb;
-    background: #eff6ff;
+    color: var(--accent-blue);
+    background: var(--accent-blue-bg);
     border-radius: 99px;
     padding: 2px 10px;
 }
@@ -96,8 +96,8 @@
     height: 36px;
     border-radius: 50%;
     border: none;
-    background: #f5f5f5;
-    color: #888;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
     font-size: 1rem;
     cursor: pointer;
     display: flex;
@@ -108,8 +108,8 @@
 }
 
 .closeBtn:hover {
-    background: #fee2e2;
-    color: #ef4444;
+    background: var(--danger-bg);
+    color: var(--danger-color);
 }
 
 .cos {
@@ -125,15 +125,15 @@
     justify-content: center;
     gap: 16px;
     padding: 60px 0;
-    color: #888;
+    color: var(--text-secondary);
     font-size: 0.9rem;
 }
 
 .spinner {
     width: 32px;
     height: 32px;
-    border: 3px solid #e8f0ff;
-    border-top-color: #2563eb;
+    border: 3px solid var(--accent-blue-bg);
+    border-top-color: var(--accent-blue);
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
 }
@@ -156,7 +156,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.07em;
-    color: #2563eb;
+    color: var(--accent-blue);
     margin: 0 0 16px;
 }
 
@@ -168,8 +168,8 @@
     margin-left: auto;
     font-size: 0.72rem;
     font-weight: 600;
-    background: #eff6ff;
-    color: #2563eb;
+    background: var(--accent-blue-bg);
+    color: var(--accent-blue);
     border-radius: 99px;
     padding: 1px 8px;
     text-transform: none;
@@ -178,7 +178,7 @@
 
 .divider {
     height: 1.5px;
-    background: #f0f0f0;
+    background: var(--border-color);
     margin: 20px 0;
 }
 
@@ -197,7 +197,7 @@
 
 .infoLabel {
     font-size: 0.75rem;
-    color: #999;
+    color: var(--text-muted);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -205,22 +205,22 @@
 
 .infoValue {
     font-size: 0.95rem;
-    color: #111;
+    color: var(--text-primary);
     font-weight: 500;
 }
 
 .mono {
     font-family: monospace;
     font-size: 0.9rem;
-    color: #555;
+    color: var(--text-secondary);
 }
 
 .badgeFase {
     display: inline-block;
     font-size: 0.78rem;
     font-weight: 600;
-    background: #eff6ff;
-    color: #2563eb;
+    background: var(--accent-blue-bg);
+    color: var(--accent-blue);
     border-radius: 99px;
     padding: 2px 10px;
 }
@@ -229,8 +229,8 @@
     display: inline-block;
     font-size: 0.78rem;
     font-weight: 600;
-    background: #f0fdf4;
-    color: #16a34a;
+    background: rgba(45, 122, 79, 0.15);
+    color: var(--success-color);
     border-radius: 99px;
     padding: 2px 10px;
 }
@@ -244,17 +244,17 @@
 
 .descripcioText {
     font-size: 0.88rem;
-    color: #555;
+    color: var(--text-secondary);
     line-height: 1.55;
     margin: 0;
-    background: #f8f9ff;
-    border-left: 3px solid #bfdbfe;
+    background: var(--bg-tertiary);
+    border-left: 3px solid var(--accent-blue-border);
     padding: 10px 14px;
     border-radius: 0 8px 8px 0;
 }
 
 .progresBox {
-    background: #f8f9ff;
+    background: var(--bg-tertiary);
     border-radius: 12px;
     padding: 16px;
 }
@@ -268,19 +268,19 @@
 
 .progresLabel {
     font-size: 0.82rem;
-    color: #555;
+    color: var(--text-secondary);
     font-weight: 500;
 }
 
 .progresNum {
     font-size: 0.95rem;
     font-weight: 700;
-    color: #2563eb;
+    color: var(--accent-blue);
 }
 
 .progresBarBg {
     height: 8px;
-    background: #dbeafe;
+    background: var(--accent-blue-hover);
     border-radius: 99px;
     overflow: hidden;
     margin-bottom: 8px;
@@ -288,14 +288,14 @@
 
 .progresBarFill {
     height: 100%;
-    background: linear-gradient(90deg, #3b82f6, #2563eb);
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-blue));
     border-radius: 99px;
     transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .progresDetall {
     font-size: 0.78rem;
-    color: #888;
+    color: var(--text-secondary);
     margin: 0;
     text-align: right;
 }
@@ -311,29 +311,29 @@
     grid-template-columns: 1fr auto auto auto;
     align-items: center;
     gap: 12px;
-    background: #fafafa;
-    border: 1.5px solid #f0f0f0;
+    background: var(--bg-secondary);
+    border: 1.5px solid var(--border-color);
     border-radius: 10px;
     padding: 10px 14px;
     transition: border-color 0.15s, background 0.15s;
 }
 
 .sessioRow:hover {
-    border-color: #bfdbfe;
-    background: #f0f8ff;
+    border-color: var(--accent-blue-border);
+    background: var(--accent-blue-bg);
 }
 
 .sessioData {
     font-size: 0.85rem;
-    color: #444;
+    color: var(--text-primary);
     font-weight: 500;
 }
 
 .sessioBadge {
     font-size: 0.72rem;
     font-weight: 600;
-    background: #eff6ff;
-    color: #2563eb;
+    background: var(--accent-blue-bg);
+    color: var(--accent-blue);
     border-radius: 99px;
     padding: 2px 8px;
     white-space: nowrap;
@@ -341,7 +341,7 @@
 
 .sessioLesio {
     font-size: 0.8rem;
-    color: #666;
+    color: var(--text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -351,13 +351,13 @@
 .sessioPunts {
     font-size: 0.8rem;
     font-weight: 600;
-    color: #16a34a;
+    color: var(--success-color);
     white-space: nowrap;
 }
 
 .senseDades {
     font-size: 0.88rem;
-    color: #bbb;
+    color: var(--text-muted);
     font-style: italic;
     margin: 0;
     text-align: center;
@@ -375,16 +375,16 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    background: #fafafa;
-    border: 1.5px solid #f0f0f0;
+    background: var(--bg-secondary);
+    border: 1.5px solid var(--border-color);
     border-radius: 10px;
     padding: 12px 16px;
     transition: border-color 0.15s, background 0.15s;
 }
 
 .lesioRow:hover {
-    border-color: #bfdbfe;
-    background: #f0f8ff;
+    border-color: var(--accent-blue-border);
+    background: var(--accent-blue-bg);
 }
 
 .lesioLeft {
@@ -397,7 +397,7 @@
 .lesioNom {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #111;
+    color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -405,7 +405,7 @@
 
 .lesioMuscul {
     font-size: 0.78rem;
-    color: #888;
+    color: var(--text-secondary);
 }
 
 .lesioRight {
@@ -417,7 +417,7 @@
 
 .lesioSessions {
     font-size: 0.78rem;
-    color: #999;
+    color: var(--text-muted);
     white-space: nowrap;
 }
 
@@ -444,10 +444,28 @@
         gap: 8px 12px;
     }
 
-    .sessioData { grid-column: 1; grid-row: 1; }
-    .sessioPunts { grid-column: 2; grid-row: 1; justify-self: end; }
-    .sessioLesio { grid-column: 1; grid-row: 2; max-width: 100%; }
-    .sessioBadge { grid-column: 2; grid-row: 2; justify-self: end; }
+    .sessioData {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .sessioPunts {
+        grid-column: 2;
+        grid-row: 1;
+        justify-self: end;
+    }
+
+    .sessioLesio {
+        grid-column: 1;
+        grid-row: 2;
+        max-width: 100%;
+    }
+
+    .sessioBadge {
+        grid-column: 2;
+        grid-row: 2;
+        justify-self: end;
+    }
 }
 
 @media (max-width: 900px) {
@@ -479,16 +497,16 @@
 }
 
 .diagCard {
-    border: 1.5px solid #f0f0f0;
+    border: 1.5px solid var(--border-color);
     border-radius: 12px;
     padding: 16px 18px;
     margin-bottom: 12px;
-    background: #fafcff;
+    background: var(--bg-tertiary);
     transition: border-color 0.15s;
 }
 
 .diagCard:hover {
-    border-color: #bfdbfe;
+    border-color: var(--accent-blue-border);
 }
 
 .diagCardHeader {
@@ -502,12 +520,12 @@
 .diagNom {
     font-weight: 700;
     font-size: 0.97rem;
-    color: #111;
+    color: var(--text-primary);
 }
 
 .diagMuscul {
     font-size: 0.82rem;
-    color: #888;
+    color: var(--text-secondary);
     margin-top: 2px;
 }
 
@@ -521,9 +539,9 @@
 }
 
 .badgeNoConfirmat {
-    background: #fef3c7;
-    color: #92400e;
-    border: 1px solid #fcd34d;
+    background: transparent;
+    color: #f59e0b;
+    border: 1px solid #f59e0b;
     border-radius: 99px;
     padding: 2px 10px;
     font-size: 0.72rem;
@@ -533,10 +551,10 @@
 
 .editarRutinaBtn {
     padding: 5px 14px;
-    background: #eff6ff;
-    border: 1.5px solid #bfdbfe;
+    background: var(--accent-blue-bg);
+    border: 1.5px solid var(--accent-blue-border);
     border-radius: 99px;
-    color: #2563eb;
+    color: var(--accent-blue);
     font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
@@ -545,18 +563,18 @@
 }
 
 .editarRutinaBtn:hover {
-    background: #dbeafe;
-    border-color: #2563eb;
+    background: var(--accent-blue-hover);
+    border-color: var(--accent-blue);
 }
 
 .dolorHint {
     font-size: 0.8rem;
-    color: #94a3b8;
+    color: var(--text-muted);
     margin: -0.5rem 0 0.75rem;
 }
 
 .sessioCard {
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     overflow: hidden;
     margin-bottom: 0.5rem;
@@ -568,7 +586,7 @@
 }
 
 .sessioRowClickable:hover {
-    background: #f8fafc;
+    background: var(--hover-bg);
 }
 
 .dolorBadge {
@@ -582,19 +600,19 @@
 
 .dolorBadgeNull {
     font-size: 0.75rem;
-    color: #cbd5e1;
+    color: var(--text-muted);
     font-style: italic;
 }
 
 .expandIcon {
     font-size: 0.7rem;
-    color: #94a3b8;
+    color: var(--text-muted);
     margin-left: auto;
 }
 
 .dolorDetall {
-    background: #f8fafc;
-    border-top: 1px solid #e2e8f0;
+    background: var(--hover-bg);
+    border-top: 1px solid var(--border-color);
     padding: 0.75rem 1rem;
     display: flex;
     flex-direction: column;
@@ -604,7 +622,7 @@
 .dolorDetallTitol {
     font-size: 0.75rem;
     font-weight: 700;
-    color: #64748b;
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 0.25rem;
@@ -618,7 +636,7 @@
 }
 
 .dolorExerciciNom {
-    color: #334155;
+    color: var(--text-primary);
 }
 
 .dolorExerciciVal {
@@ -627,7 +645,7 @@
 }
 
 .dolorExerciciNull {
-    color: #cbd5e1;
+    color: var(--text-muted);
     font-size: 0.8rem;
     font-style: italic;
 }

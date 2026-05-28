@@ -66,6 +66,14 @@ export default function Sidebar({
                         {vistaActual === id && <span className={styles.activeIndicator} />}
                     </button>
                 ))}
+                
+                {/* Botó de tancar sessió per a mòbils integrat a la navegació */}
+                <button 
+                    onClick={onTancarSessio} 
+                    className={`${styles.navItem} ${styles.mobileLogoutBtn}`}
+                >
+                    <span className={styles.navLabel}>Tancar sessió</span>
+                </button>
             </nav>
 
             <div className={styles.footer}>
