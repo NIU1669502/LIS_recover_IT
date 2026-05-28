@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../utils/supabase'
 import { showToast } from '../utils/toast'
 import { validarDniNouUsuari, validarEmailNouUsuari } from '../utils/validacioRegistre'
+import { esEnllaçRecuperacioContrasenya } from '../utils/recuperacioContrasenya'
 
 export function useAuth(navegarA) {
     const [usuariSessio, setUsuariSessio] = useState(null)
@@ -75,6 +76,11 @@ export function useAuth(navegarA) {
     }
 
     const comprovarSessio = async () => {
+        if (esEnllaçRecuperacioContrasenya()) {
+            navegarA('canviar-contrasenya', undefined, { preservarHash: true })
+            return
+        }
+
         const { data, error } = await supabase.auth.getSession()
         if (error) return
 
@@ -102,8 +108,15 @@ export function useAuth(navegarA) {
         }
         comprovarSessio()
 
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+            if (event === 'PASSWORD_RECOVERY') {
+                navegarA('canviar-contrasenya', undefined, { preservarHash: true })
+            }
+        })
+
         return () => {
             window.removeEventListener('popstate', manejarPopState)
+            subscription.unsubscribe()
         }
     }, [])
 

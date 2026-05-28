@@ -19,13 +19,16 @@ export default function LoginForm({ loginForm, setLoginForm, onSubmit, errorAuth
         if (!emailRecuperar.trim()) return
         setEnviant(true)
         const { error } = await supabase.auth.resetPasswordForEmail(emailRecuperar.trim(), {
-            redirectTo: `${window.location.origin}#canviar-contrasenya`,
+            redirectTo: `${window.location.origin}/#canviar-contrasenya`,
         })
         setEnviant(false)
         if (error) {
             setMissatgeRecuperar({ tipus: 'error', text: `Error: ${error.message}` })
         } else {
-            setMissatgeRecuperar({ tipus: 'ok', text: 'Correu enviat! Revisa la teva bústia.' })
+            setMissatgeRecuperar({
+                tipus: 'ok',
+                text: 'Correu enviat! Obre l\'enllaç del correu, defineix la nova contrasenya i després inicia sessió.',
+            })
         }
     }
 

@@ -10,6 +10,8 @@ import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
 import LoginForm from './components/LoginForm'
 import RegistreForm from './components/RegistreForm'
+import RecuperarContrasenya from './components/RecuperarContrasenya'
+import { esEnllaçRecuperacioContrasenya } from './utils/recuperacioContrasenya'
 import PerfilUsuari from './components/PerfilUsuari'
 import TestDiagnostic from './components/TestDiagnostic'
 import BibliotecaExercicis from './components/BibliotecaExercicis'
@@ -45,14 +47,17 @@ export default function Page() {
   const [carregantRutina, setCarregantRutina] = useState(false)
   const [refreshProgres, setRefreshProgres] = useState(0)
 
-  const navegarA = (novaVista, onTransition) => {
+  const navegarA = (novaVista, onTransition, opcions = {}) => {
     if (transitionRef.current) clearTimeout(transitionRef.current)
     setPageVisible(false)
     transitionRef.current = setTimeout(() => {
       if (onTransition) onTransition()
       setErrorAuth('')
       setVistaActual(novaVista)
-      window.history.pushState({ vista: novaVista }, '', `#${novaVista}`)
+      const hashUrl = opcions.preservarHash && typeof window !== 'undefined'
+        ? (window.location.hash || `#${novaVista}`)
+        : `#${novaVista}`
+      window.history.pushState({ vista: novaVista }, '', hashUrl)
       setPageVisible(true)
     }, 220)
   }
@@ -65,6 +70,16 @@ export default function Page() {
     loginForm, setLoginForm,
     registrarUsuari, iniciarSessio, tancarSessio, editarPerfil, obtenirPerfil
   } = useAuth(navegarA)
+
+  useEffect(() => {
+    if (!esEnllaçRecuperacioContrasenya()) return
+    setVistaActual('canviar-contrasenya')
+    const hashActual = window.location.hash
+    const hashSegur = hashActual && hashActual.includes('access_token')
+      ? hashActual
+      : '#canviar-contrasenya'
+    window.history.replaceState({ vista: 'canviar-contrasenya' }, '', hashSegur)
+  }, [])
 
   useEffect(() => {
     if (vistaActual === 'perfil' && usuariSessio) {
@@ -125,7 +140,10 @@ export default function Page() {
   const esFisio = perfilUsuari?.es_fisioterapeuta === true
   const dniPacient = !esFisio ? perfilUsuari?.dni : null
   const { teFisio, relacio, carregant: carregantRelacioFisio } = useRelacioFisioConfirmada(dniPacient)
-  const esPantallaAuth = vistaActual === 'login' || vistaActual === 'registre'
+  const esPantallaAuth =
+    vistaActual === 'login' ||
+    vistaActual === 'registre' ||
+    vistaActual === 'canviar-contrasenya'
 
   return (
     <div className={`${styles.container} ${usuariSessio ? styles.withSidebar : ''}`}>
@@ -182,6 +200,12 @@ export default function Page() {
               onSubmit={registrarUsuari}
               errorAuth={errorAuth}
               carregantAuth={carregantAuth}
+            />
+          )}
+
+          {vistaActual === 'canviar-contrasenya' && (
+            <RecuperarContrasenya
+              onNavegarLogin={() => navegarA('login')}
             />
           )}
 
