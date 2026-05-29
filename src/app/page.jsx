@@ -11,7 +11,7 @@ import Sidebar from './components/Sidebar'
 import LoginForm from './components/LoginForm'
 import RegistreForm from './components/RegistreForm'
 import RecuperarContrasenya from './components/RecuperarContrasenya'
-import { esEnllaçRecuperacioContrasenya } from './utils/recuperacioContrasenya'
+import { esEnllaçRecuperacioContrasenya, vistaDesDeUrl, urlActualSenseCanviar } from './utils/recuperacioContrasenya'
 import PerfilUsuari from './components/PerfilUsuari'
 import TestDiagnostic from './components/TestDiagnostic'
 import BibliotecaExercicis from './components/BibliotecaExercicis'
@@ -32,7 +32,9 @@ import { useRelacioFisioConfirmada } from './hooks/useRelacioFisio'
 import styles from './page.module.css'
 
 export default function Page() {
-  const [vistaActual, setVistaActual] = useState('inici')
+  const [vistaActual, setVistaActual] = useState(() =>
+    typeof window !== 'undefined' ? vistaDesDeUrl() : 'inici'
+  )
   const [exercicisRutina, setExercicisRutina] = useState([])
   const [indexExercici, setIndexExercici] = useState(0)
   const [faseActual, setFaseActual] = useState(1)
@@ -74,11 +76,11 @@ export default function Page() {
   useEffect(() => {
     if (!esEnllaçRecuperacioContrasenya()) return
     setVistaActual('canviar-contrasenya')
-    const hashActual = window.location.hash
-    const hashSegur = hashActual && hashActual.includes('access_token')
-      ? hashActual
-      : '#canviar-contrasenya'
-    window.history.replaceState({ vista: 'canviar-contrasenya' }, '', hashSegur)
+    window.history.replaceState(
+      { vista: 'canviar-contrasenya' },
+      '',
+      urlActualSenseCanviar().includes('#') ? urlActualSenseCanviar() : '#canviar-contrasenya'
+    )
   }, [])
 
   useEffect(() => {

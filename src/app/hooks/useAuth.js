@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../utils/supabase'
 import { showToast } from '../utils/toast'
 import { validarDniNouUsuari, validarEmailNouUsuari } from '../utils/validacioRegistre'
-import { esEnllaçRecuperacioContrasenya } from '../utils/recuperacioContrasenya'
+import { esEnllaçRecuperacioContrasenya, vistaDesDeUrl, urlActualSenseCanviar } from '../utils/recuperacioContrasenya'
 
 export function useAuth(navegarA) {
     const [usuariSessio, setUsuariSessio] = useState(null)
@@ -104,7 +104,8 @@ export function useAuth(navegarA) {
 
         window.addEventListener('popstate', manejarPopState)
         if (!window.history.state) {
-            window.history.replaceState({ vista: 'inici' }, '')
+            const vista = vistaDesDeUrl()
+            window.history.replaceState({ vista }, '', urlActualSenseCanviar())
         }
         comprovarSessio()
 

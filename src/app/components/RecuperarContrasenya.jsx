@@ -7,21 +7,37 @@ import {
   esEnllaçRecuperacioContrasenya,
   hashTeTokensAuth,
   parseTokensDelHash,
+  urlTeCodiAuth,
 } from '../utils/recuperacioContrasenya'
 import styles from './loginForm.module.css'
+
+async function esperar(ms) {
+  return new Promise((r) => setTimeout(r, ms))
+}
 
 async function establirSessioRecuperacio() {
   const { data: { session } } = await supabase.auth.getSession()
   if (session) return true
 
   const tokens = parseTokensDelHash()
-  if (!tokens) return false
+  if (tokens) {
+    const { data, error } = await supabase.auth.setSession(tokens)
+    return !error && !!data.session
+  }
 
-  const { data, error } = await supabase.auth.setSession(tokens)
-  return !error && !!data.session
+  if (urlTeCodiAuth()) {
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('code')
+    if (code) {
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+      return !error && !!data.session
+    }
+  }
+
+  return false
 }
 
-function netejarHashDespresRecuperacio() {
+function netejarUrlDespresRecuperacio() {
   window.history.replaceState({ vista: 'canviar-contrasenya' }, '', '#canviar-contrasenya')
 }
 
@@ -40,26 +56,31 @@ export default function RecuperarContrasenya({ onNavegarLogin }) {
       if (!actiu) return
       setPotCanviar(true)
       setComprovant(false)
-      if (hashTeTokensAuth()) {
-        netejarHashDespresRecuperacio()
+      if (hashTeTokensAuth() || urlTeCodiAuth()) {
+        netejarUrlDespresRecuperacio()
       }
     }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sessio) => {
       if (!actiu) return
-      if (event === 'PASSWORD_RECOVERY' && sessio) {
+      if ((event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') && sessio) {
         activarFormulari()
       }
     })
 
     const iniciar = async () => {
-      if (await establirSessioRecuperacio()) {
-        activarFormulari()
-        return
+      for (let intent = 0; intent < 8; intent += 1) {
+        if (!actiu) return
+        if (await establirSessioRecuperacio()) {
+          activarFormulari()
+          return
+        }
+        await esperar(400)
       }
 
+      if (!actiu) return
+
       if (!esEnllaçRecuperacioContrasenya()) {
-        if (!actiu) return
         setComprovant(false)
         setMissatge({
           tipus: 'error',
@@ -68,18 +89,10 @@ export default function RecuperarContrasenya({ onNavegarLogin }) {
         return
       }
 
-      await new Promise((r) => setTimeout(r, 800))
-      if (!actiu) return
-
-      if (await establirSessioRecuperacio()) {
-        activarFormulari()
-        return
-      }
-
       setComprovant(false)
       setMissatge({
         tipus: 'error',
-        text: "L'enllaç ha caducat o no és vàlid. Torna al login i sol·licita un correu nou.",
+        text: "L'enllaç ha caducat o no és vàlid. Sol·licita un correu nou des del mateix navegador on ho has demanat.",
       })
     }
 

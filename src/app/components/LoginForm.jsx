@@ -19,7 +19,7 @@ export default function LoginForm({ loginForm, setLoginForm, onSubmit, errorAuth
         if (!emailRecuperar.trim()) return
         setEnviant(true)
         const { error } = await supabase.auth.resetPasswordForEmail(emailRecuperar.trim(), {
-            redirectTo: `${window.location.origin}/#canviar-contrasenya`,
+            redirectTo: `${window.location.origin}/auth/callback?next=canviar-contrasenya`,
         })
         setEnviant(false)
         if (error) {
